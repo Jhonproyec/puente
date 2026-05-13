@@ -1,0 +1,49 @@
+.layout-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav-container {
+  flex: 1;
+  display: flex;
+
+  .sidenav {
+    width: 240px;
+    background: var(--background-sidebar);
+    color: white;
+    border: none;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-body);
+    flex: 1; 
+
+    .page-content {
+      flex: 1;
+      padding: 1rem 2rem;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidenav-container .main-content .page-content {
+    padding: 1rem;
+  }
+}

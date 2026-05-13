@@ -1,0 +1,141 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-info">
+        <h1>Catálogo de Imágenes</h1>
+        <p>Administra todas tus imágenes de forma rápida y sencilla</p>
+      </div>
+      <div class="header-actions">
+        <button
+          *ngIf="picker && picker.selectedImages.size > 0"
+          class="btn btn-danger"
+          (click)="deleteSelected()"
+        >
+          <mat-icon>delete_sweep</mat-icon>
+          Eliminar seleccionados ({{ picker.selectedImages.size }})
+        </button>
+        <button class="btn btn-primary" (click)="openUploadModal()">
+          <mat-icon>upload</mat-icon>
+          Subir Imágenes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO: image-picker en modo admin -->
+  <div class="catalog-container">
+    <app-image-picker
+      #picker
+      mode="admin"
+      (viewRequested)="openViewer($event)"
+      (editRequested)="openEditModal($event)"
+      (deleteRequested)="deleteImage($event)"
+    />
+  </div>
+
+</div>
+
+
+<!-- ===================== MODAL: SUBIR IMÁGENES ===================== -->
+<div class="modal-overlay" *ngIf="isUploadModalOpen" (click)="closeUploadModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon class="modal-icon">upload</mat-icon>
+        Subir Imágenes
+      </h2>
+      <button class="close-button" (click)="closeUploadModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div
+        class="upload-zone"
+        [class.drag-over]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <mat-icon class="upload-icon">cloud_upload</mat-icon>
+        <p class="upload-title">Arrastra las imágenes aquí</p>
+        <p class="upload-subtitle">o haz clic para seleccionar archivos</p>
+        <p class="upload-hint">PNG, JPG, WEBP — múltiples archivos permitidos</p>
+        <input #fileInput type="file" accept="image/*" multiple style="display:none" (change)="onFileSelect($event)">
+      </div>
+
+      <div class="upload-preview" *ngIf="pendingFiles.length > 0">
+        <div class="preview-header">
+          <span class="preview-title">{{ pendingFiles.length }} archivo(s) seleccionado(s)</span>
+          <button class="btn btn-secondary btn-sm" (click)="clearPending()">Limpiar</button>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-item" *ngFor="let file of pendingFiles; let i = index">
+            <img [src]="file.preview" [alt]="file.nombre">
+            <div class="preview-info">
+              <input type="text" class="form-input" [(ngModel)]="file.nombre" placeholder="Nombre">
+              <button mat-icon-button (click)="removePending(i)">
+                <mat-icon class="delete-icon">close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeUploadModal()">Cancelar</button>
+      <button class="btn btn-primary" [disabled]="pendingFiles.length === 0 || isSaving" (click)="uploadImages()">
+        <div class="text-loading" *ngIf="isSaving">
+          <mat-spinner diameter="16"></mat-spinner>
+          <span>Subiendo...</span>
+        </div>
+        <ng-container *ngIf="!isSaving">
+          <mat-icon>upload</mat-icon>
+          Subir {{ pendingFiles.length > 0 ? pendingFiles.length + ' imagen(es)' : '' }}
+        </ng-container>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODAL: EDITAR NOMBRE ===================== -->
+<div class="modal-overlay" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon class="modal-icon">edit</mat-icon>
+        Renombrar Imagen
+      </h2>
+      <button class="close-button" (click)="closeEditModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group full-width">
+        <label class="form-label">Nombre *</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="editingName"
+          placeholder="Ingresa el nombre de la imagen"
+          (keydown.enter)="saveEdit()"
+        >
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveEdit()" [disabled]="!editingName.trim() || isSaving">
+        <div class="text-loading" *ngIf="isSaving">
+          <mat-spinner diameter="16"></mat-spinner>
+          <span>Guardando...</span>
+        </div>
+        <ng-container *ngIf="!isSaving">Guardar</ng-container>
+      </button>
+    </div>
+  </div>
+</div>

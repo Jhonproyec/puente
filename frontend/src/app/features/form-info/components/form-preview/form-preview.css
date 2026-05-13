@@ -1,0 +1,334 @@
+/* ===== TOOLBAR (solo en pantalla) ===== */
+.print-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.toolbar-title {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.btn-print {
+  background: white;
+  color: #1a73e8;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-print:hover {
+  background: #f0f0f0;
+}
+
+/* ===== DOCUMENTO ===== */
+.form-document {
+  max-width: 800px;
+  margin: 72px auto 40px;
+  padding: 40px;
+  background: white;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #222;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+}
+
+/* ===== ENCABEZADO ===== */
+.document-header {
+  text-align: center;
+  border-bottom: 2px solid #333;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.document-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+}
+
+.document-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+/* ===== REGIÓN ===== */
+.region-block {
+  margin-bottom: 24px;
+  break-inside: avoid;
+}
+
+.region-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2c3e50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.region-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.region-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.badge-repeat      { background: #f39c12; color: white; }
+.badge-conditional { background: #8e44ad; color: white; }
+
+/* ===== GRID DE ELEMENTOS ===== */
+.elements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.element-block {
+  break-inside: avoid;
+}
+
+.element-block.full-width {
+  grid-column: 1 / -1;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ===== LABELS ===== */
+.element-label {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.required-star {
+  color: red;
+  margin-left: 2px;
+}
+
+.conditional-badge {
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+.element-type-hint {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+/* ===== CAMPOS ===== */
+.field-line {
+  border-bottom: 1px solid #555;
+  height: 22px;
+  width: 100%;
+}
+
+.field-line.short {
+  width: 60%;
+}
+
+.field-textarea {
+  border: 1px solid #555;
+  height: 60px;
+  width: 100%;
+  border-radius: 2px;
+}
+
+.field-select-box {
+  border: 1px solid #555;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+  color: #888;
+  background: #fafafa;
+}
+
+.field-date-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.field-date-box span {
+  border-bottom: 1px solid #555;
+  min-width: 30px;
+  text-align: center;
+  padding-bottom: 2px;
+  color: #888;
+}
+
+.field-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.option-circle,
+.option-square {
+  font-size: 14px;
+  color: #555;
+}
+
+.placeholder-option {
+  color: #aaa;
+  font-style: italic;
+}
+
+.field-camera {
+  border: 1px dashed #888;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.field-coordinates {
+  display: flex;
+  gap: 12px;
+}
+
+.coord-box {
+  border-bottom: 1px solid #555;
+  font-size: 11px;
+  color: #888;
+  padding-bottom: 2px;
+  flex: 1;
+}
+
+/* ===== HEADING ===== */
+.element-heading {
+  grid-column: 1 / -1;
+  padding: 8px 12px;
+  background: #f0f4f8;
+  border-left: 3px solid #1a73e8;
+  margin-bottom: 4px;
+}
+
+.heading-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1a73e8;
+}
+
+.heading-description {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: #666;
+}
+
+/* ===== FOOTER / FIRMA ===== */
+.document-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #ccc;
+}
+
+.signature-line {
+  display: flex;
+  justify-content: space-around;
+}
+
+.signature-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 200px;
+}
+
+.sig-line {
+  border-bottom: 1px solid #333;
+  width: 100%;
+}
+
+.signature-box span {
+  font-size: 11px;
+  color: #666;
+}
+
+/* ===== MEDIA PRINT ===== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .form-document {
+    margin: 0;
+    padding: 20px;
+    max-width: 100%;
+    font-size: 12px;
+  }
+
+  .region-block {
+    break-inside: avoid;
+  }
+
+  .element-block {
+    break-inside: avoid;
+  }
+
+  body {
+    background: white;
+  }
+}
+mat-icon {
+  vertical-align: middle;
+  margin-right: 5px;
+  font-size: 20px;
+  margin-top: 4px;
+}

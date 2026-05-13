@@ -1,0 +1,2524 @@
+{
+    "tipo_actividad": [
+        {
+            "id": 1,
+            "nombre": "Inscripción de Familia"
+        },
+        {
+            "id": 2,
+            "nombre": "Evaluación de Familia"
+        }
+    ],
+    "departamentos": [
+        {
+            "id": 1,
+            "nombre": "Guatemala"
+        },
+        {
+            "id": 2,
+            "nombre": "Alta Verapaz"
+        },
+        {
+            "id": 3,
+            "nombre": "Chimaltenango"
+        },
+        {
+            "id": 4,
+            "nombre": "Petén"
+        }
+    ],
+    "tipo_registro": [
+        {
+            "id": 1,
+            "nombre": "Escáner QR"
+        },
+        {
+            "id": 2,
+            "nombre": "Código"
+        },
+        {
+            "id": 3,
+            "nombre": "Texto"
+        }
+    ],
+    "comunidad": [
+        {
+            "id_departamento": 2,
+            "filterKey": 2,
+            "id": 1,
+            "nombre": "Aldea Balamte"
+        },
+        {
+            "id_departamento": 2,
+            "filterKey": 2,
+            "id": 2,
+            "nombre": "Aldea Pinares"
+        },
+        {
+            "id_departamento": 2,
+            "filterKey": 2,
+            "id": 3,
+            "nombre": "Aldea Santa Maria Rubeltzul"
+        },
+        {
+            "id_departamento": 2,
+            "filterKey": 2,
+            "id": 4,
+            "nombre": "Aldea Temax"
+        },
+        {
+            "id_departamento": 3,
+            "filterKey": 3,
+            "id": 5,
+            "nombre": "Casco Urbano Zona 1"
+        },
+        {
+            "id_departamento": 3,
+            "filterKey": 3,
+            "id": 6,
+            "nombre": "Casco Urbano Zona 2"
+        },
+        {
+            "id_departamento": 3,
+            "filterKey": 3,
+            "id": 7,
+            "nombre": "Casco Urbano Zona 3"
+        },
+        {
+            "id_departamento": 3,
+            "filterKey": 3,
+            "id": 8,
+            "nombre": "Casco Urbano Zona 4"
+        }
+    ],
+    "consentimientos": [
+        {
+            "id": 1,
+            "nombre": "Entrevista e ingresar a la vivienda para observar el saneamiento en la cocina, el piso, la letrina etc."
+        },
+        {
+            "id": 2,
+            "nombre": "Fotografías"
+        },
+        {
+            "id": 3,
+            "nombre": "Ninguno"
+        }
+    ],
+    "motivo_no_consentimiento": [
+        {
+            "id": 1,
+            "nombre": "Actividad de otra institución"
+        },
+        {
+            "id": 2,
+            "nombre": "Falta de tiempo (actividades del hogar, trabajo, etc)"
+        },
+        {
+            "id": 3,
+            "nombre": "Los suegros no autorizaron"
+        },
+        {
+            "id": 4,
+            "nombre": "No desea participar"
+        },
+        {
+            "id": 5,
+            "nombre": "No está en casa"
+        },
+        {
+            "id": 6,
+            "nombre": "No se localizó en la comunidad (nadie la conoce)"
+        },
+        {
+            "id": 7,
+            "nombre": "No vive en la comunidad"
+        },
+        {
+            "id": 8,
+            "nombre": "Parto o Puerperio"
+        },
+        {
+            "id": 9,
+            "nombre": "Problemas de salud"
+        },
+        {
+            "id": 10,
+            "nombre": "Se retiró del programa"
+        },
+        {
+            "id": 11,
+            "nombre": "Trabajo formal"
+        },
+        {
+            "id": 12,
+            "nombre": "Otros motivos"
+        }
+    ],
+    "tipo_participantes": [
+        {
+            "id": 1,
+            "nombre": "Grupo Meta"
+        },
+        {
+            "id": 2,
+            "nombre": "Grupo Meta y Educador Voluntario"
+        }
+    ],
+    "si_no_list": [
+        {
+            "id": 1,
+            "nombre": "Si"
+        },
+        {
+            "id": 0,
+            "nombre": "No"
+        }
+    ],
+    "sintomas_enfermedad": [
+        {
+            "id": 1,
+            "nombre": "Anemia"
+        },
+        {
+            "id": 2,
+            "nombre": "Ansiedad"
+        },
+        {
+            "id": 3,
+            "nombre": "Artritis"
+        },
+        {
+            "id": 4,
+            "nombre": "Asma"
+        },
+        {
+            "id": 5,
+            "nombre": "Cancer de mama"
+        },
+        {
+            "id": 6,
+            "nombre": "Depresión"
+        },
+        {
+            "id": 7,
+            "nombre": "Desmayos"
+        },
+        {
+            "id": 8,
+            "nombre": "Diabetes"
+        },
+        {
+            "id": 9,
+            "nombre": "Diarrea"
+        },
+        {
+            "id": 10,
+            "nombre": "Dificultad para respirar"
+        }
+    ],
+    "servicios_salud": [
+        {
+            "id": 1,
+            "nombre": "Comadrona"
+        },
+        {
+            "id": 2,
+            "nombre": "Curandero"
+        },
+        {
+            "id": 3,
+            "nombre": "Doctor o enfermera particular"
+        },
+        {
+            "id": 4,
+            "nombre": "Farmacia"
+        },
+        {
+            "id": 5,
+            "nombre": "Hospital"
+        },
+        {
+            "id": 6,
+            "nombre": "Iglesia"
+        },
+        {
+            "id": 7,
+            "nombre": "Puesto o centro de salud"
+        },
+        {
+            "id": 8,
+            "nombre": "Promotor de Salud"
+        },
+        {
+            "id": 9,
+            "nombre": "Sacerdote maya"
+        },
+        {
+            "id": 10,
+            "nombre": "Ninguno"
+        }
+    ],
+    "alimentos_fuentes_hierro": [
+        {
+            "id": 1,
+            "nombre": "Frutas: Manzanas, Plátanos, Naranjas, melon, piña, papaya, guayaba"
+        },
+        {
+            "id": 2,
+            "nombre": "Granos: Arroz, frijol, maiz, avellana, almendras, nueces, lentejas"
+        },
+        {
+            "id": 3,
+            "nombre": "Lácteos: Queso, crema, yogurt"
+        },
+        {
+            "id": 4,
+            "nombre": "Proteínas: Huevos, pollo, gallina, pescado, conejo, hígado"
+        },
+        {
+            "id": 5,
+            "nombre": "Verduras y Hortalizas: espinaca, berro, berengena, acelga, repollo, brócoli"
+        },
+        {
+            "id": 6,
+            "nombre": "Ninguno"
+        }
+    ],
+    "si_no_aplica": [
+        {
+            "id": 1,
+            "nombre": "Si"
+        },
+        {
+            "id": 0,
+            "nombre": "No"
+        },
+        {
+            "id": 2,
+            "nombre": "No plica"
+        }
+    ],
+    "falta_tiempo_comidas": [
+        {
+            "id": 1,
+            "nombre": "Bebió líquidos (atoles o agüita de masa, cacao o café)"
+        },
+        {
+            "id": 2,
+            "nombre": "Dolores de parto"
+        },
+        {
+            "id": 3,
+            "nombre": "Dormía"
+        },
+        {
+            "id": 4,
+            "nombre": "Enfermedad (diarrea, dolor o ingección estomacal, fiebre, gripe, tos, vómitos, entre otros)"
+        },
+        {
+            "id": 5,
+            "nombre": "Falta de dinero o recursos"
+        },
+        {
+            "id": 6,
+            "nombre": "Náuseas"
+        },
+        {
+            "id": 7,
+            "nombre": "No le gusta la comida (melindrosa)"
+        },
+        {
+            "id": 8,
+            "nombre": "No realizó mercado"
+        },
+        {
+            "id": 9,
+            "nombre": "Stisfecho por refacción"
+        },
+        {
+            "id": 10,
+            "nombre": "Satisfecho por tiempo de comida anterior"
+        },
+        {
+            "id": 11,
+            "nombre": "Sin apetito"
+        },
+        {
+            "id": 12,
+            "nombre": "Sin horario para los tiempos de comida"
+        },
+        {
+            "id": 13,
+            "nombre": "Otro"
+        }
+    ],
+    "desinfectar_agua": [
+        {
+            "id": 1,
+            "nombre": "Hervir"
+        },
+        {
+            "id": 2,
+            "nombre": "Filtrar"
+        },
+        {
+            "id": 3,
+            "nombre": "Clorar"
+        },
+        {
+            "id": 4,
+            "nombre": "Comprar"
+        },
+        {
+            "id": 5,
+            "nombre": "Ninguno"
+        }
+    ],
+    "manejo_basura": [
+        {
+            "id": 1,
+            "nombre": "Quema la basura"
+        },
+        {
+            "id": 2,
+            "nombre": "Servicio de recolección de basura"
+        },
+        {
+            "id": 3,
+            "nombre": "Acumulación en un espacio fuera de la vivienda"
+        }
+    ],
+    "tipo_servicio_sanitario": [
+        {
+            "id": 1,
+            "nombre": "Letrina (cualquier tipo)"
+        },
+        {
+            "id": 2,
+            "nombre": "Inodoro conectado a drenaje"
+        },
+        {
+            "id": 3,
+            "nombre": "Ninguno"
+        }
+    ],
+    "metodo_para_cocinar": [
+        {
+            "id": 1,
+            "nombre": "Fuego abierto o Fogón"
+        },
+        {
+            "id": 2,
+            "nombre": "Polletón"
+        },
+        {
+            "id": 3,
+            "nombre": "Estufa de gas"
+        },
+        {
+            "id": 4,
+            "nombre": "Estufa eléctrica"
+        },
+        {
+            "id": 5,
+            "nombre": "Estufa mejorada"
+        },
+        {
+            "id": 6,
+            "nombre": "Otra forma"
+        }
+    ],
+    "metodo_extraer_humo": [
+        {
+            "id": 1,
+            "nombre": "Chimenea"
+        },
+        {
+            "id": 2,
+            "nombre": "Ventilación Natural (Ventanas y Puertas abiertas)"
+        },
+        {
+            "id": 3,
+            "nombre": "Campana de cocina"
+        }
+    ],
+    "metodo_cultipo_principal": [
+        {
+            "id": 1,
+            "nombre": "Contenedores (Llantas, Botes, Cajas, etc.)"
+        },
+        {
+            "id": 2,
+            "nombre": "Directo a suelo"
+        },
+        {
+            "id": 3,
+            "nombre": "Mesa"
+        }
+    ],
+    "tipo_techo_cultivo": [
+        {
+            "id": 1,
+            "nombre": "Nilon"
+        },
+        {
+            "id": 2,
+            "nombre": "Lámina metálica"
+        },
+        {
+            "id": 3,
+            "nombre": "Paja, Sarat etc."
+        },
+        {
+            "id": 4,
+            "nombre": "Ninguno"
+        }
+    ],
+    "tipo_fertilizante": [
+        {
+            "id": 1,
+            "nombre": "Artesanal o Casero"
+        },
+        {
+            "id": 2,
+            "nombre": "Comercial o Formulado"
+        }
+    ],
+    "tipos_plaga_enfermedades": [
+        {
+            "id": 1,
+            "nombre": "Ácaros"
+        },
+        {
+            "id": 2,
+            "nombre": "Araña"
+        },
+        {
+            "id": 3,
+            "nombre": "Caracoles y babosas"
+        },
+        {
+            "id": 4,
+            "nombre": "Cochinilla"
+        },
+        {
+            "id": 5,
+            "nombre": "Escarabajos"
+        },
+        {
+            "id": 6,
+            "nombre": "Grillos o Chapulines"
+        },
+        {
+            "id": 7,
+            "nombre": "Larvas, orugas o gusano"
+        },
+        {
+            "id": 8,
+            "nombre": "Mosca"
+        },
+        {
+            "id": 9,
+            "nombre": "Pulgones"
+        },
+        {
+            "id": 10,
+            "nombre": "Hongos"
+        }
+    ],
+    "metodo_eliminar_plangas": [
+        {
+            "id": 1,
+            "nombre": "Quimico (Insecticidas, Fungicidas, Herbicidas, etc.)"
+        },
+        {
+            "id": 2,
+            "nombre": "Repelente Casero u organico (Lejía de ceniza, ajó, detergente o jabón)"
+        },
+        {
+            "id": 3,
+            "nombre": "Forma Manual (Eliminar parte dañada)"
+        },
+        {
+            "id": 4,
+            "nombre": "Ninguno"
+        }
+    ],
+    "motivo_perdida_plantas": [
+        {
+            "id": 1,
+            "nombre": "Calor intenso"
+        },
+        {
+            "id": 2,
+            "nombre": "Comido por animales"
+        },
+        {
+            "id": 3,
+            "nombre": "Enfermedades"
+        },
+        {
+            "id": 4,
+            "nombre": "Lluvias excesivas"
+        },
+        {
+            "id": 5,
+            "nombre": "Plagas"
+        },
+        {
+            "id": 6,
+            "nombre": "Tormentay viento fuerte"
+        },
+        {
+            "id": 7,
+            "nombre": "Sequía o escases de agua"
+        },
+        {
+            "id": 8,
+            "nombre": "Otros"
+        }
+    ],
+    "tipo_planta_pillones": [
+        {
+            "id": 1,
+            "nombre": "Acelga"
+        },
+        {
+            "id": 2,
+            "nombre": "Apio"
+        },
+        {
+            "id": 3,
+            "nombre": "Arbeja"
+        },
+        {
+            "id": 4,
+            "nombre": "Berro"
+        },
+        {
+            "id": 5,
+            "nombre": "Brócoli"
+        },
+        {
+            "id": 6,
+            "nombre": "Bledo"
+        },
+        {
+            "id": 7,
+            "nombre": "Cebolla"
+        },
+        {
+            "id": 8,
+            "nombre": "Cebollín"
+        },
+        {
+            "id": 9,
+            "nombre": "Colinabo"
+        },
+        {
+            "id": 10,
+            "nombre": "Cilantro"
+        }
+    ],
+    "elementos_basicos_gallinero": [
+        {
+            "id": 1,
+            "nombre": "Bebederos"
+        },
+        {
+            "id": 2,
+            "nombre": "Comederos"
+        },
+        {
+            "id": 3,
+            "nombre": "Cortina"
+        },
+        {
+            "id": 4,
+            "nombre": "Nidos"
+        },
+        {
+            "id": 5,
+            "nombre": "Perchas o ramas para que las gallinas descansen"
+        },
+        {
+            "id": 6,
+            "nombre": "Suelo con paja, viruta o aserrin para mantener la limpieza e higiene"
+        },
+        {
+            "id": 7,
+            "nombre": "Techo"
+        },
+        {
+            "id": 8,
+            "nombre": "Ninguno"
+        }
+    ],
+    "causa_muerte_aver": [
+        {
+            "id": 1,
+            "nombre": "Cólera aviar"
+        },
+        {
+            "id": 2,
+            "nombre": "Cojera o dificultad para caminar"
+        },
+        {
+            "id": 3,
+            "nombre": "Coryza"
+        },
+        {
+            "id": 4,
+            "nombre": "Diarrea"
+        },
+        {
+            "id": 5,
+            "nombre": "Estrés (encierro, comida y agua en el mismo sitio, soledad etc)"
+        },
+        {
+            "id": 6,
+            "nombre": "Falta de apetito"
+        },
+        {
+            "id": 7,
+            "nombre": "Heces con sangre"
+        }
+    ],
+    "grupos_bancarios": [
+        {
+            "id": 1,
+            "nombre": "Grupo ALAC"
+        },
+        {
+            "id": 2,
+            "nombre": "Ninguno"
+        }
+    ],
+    "destino_ahorros": [
+        {
+            "id": 1,
+            "nombre": "Alimentación"
+        },
+        {
+            "id": 2,
+            "nombre": "Actividad agropecuaria"
+        },
+        {
+            "id": 3,
+            "nombre": "Educación"
+        },
+        {
+            "id": 4,
+            "nombre": "Emprendimiento"
+        },
+        {
+            "id": 5,
+            "nombre": "Préstamo"
+        },
+        {
+            "id": 6,
+            "nombre": "Emprendimiento"
+        }
+    ],
+    "forma_corregir_hijos": [
+        {
+            "id": 1,
+            "nombre": "1ro. Habla y escucha al niño(a), 2do. Enseña o edica al niño(a), 3ro. Corregir o catigar si es necesario"
+        },
+        {
+            "id": 2,
+            "nombre": "1ro Corrige o castiga de inmediato al niño(a) 2do No Enseña 3ro. No habla y escucha al niño(a)"
+        },
+        {
+            "id": 3,
+            "nombre": "Ninguna"
+        }
+    ],
+    "pendamientos_espejo": [
+        {
+            "id": 1,
+            "nombre": "Me veo bien (soy guapo), me acepto como soy"
+        },
+        {
+            "id": 2,
+            "nombre": "No me veo bien y no me acepto como soy"
+        }
+    ],
+    "aplicacion_conocimientos_adquiridos": [
+        {
+            "id": 1,
+            "nombre": "1 vez"
+        },
+        {
+            "id": 2,
+            "nombre": "2 o 3 veces"
+        },
+        {
+            "id": 3,
+            "nombre": "Todos los días"
+        },
+        {
+            "id": 4,
+            "nombre": "Ninguna"
+        }
+    ],
+    "ultima_asistencias": [
+        {
+            "id": 1,
+            "nombre": "Hace una semana"
+        },
+        {
+            "id": 2,
+            "nombre": "Hace 15 días"
+        },
+        {
+            "id": 3,
+            "nombre": "Hace un mes"
+        },
+        {
+            "id": 4,
+            "nombre": "Hace más de un mes"
+        }
+    ],
+    "motivo_no_consentimiento_made": [
+        {
+            "id": 1,
+            "nombre": "Actividad de otra institución"
+        },
+        {
+            "id": 2,
+            "nombre": "Berrinche"
+        },
+        {
+            "id": 3,
+            "nombre": "Discapacidad"
+        },
+        {
+            "id": 4,
+            "nombre": "Dormía"
+        },
+        {
+            "id": 5,
+            "nombre": "Enfermedad o Problemas de Salud"
+        },
+        {
+            "id": 6,
+            "nombre": "Falta de tiempo (actividades del hogar, trabajo, etc)"
+        },
+        {
+            "id": 7,
+            "nombre": "Llanto"
+        },
+        {
+            "id": 8,
+            "nombre": "No desea participar"
+        },
+        {
+            "id": 9,
+            "nombre": "Se retiró del programa"
+        },
+        {
+            "id": 10,
+            "nombre": "Timidez"
+        },
+        {
+            "id": 11,
+            "nombre": "otro"
+        },
+        {
+            "id": 11,
+            "nombre": "esto puede ir en una misma tabla"
+        }
+    ],
+    "rango_hitos": [
+        {
+            "id": 1,
+            "nombre": "0 a 1 año"
+        },
+        {
+            "id": 2,
+            "nombre": "1 a 2 años"
+        },
+        {
+            "id": 3,
+            "nombre": "2 a 3 años"
+        },
+        {
+            "id": 4,
+            "nombre": "3 a 4 años"
+        }
+    ],
+    "detalle_rango_hitos": [
+        {
+            "id": 1,
+            "id_hito": 1,
+            "nombre": "0 a 2 meses"
+        },
+        {
+            "id": 2,
+            "id_hito": 1,
+            "nombre": "3 a 5 meses"
+        },
+        {
+            "id": 3,
+            "id_hito": 1,
+            "nombre": "6 a 8 meses"
+        },
+        {
+            "id": 4,
+            "id_hito": 1,
+            "nombre": "9 a 11 meses"
+        },
+        {
+            "id": 5,
+            "id_hito": 2,
+            "nombre": "12 a 14 meses"
+        },
+        {
+            "id": 6,
+            "id_hito": 2,
+            "nombre": "15 a 17 meses"
+        },
+        {
+            "id": 7,
+            "id_hito": 2,
+            "nombre": "18 a 20 meses"
+        },
+        {
+            "id": 8,
+            "id_hito": 2,
+            "nombre": "21 a 23 meses"
+        }
+    ],
+    "si_no_proceso": [
+        {
+            "id": 1,
+            "nombre": "Si"
+        },
+        {
+            "id": 0,
+            "nombre": "No"
+        },
+        {
+            "id": 4,
+            "nombre": "Proceso"
+        }
+    ],
+    "practica_consulta": [
+        {
+            "id": 1,
+            "nombre": "Práctica"
+        },
+        {
+            "id": 2,
+            "nombre": "Consulta"
+        }
+    ],
+    "especialidad_evaluador": [
+        {
+            "id": 1,
+            "nombre": "Embarazada"
+        },
+        {
+            "id": 1,
+            "nombre": "0 a 1"
+        },
+        {
+            "id": 1,
+            "nombre": "1 a 2"
+        },
+        {
+            "id": 1,
+            "nombre": "3 a 4"
+        }
+    ],
+    "impedimento_realizacion_sesion": [
+        {
+            "id": 1,
+            "nombre": "Embarazadas o Niños y sus cuidadores (GM)"
+        },
+        {
+            "id": 2,
+            "nombre": "Educador Voluntario"
+        },
+        {
+            "id": 3,
+            "nombre": "Ambos (Educador y GM)"
+        },
+        {
+            "id": 4,
+            "nombre": "Evaluador"
+        }
+    ],
+    "motivo_impedimento_sesion": [
+        {
+            "id": 1,
+            "nombre": "Actividad de otra institución"
+        },
+        {
+            "id": 2,
+            "nombre": "Cambio de horario"
+        },
+        {
+            "id": 3,
+            "nombre": "Compromiso personal"
+        },
+        {
+            "id": 4,
+            "nombre": "Cosecha o siembre"
+        },
+        {
+            "id": 5,
+            "nombre": "Enfermedad"
+        }
+    ],
+    "infraestructuras": [
+        {
+            "id": 1,
+            "nombre": "Cosechador de agua (1)"
+        },
+        {
+            "id": 2,
+            "nombre": "Sanitario o Letrina (1)"
+        },
+        {
+            "id": 3,
+            "nombre": "Sitio de lavado: pila o lavamanos (1)"
+        }
+    ],
+    "parte_estructura_cn": [
+        {
+            "id": 1,
+            "nombre": "Paredes o Cajón"
+        },
+        {
+            "id": 2,
+            "nombre": "Piso de cemento o cerámica"
+        },
+        {
+            "id": 3,
+            "nombre": "Puerta"
+        },
+        {
+            "id": 4,
+            "nombre": "Techo de lamina, concreto, madera etc"
+        },
+        {
+            "id": 5,
+            "nombre": "Ventanas"
+        },
+        {
+            "id": 6,
+            "nombre": "Ninguno"
+        }
+    ],
+    "mobiliario_equipo_cn": [
+        {
+            "id": 1,
+            "nombre": "Bancos o sillas para adulto (5)"
+        },
+        {
+            "id": 2,
+            "nombre": "Banquitos o sillitas para niño (5)"
+        },
+        {
+            "id": 3,
+            "nombre": "cajas organizadores (carton o plasticas) (1)"
+        },
+        {
+            "id": 4,
+            "nombre": "Filtro de agua (1)"
+        },
+        {
+            "id": 5,
+            "nombre": "Mesa o banco para filtro de agua (1)"
+        },
+        {
+            "id": 6,
+            "nombre": "Mesa para manta de crecimiento (1)"
+        },
+        {
+            "id": 7,
+            "nombre": "Mesitas para niños (1)"
+        }
+    ],
+    "insumos_cn": [
+        {
+            "id": 1,
+            "nombre": "Alcohol o gel de manos (1)"
+        },
+        {
+            "id": 2,
+            "nombre": "Bote para basura (1)"
+        },
+        {
+            "id": 3,
+            "nombre": "Cepillos dental (1)"
+        },
+        {
+            "id": 4,
+            "nombre": "Desinfectante para superficios(1)"
+        },
+        {
+            "id": 5,
+            "nombre": "Escoba (1)"
+        }
+    ],
+    "utensilios_cn": [
+        {
+            "id": 1,
+            "nombre": "Campana extractora de humo (1)"
+        },
+        {
+            "id": 1,
+            "nombre": "Coladores (1)"
+        },
+        {
+            "id": 1,
+            "nombre": "Contenedor para alimentos (1)"
+        },
+        {
+            "id": 1,
+            "nombre": "Cucharitas para niños (5)"
+        }
+    ],
+    "material_didactico_cn": [
+        {
+            "id": 1,
+            "nombre": "Almohadilla (1)"
+        },
+        {
+            "id": 2,
+            "nombre": "Bocina (1)"
+        },
+        {
+            "id": 3,
+            "nombre": "Carnets de asistencia (1)"
+        },
+        {
+            "id": 4,
+            "nombre": "Engrapadora (1)"
+        }
+    ],
+    "material_ludicos_cn": [
+        {
+            "id": 1,
+            "nombre": "Alfrombras o petates (2)"
+        },
+        {
+            "id": 2,
+            "nombre": "Aros pequeños (5)"
+        },
+        {
+            "id": 3,
+            "nombre": "Botones con figuras: Triangulo, cuadrado, circulo etc."
+        }
+    ],
+    "equipamiento_agua_limpia": [
+        {
+            "id": 1,
+            "nombre": "Filtro de agua"
+        },
+        {
+            "id": 2,
+            "nombre": "Sitio de lavado: pila o lavamanos"
+        },
+        {
+            "id": 3,
+            "nombre": "Tinaco"
+        },
+        {
+            "id": 4,
+            "nombre": "Ninguno"
+        }
+    ],
+    "equipamiento_saneamiento": [
+        {
+            "id": 1,
+            "nombre": "Centro nútreme con iluminacion y ventilación adecuada"
+        },
+        {
+            "id": 2,
+            "nombre": "Centro nútreme decorado (Carteles, dibujos, listones, etc)"
+        },
+        {
+            "id": 3,
+            "nombre": "Centro nútreme limpio"
+        }
+    ],
+    "meses": [
+        {
+            "id": 1,
+            "nombre": "Enero"
+        },
+        {
+            "id": 2,
+            "nombre": "Febrero"
+        },
+        {
+            "id": 3,
+            "nombre": "Marzo"
+        },
+        {
+            "id": 4,
+            "nombre": "Abril"
+        },
+        {
+            "id": 5,
+            "nombre": "Mayo"
+        },
+        {
+            "id": 6,
+            "nombre": "Junio"
+        },
+        {
+            "id": 7,
+            "nombre": "Julio"
+        },
+        {
+            "id": 8,
+            "nombre": "Agosto"
+        },
+        {
+            "id": 9,
+            "nombre": "Septiembre"
+        },
+        {
+            "id": 10,
+            "nombre": "Octubre"
+        },
+        {
+            "id": 11,
+            "nombre": "Noviembre"
+        },
+        {
+            "id": 12,
+            "nombre": "Diciembre"
+        }
+    ],
+    "actividades_cn": [
+        {
+            "id": 1,
+            "nombre": "Casa Modelo"
+        },
+        {
+            "id": 2,
+            "nombre": "Receta de nutritiva"
+        },
+        {
+            "id": 3,
+            "nombre": "Incaparina Maternal"
+        },
+        {
+            "id": 4,
+            "nombre": "Ninguna"
+        }
+    ],
+    "enfermedad_ninio_embarazada": [
+        {
+            "id": 1,
+            "nombre": "Diarrea"
+        },
+        {
+            "id": 2,
+            "nombre": "Fiebre"
+        },
+        {
+            "id": 3,
+            "nombre": "Gripe y tos"
+        },
+        {
+            "id": 4,
+            "nombre": "Vómitos"
+        },
+        {
+            "id": 5,
+            "nombre": "Otra enfermedad"
+        },
+        {
+            "id": 6,
+            "nombre": "Ninguna"
+        }
+    ],
+    "inasistencia_ninio_embarazada": [
+        {
+            "id": 1,
+            "nombre": "Dependencia laboral (Trabajo formal)"
+        },
+        {
+            "id": 2,
+            "nombre": "Distancia a centro nútreme"
+        },
+        {
+            "id": 3,
+            "nombre": "Educadora cambio horarios"
+        },
+        {
+            "id": 4,
+            "nombre": "Emergencia"
+        },
+        {
+            "id": 5,
+            "nombre": "Enfermedad"
+        }
+    ],
+    "lugares_atencion_medica": [
+        {
+            "id": 1,
+            "nombre": "Jornada de Salud"
+        },
+        {
+            "id": 2,
+            "nombre": "Centro de Salud"
+        }
+    ],
+    "servicio_atencion_salud_embarazada": [
+        {
+            "id": 1,
+            "nombre": "Control prenatal"
+        },
+        {
+            "id": 2,
+            "nombre": "Suplementos"
+        },
+        {
+            "id": 3,
+            "nombre": "Ultrasonido"
+        },
+        {
+            "id": 4,
+            "nombre": "Papanicolaou"
+        },
+        {
+            "id": 5,
+            "nombre": "Otro"
+        }
+    ],
+    "catalogMetadata": {
+        "municipios": {
+            "filterFields": [
+                "id_departamento"
+            ]
+        },
+        "comunidad": {
+            "filterFields": [
+                "id_departamento"
+            ]
+        },
+        "detalle_rango_hitos": {
+            "filterFields": [
+                "id_hito"
+            ]
+        }
+    }
+}
+
+
+
+
+{
+    "name": "Evaluación de Centro Nútreme",
+    "regions": [
+        {
+            "id": "region_1771897856440",
+            "type": "region",
+            "title": "DISPONIBILIDAD DE INFRAESTRUCTURA",
+            "elements": [
+                {
+                    "id": "survey_1771897872777_1",
+                    "type": "survey",
+                    "label": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "36",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "element_1771897921004_2",
+                    "type": "text",
+                    "label": "¿Por qué no esta disponible o cuál es el daño en el cosechador de agua?",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "no hay cosechador de agua",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_not_equals",
+                            "value": "281"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771897921517_3",
+                    "type": "text",
+                    "label": "¿Por qué no está disponible o cual es el daño en el servicio sanitario o letrina?",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "mostrar no h ay servicio de letrina",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_not_equals",
+                            "value": "282"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771897921814_4",
+                    "type": "text",
+                    "label": "¿Por qué no está disponible o cual es el daño en el sitio de lavado?",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "sitio de lavado especifique",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_not_equals",
+                            "value": "283"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771898183686_5",
+                    "type": "camera",
+                    "label": "Fotrografía exterior del centro",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "tiene cosechador de agua",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_equals",
+                            "value": "281"
+                        },
+                        {
+                            "name": "Tiene sanitario",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_equals",
+                            "value": "282"
+                        },
+                        {
+                            "name": "Tiene s itio de lavado",
+                            "triggerField": "survey_1771897872777_1",
+                            "triggerLabel": "¿Qué infraestructura está disponible y en buenas condiciones?",
+                            "type": "show_if_equals",
+                            "value": "283"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771903002099",
+            "type": "region",
+            "title": "CONDICIONES DEL CENTRO NÚTREME",
+            "elements": [
+                {
+                    "id": "survey_1771903147969_18",
+                    "type": "survey",
+                    "label": "¿Qué partes de la estructura del Centro nútreme están en buenas condiciones?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "37",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771901700860",
+            "type": "region",
+            "title": "MOBILIARIO Y EQUIPO",
+            "elements": [
+                {
+                    "id": "survey_1771901712386_0",
+                    "type": "survey",
+                    "label": "¿Qué mobiliario y equipamiento están disponibles y en buenas condiciones en el centro nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "38",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "element_1771901830448_1",
+                    "type": "text",
+                    "label": "¿Por qué no esta disponible o cual es el daño en los bancos, sillas, banquitos, sillitas, mesas o mesitas?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "Sin nombre",
+                            "triggerField": "survey_1771901712386_0",
+                            "triggerLabel": "¿Qué mobiliario y equipamiento están disponibles y en buenas condiciones en el centro nútreme?",
+                            "type": "hide_if_between",
+                            "value": "[291,294,295,296]",
+                            "betweenType": "catalog"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771901830822_2",
+                    "type": "text",
+                    "label": "Porqué no esta disponiblle o cual es el daño en el filtro de agua",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "validar filtro de agua",
+                            "triggerField": "survey_1771901712386_0",
+                            "triggerLabel": "¿Qué mobiliario y equipamiento están disponibles y en buenas condiciones en el centro nútreme?",
+                            "type": "hide_if_equals",
+                            "value": "293",
+                            "betweenType": "number"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771901831098_3",
+                    "type": "text",
+                    "label": "Por que no esta disponible o cual es el daño en el ropero",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [
+                        {
+                            "name": "validar ropero",
+                            "triggerField": "survey_1771901712386_0",
+                            "triggerLabel": "¿Qué mobiliario y equipamiento están disponibles y en buenas condiciones en el centro nútreme?",
+                            "type": "hide_if_equals",
+                            "value": "297",
+                            "betweenType": "number"
+                        }
+                    ],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771901831335_4",
+                    "type": "camera",
+                    "label": "Fotografía interior del centro",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": []
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902363120",
+            "type": "region",
+            "title": "INSUMOS DE HIGIENE Y SANEAMIENTO",
+            "elements": [
+                {
+                    "id": "survey_1771902384415_0",
+                    "type": "survey",
+                    "label": "¿Qué insumos de higiene y saneamiento están disponibles en el Centro Nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "39",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902441285",
+            "type": "region",
+            "title": "Insumos de Cocina",
+            "elements": [
+                {
+                    "id": "survey_1771902442845_1",
+                    "type": "survey",
+                    "label": "¿Qué utensilios de cocina están disponibles en el centro nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "40",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902497678",
+            "type": "region",
+            "title": "MATERIALES DIDÁCTICOS Y LÚDICOS",
+            "elements": [
+                {
+                    "id": "survey_1771902511366_2",
+                    "type": "survey",
+                    "label": "¿Qué materiales didácticos están disponibles en el centro nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "41",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902548528_3",
+                    "type": "survey",
+                    "label": "¿Qué materiales lúdicos están disponibles en el centro nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "42",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902610520",
+            "type": "region",
+            "title": "AGUA, SANEMIENTO Y AMBIENTE",
+            "elements": [
+                {
+                    "id": "survey_1771902624970_4",
+                    "type": "survey",
+                    "label": "¿Qué equipamiento dispone de agua limpia para consumo o uso general?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "43",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902625247_5",
+                    "type": "survey",
+                    "label": "¿Qué equipamiento dispone con un nivel adecuado de saneamiento y ambiente?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_question",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [],
+                        "surveySource": "catalog",
+                        "catalogType": "44",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902699366",
+            "type": "region",
+            "title": "RECOMENDACIÓN",
+            "elements": [
+                {
+                    "id": "element_1771902711664_6",
+                    "type": "text",
+                    "label": "¿Que otro material, insumo o equipo recomienda incluir en el Centro nútreme?",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771902713851_7",
+                    "type": "text",
+                    "label": "Observación General",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": []
+                },
+                {
+                    "id": "element_1771902716778_8",
+                    "type": "camera",
+                    "label": "Fotografía de los insumos y materiales",
+                    "placeholder": "",
+                    "required": true,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": []
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771902770174",
+            "type": "region",
+            "title": "RESULTADOS POR MODULO",
+            "elements": [
+                {
+                    "id": "survey_1771902787027_9",
+                    "type": "survey",
+                    "label": "1. Disponibilidad y condiciones de Infraestructura",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771897872777_1"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902847331_10",
+                    "type": "survey",
+                    "label": "2. Condiciones del Cento",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771903147969_18"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902847655_11",
+                    "type": "survey",
+                    "label": "3. Disponibilidad y condiciones del Mobiliarios y Equipo",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771901712386_0"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902848020_12",
+                    "type": "survey",
+                    "label": "4. Disponibilidad de insumos de Higiene y Saneamiento",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902384415_0"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902848397_13",
+                    "type": "survey",
+                    "label": "5. Disponibilidad de utensilios de cocina",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902442845_1"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902848702_14",
+                    "type": "survey",
+                    "label": "6. Disponibilidad de MAteriales didácticos",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902511366_2"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902849026_15",
+                    "type": "survey",
+                    "label": "7. Disponibilidad de materiales lúdicos",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902548528_3"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902849342_16",
+                    "type": "survey",
+                    "label": "8. Disponibilidad de agua",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902624970_4"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                },
+                {
+                    "id": "survey_1771902849628_17",
+                    "type": "survey",
+                    "label": "9. Saneamiento y ambiente",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_subtotal",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902625247_5"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        },
+        {
+            "id": "region_1771903419918",
+            "type": "region",
+            "title": "RESULTADOS FINALES",
+            "elements": [
+                {
+                    "id": "survey_1771903434049_19",
+                    "type": "survey",
+                    "label": "NOTA FINAL",
+                    "placeholder": "",
+                    "required": false,
+                    "multipleSelecction": false,
+                    "options": [],
+                    "selectedOptions": [],
+                    "catalogType": null,
+                    "actions": [],
+                    "validations": [],
+                    "formulas": [],
+                    "isSurveyField": true,
+                    "surveyConfig": {
+                        "mode": "catalog_stars",
+                        "displayType": "text",
+                        "responses": [
+                            {
+                                "value": 1,
+                                "label": "Malo"
+                            },
+                            {
+                                "value": 2,
+                                "label": "Regular"
+                            },
+                            {
+                                "value": 3,
+                                "label": "Bueno"
+                            },
+                            {
+                                "value": 4,
+                                "label": "Muy Bueno"
+                            },
+                            {
+                                "value": 5,
+                                "label": "Excelente"
+                            }
+                        ],
+                        "linkedFieldIds": [
+                            "survey_1771902787027_9",
+                            "survey_1771902847331_10",
+                            "survey_1771902847655_11",
+                            "survey_1771902848020_12",
+                            "survey_1771902848397_13",
+                            "survey_1771902848702_14",
+                            "survey_1771902849342_16",
+                            "survey_1771902849026_15",
+                            "survey_1771902849628_17"
+                        ],
+                        "surveySource": "catalog",
+                        "catalogSelectedIds": []
+                    }
+                }
+            ],
+            "actions": [],
+            "validations": [],
+            "repeatConfig": ""
+        }
+    ]
+}

@@ -1,0 +1,128 @@
+<!-- BÚSQUEDA -->
+<div class="search-section">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Buscar imágenes...</mat-label>
+    <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Ej: logo, banner...">
+    <mat-icon matPrefix>search</mat-icon>
+    <button *ngIf="searchTerm" matSuffix mat-icon-button (click)="clearSearch()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <span class="count-badge">{{ totalItems }} imagen{{ totalItems !== 1 ? 'es' : '' }}</span>
+</div>
+
+<!-- LOADING -->
+<div *ngIf="isLoading" class="loading-container">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Cargando imágenes...</p>
+</div>
+
+<ng-container *ngIf="!isLoading">
+
+  <!-- EMPTY GLOBAL -->
+  <div *ngIf="images.length === 0 && !searchTerm" class="empty-state">
+    <mat-icon>photo_library</mat-icon>
+    <p>Aún no hay imágenes en el catálogo</p>
+  </div>
+
+  <ng-container *ngIf="images.length > 0 || searchTerm">
+
+    <!-- BARRA SELECCIÓN MÚLTIPLE (solo admin) -->
+    <div class="selection-bar" *ngIf="mode === 'admin'">
+      <label class="select-all-label">
+        <input
+          type="checkbox"
+          [checked]="isAllSelected()"
+          [indeterminate]="isSomeSelected()"
+          (change)="toggleSelectAll($event)"
+        >
+        <span>Seleccionar todos</span>
+      </label>
+      <span *ngIf="selectedImages.size > 0" class="selection-count">
+        {{ selectedImages.size }} imagen(es) seleccionada(s)
+      </span>
+    </div>
+
+    <!-- HINT modo select -->
+    <p *ngIf="mode === 'select'" class="select-hint">
+      <mat-icon>touch_app</mat-icon>
+      Haz clic en una imagen para seleccionarla
+    </p>
+
+    <!-- EMPTY SEARCH -->
+    <div *ngIf="images.length === 0 && searchTerm" class="empty-state">
+      <mat-icon>image_search</mat-icon>
+      <p>No se encontraron imágenes para "{{ searchTerm }}"</p>
+    </div>
+
+    <!-- GRID -->
+    <div class="images-grid" *ngIf="images.length > 0">
+      <div
+        *ngFor="let image of images"
+        class="img-card"
+        [class.selected]="selectedImages.has(image.id_catalogo_imagen)"
+        [class.selectable]="mode === 'select'"
+        (click)="onCardClick(image)"
+      >
+        <!-- Checkbox (solo admin) -->
+        <div *ngIf="mode === 'admin'" class="check-wrap" (click)="toggleSelect(image.id_catalogo_imagen, $event)">
+          <div class="check">
+            <mat-icon *ngIf="selectedImages.has(image.id_catalogo_imagen)">check</mat-icon>
+          </div>
+        </div>
+
+        <!-- Imagen -->
+        <div class="img-thumb">
+          <img [src]="image.path" [alt]="image.name" loading="lazy">
+          <!-- Overlay modo select -->
+          <div *ngIf="mode === 'select'" class="select-overlay">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="img-footer">
+          <span class="img-name" [title]="image.name">{{ image.name }}</span>
+          <!-- Acciones solo en admin -->
+          <div *ngIf="mode === 'admin'" class="img-actions">
+            <button mat-icon-button (click)="onEdit(image, $event)">
+              <mat-icon class="edit-icon">edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="onDelete(image, $event)">
+              <mat-icon class="delete-icon">delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-section" *ngIf="totalItems > 0">
+      <div class="page-size-select">
+        <span class="page-size-label">Por página:</span>
+        <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()" class="page-size-input">
+          <option [value]="12">12</option>
+          <option [value]="24">24</option>
+          <option [value]="48">48</option>
+        </select>
+      </div>
+      <div class="page-info">{{ pageStart }}-{{ pageEnd }} de {{ totalItems }}</div>
+      <div class="page-controls">
+        <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(1)">
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="currentPage === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="page-number">{{ currentPage }} / {{ totalPages }}</span>
+        <button mat-icon-button [disabled]="currentPage === totalPages" (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="currentPage === totalPages" (click)="goToPage(totalPages)">
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+</ng-container>

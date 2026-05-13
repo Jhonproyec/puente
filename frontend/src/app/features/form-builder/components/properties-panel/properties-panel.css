@@ -1,0 +1,46 @@
+
+/* =============== */
+/* PROPERTIES PANEL */
+/* =============== */
+
+.properties-panel__header {
+  padding: 20px 24px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;
+  top: -16px;
+  z-index: 10;
+}
+
+/* .properties-panel__content {
+  padding: 24px;
+} */
+
+/* =============== */
+/* EMPTY STATE */
+/* =============== */
+
+.empty-element{
+  margin-top: 18px;
+  color: #6b7280;
+}
+.empty-state {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.empty-state__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
+}

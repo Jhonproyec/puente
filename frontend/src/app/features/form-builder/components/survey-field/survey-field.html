@@ -1,0 +1,172 @@
+<div class="survey-field">
+
+  <!-- =============== CATÁLOGO: QUESTION - TEXTO =============== -->
+  @if (element.surveyConfig?.mode === 'catalog_question') {
+  <div class="catalog-question">
+
+    @if (loadingOptions) {
+    <div class="loading-state">
+      <span>Cargando opciones...</span>
+    </div>
+    } @else {
+
+    <!-- DISPLAY: TEXT -->
+    @if (element.surveyConfig?.displayType === 'text') {
+    <div class="catalog-options">
+      @for (option of catalogOptions; track option.value) {
+      <div class="catalog-option-item">
+
+        <!-- ✅ MÚLTIPLE: checkbox -->
+        @if (element.surveyConfig?.multipleSelection) {
+        <label [class.disabled]="isCatalogOptionDisabled(option)" [class.none-option]="option.isNone">
+          <input type="checkbox" [checked]="isCatalogOptionSelected(option.value)"
+            [disabled]="isCatalogOptionDisabled(option)"
+            (change)="onCatalogOptionChange(option, $any($event.target).checked)" />
+          <span>{{ option.label }}</span>
+          @if (option.isNone) { <span class="none-badge">(0 pts)</span> }
+        </label>
+        } @else {
+        <!-- ✅ SIMPLE: radio -->
+        <label [class.none-option]="option.isNone">
+          <input type="radio" [name]="'survey_' + element.id" [value]="option.value"
+            [checked]="isCatalogOptionSelected(option.value)"
+            (change)="onCatalogOptionChange(option, true)" />
+          <span>{{ option.label }}</span>
+        </label>
+        }
+
+      </div>
+      }
+      @if (catalogOptions.length === 0) {
+      <div class="no-options">No hay opciones disponibles</div>
+      }
+    </div>
+    }
+
+    <!-- DISPLAY: IMAGES -->
+    @if (element.surveyConfig?.displayType === 'images') {
+    <div class="catalog-options-images">
+      @for (option of catalogOptions; track option.value) {
+      <div class="catalog-image-option" [class.selected]="isCatalogOptionSelected(option.value)"
+        [class.disabled]="isCatalogOptionDisabled(option)">
+
+        @if (element.surveyConfig?.multipleSelection) {
+        <!-- ✅ MÚLTIPLE: checkbox con imagen -->
+        <label [class.disabled]="isCatalogOptionDisabled(option)">
+          <input type="checkbox" [checked]="isCatalogOptionSelected(option.value)"
+            [disabled]="isCatalogOptionDisabled(option)"
+            (change)="onCatalogOptionChange(option, $any($event.target).checked)" hidden />
+          <div class="image-card" [class.selected]="isCatalogOptionSelected(option.value)"
+            (click)="!isCatalogOptionDisabled(option) && onCatalogOptionChange(option, !isCatalogOptionSelected(option.value))">
+            @if (getOptionImageUrl(option.value)) {
+            <img [src]="getOptionImageUrl(option.value)" [alt]="option.label" class="option-img" />
+            } @else {
+            <div class="option-img-placeholder">🖼️</div>
+            }
+            <span class="option-label">{{ option.label }}</span>
+            @if (isCatalogOptionSelected(option.value)) {
+            <span class="selected-check">✓</span>
+            }
+          </div>
+        </label>
+        } @else {
+        <!-- ✅ SIMPLE: radio con imagen -->
+        <div class="image-card" [class.selected]="isCatalogOptionSelected(option.value)"
+          (click)="onCatalogOptionChange(option, true)">
+          @if (getOptionImageUrl(option.value)) {
+          <img [src]="getOptionImageUrl(option.value)" [alt]="option.label" class="option-img" />
+          } @else {
+          <div class="option-img-placeholder">🖼️</div>
+          }
+          <span class="option-label">{{ option.label }}</span>
+          @if (isCatalogOptionSelected(option.value)) {
+          <span class="selected-check">✓</span>
+          }
+        </div>
+        }
+
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Score -->
+    @if (selectedCatalogIds.length > 0) {
+    <div class="score-preview">
+      <span>Puntaje: <strong>{{ getCurrentScore() | number:'1.2-2' }}</strong> / 1.00</span>
+    </div>
+    }
+
+    }
+  </div>
+  }
+
+  <!-- =============== CATÁLOGO: SUBTOTAL =============== -->
+  @if (element.surveyConfig?.mode === 'catalog_subtotal') {
+  <div class="catalog-subtotal">
+    <div class="subtotal-detail">
+      @for (fieldId of element.surveyConfig?.linkedFieldIds; track fieldId) {
+      <div class="subtotal-row">
+        <span class="subtotal-label">{{ getLinkedQuestionLabel(fieldId) }}</span>
+        <span class="subtotal-value">{{ getLinkedQuestionScore(fieldId) | number:'1.2-2' }} pts</span>
+      </div>
+      }
+    </div>
+    <div class="subtotal-result">
+      <button type="button" class="btn-recalculate" (click)="recalculateSubtotal()">🔄 Calcular</button>
+      <div class="subtotal-score">
+        <span class="score-number">{{ subtotalScore | number:'1.1-1' }}</span>
+        <span class="score-max">/ 100</span>
+      </div>
+      <div class="subtotal-bar">
+        <div class="subtotal-fill" [style.width.%]="subtotalScore"></div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- =============== CATÁLOGO: STARS =============== -->
+  @if (element.surveyConfig?.mode === 'catalog_stars') {
+  <div class="catalog-stars">
+    <div class="stars-detail">
+      @for (fieldId of element.surveyConfig?.linkedFieldIds; track fieldId) {
+      <div class="stars-subtotal-row">
+        <span class="stars-subtotal-label">{{ getSubtotalLabel(fieldId) }}</span>
+        <span class="stars-subtotal-value">{{ getSubtotalScore(fieldId) | number:'1.1-1' }} pts</span>
+      </div>
+      }
+    </div>
+    <div class="stars-result">
+      <button type="button" class="btn-recalculate" (click)="recalculateStars()">🔄 Calcular</button>
+      <div class="stars-display">
+        @for (i of getStarsArray(5); track i) {
+        <span [class.star-filled]="i <= starsScore" [class.star-empty]="i > starsScore" class="star">⭐</span>
+        }
+      </div>
+      <p class="stars-label">{{ starsScore }} de 5 estrellas</p>
+    </div>
+  </div>
+  }
+
+  <!-- =============== RESULT =============== -->
+  @if (element.surveyConfig?.mode === 'result') {
+  <div class="survey-result">
+    <h4>📊 Resultados</h4>
+    @for (linkedFieldId of element.surveyConfig?.linkedFieldIds; track linkedFieldId) {
+    @let linkedField = getLinkedField(linkedFieldId);
+    @if (linkedField) {
+    <div class="result-item">
+      <p class="result-label">{{ linkedField.label }}</p>
+      <div class="result-answer">
+        <strong>{{ getLinkedFieldAnswer(linkedFieldId) }}</strong>
+        @if (linkedField.surveyConfig?.displayType === 'images' && getLinkedFieldImageUrl(linkedFieldId)) {
+        <img [src]="getLinkedFieldImageUrl(linkedFieldId)" [alt]="getLinkedFieldAnswer(linkedFieldId)" />
+        }
+      </div>
+    </div>
+    }
+    }
+  </div>
+  }
+
+</div>

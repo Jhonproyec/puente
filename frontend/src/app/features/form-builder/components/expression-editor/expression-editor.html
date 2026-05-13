@@ -1,0 +1,95 @@
+<div class="expression-editor-container">
+  <p class="editor-help">
+    📝 Escribe tu fórmula usando:
+    <br />
+    <strong>Campos numéricos:</strong> SUMA(), PROMEDIO(), MAX(), MIN()
+    <br />
+    <strong>Condicional:</strong> SI(condición, valor_verdadero, valor_falso)
+    <br />
+    <strong>Comparadores:</strong> =, &lt;&gt;, &gt;, &lt;, &gt;=, &lt;=
+    <br />
+    <strong>Funciones de fecha:</strong>
+    <br />
+    &nbsp;&nbsp;• <strong>EDAD_AÑOS(campo_fecha)</strong> → años cumplidos
+    <br />
+    &nbsp;&nbsp;• <strong>EDAD_MESES(campo_fecha)</strong> → meses cumplidos
+    <br />
+    &nbsp;&nbsp;• <strong>EDAD_DIAS(campo_fecha)</strong> → días cumplidos
+    <br />
+    &nbsp;&nbsp;• <strong>DIAS_ENTRE(fecha1, fecha2)</strong> → días entre dos fechas
+    <br />
+    &nbsp;&nbsp;• <strong>DIAS_DESDE_HOY(campo_fecha)</strong> → días desde una fecha hasta hoy
+    <br />
+    &nbsp;&nbsp;• <strong>MES(campo_fecha)</strong>, <strong>AÑO(campo_fecha)</strong>,
+    <strong>DIA(campo_fecha)</strong>
+    <br />
+    &nbsp;&nbsp;• <strong>HOY()</strong> → fecha actual
+    <br />
+    <strong>Ejemplos:</strong>
+    <br />
+    &nbsp;&nbsp;• EDAD_AÑOS(Fecha Nacimiento) &gt;= 18
+    <br />
+    &nbsp;&nbsp;• EDAD_MESES(Fecha Nacimiento) &gt;= 6
+    <br />
+    &nbsp;&nbsp;• SI(EDAD_AÑOS(Fecha Nacimiento) &lt; 18, 1, 0)
+    <br />
+    &nbsp;&nbsp;• DIAS_ENTRE(Fecha Inicio, Fecha Fin) &gt; 30
+  </p>
+
+  <textarea [(ngModel)]="displayExpression" (input)="onExpressionInput($event)" (keydown)="onExpressionKeydown($event)"
+    class="expression-input" rows="4" placeholder="Ej: SI(Campo 1 > 10, Campo 1 * 2, Campo 2 + Campo 3)">
+  </textarea>
+
+  <!-- Helper SI/IF -->
+  @if (showIfHelper()) {
+  <div class="if-helper">
+    <div class="if-helper-title">💡 Sintaxis de SI:</div>
+    <code>SI( condición , valor_verdadero , valor_falso )</code>
+    <div class="if-helper-examples">
+      <div (click)="insertIfTemplate('simple')" class="if-example">
+        SI(Campo 1 &gt; 10, 5, Campo 1) ← si mayor a 10 devuelve 5, si no el valor del campo
+      </div>
+      <div (click)="insertIfTemplate('compare')" class="if-example">
+        SI(Campo 1 &gt; Campo 2, Campo 1, Campo 2) ← devuelve el mayor
+      </div>
+      <div (click)="insertIfTemplate('nested')" class="if-example">
+        SI(Y(Campo 1 &gt; 0, Campo 2 &gt; 0), SUMA(Campo 1, Campo 2), 0)
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Sugerencias -->
+  @if ((suggestionType() === 'fields' || suggestionType() === 'functions' || suggestionType() === 'options') &&
+  suggestions().length > 0) {
+  <div class="suggestions-dropdown">
+    <div class="suggestions-header">
+      {{ suggestionType() === 'fields' ? 'Campos disponibles:' :
+      suggestionType() === 'options' ? 'Opciones disponibles:' : 'Funciones:' }}
+    </div>
+    @for (suggestion of suggestions(); track suggestion) {
+    <div (click)="insertSuggestion(suggestion)" class="suggestion-item">
+      <span>{{ suggestionType() === 'fields' ? '🔢' :
+        suggestionType() === 'options' ? '📋' : 'ƒ' }}</span>
+      <span>{{ suggestionType() === 'fields' ? getFieldLabelById(suggestion) :
+        suggestionType() === 'options' ? suggestion.split('||')[1] : suggestion }}</span>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Validación -->
+  @if (expressionValidation(); as validation) {
+  <div class="validation-feedback">
+    @for (error of validation.errors; track error) {
+    <div class="error-item">❌ {{ error }}</div>
+    }
+    @for (warning of validation.warnings; track warning) {
+    <div class="warning-item">⚠️ {{ warning }}</div>
+    }
+    @if (validation.valid && validation.errors.length === 0) {
+    <div class="success">✅ Expresión válida</div>
+    }
+  </div>
+  }
+</div>

@@ -1,0 +1,507 @@
+/* src/app/components/structure-panel/structure-panel.component.css */
+mat-icon {
+  vertical-align: middle;
+  margin-right: 5px;
+  font-size: 15px;
+  margin-top: 3px;
+}
+
+.btn-icon mat-icon {
+  margin-right: 0;
+}
+
+.structure-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;        /* ocupa toda la altura disponible del panel */
+  overflow: hidden;    /* evita scroll en el contenedor padre */
+}
+
+.structure-panel__content {
+  padding: 10px 5px;
+  overflow-y: auto;    /* scroll solo en esta parte */
+  flex: 1;             /* ocupa el espacio restante */
+}
+
+
+.structure-panel__sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 10px 5px 0;
+  flex-shrink: 0;      /* nunca se encoge */
+}
+
+.view-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e5e5e5;
+  justify-content: space-between;
+  margin-bottom: 0;    /* el padding del header ya da espacio */
+}
+
+.view-tabs__tab {
+  padding: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.view-tabs__tab:hover {
+  color: #1a1a1a;
+}
+
+.view-tabs__tab--active {
+  color: #1a1a1a;
+  border-bottom-color: #1a1a1a;
+}
+
+.add-buttons {
+  display: flex;
+  flex-direction: row;   /* ← fila en lugar de columna */
+  flex-wrap: wrap;       /* ← bajan si no caben */
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;               /* cada botón ocupa espacio proporcional */
+  min-width: 70px;       /* mínimo antes de bajar a la siguiente fila */
+  padding: 6px 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-add mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  margin: 0;             /* resetea el margin global de mat-icon */
+}
+.btn-add:hover {
+  background: #fafafa;
+  border-color: #1a1a1a;
+}
+
+.btn-add--region {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+.btn-add--persona {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.btn-add--persona:hover {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
+.btn-add--region:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* ==================== LISTA DE ELEMENTOS ====================  */
+
+.elements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ==================== REGION ITEM ====================  */
+
+.region-item {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.region-item--selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.region-item--has-dependency {
+  border-left: 3px solid #f59e0b;
+}
+
+.region-item--dragging {
+  opacity: 0.6;
+  background: #f3f4f6;
+}
+
+/* HEADER WRAPPER: Contiene drag handle + header + actions */
+.region-item__header-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0;
+  gap: 0;
+}
+
+/* DRAG HANDLE PARA REGIÓN */
+.drag-handle--region {
+  padding: 8px 10px;
+  flex-shrink: 0;
+  cursor: grab;
+  color: #9ca3af;
+  font-size: 16px;
+  user-select: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+}
+
+.drag-handle--region:hover {
+  color: #1a1a1a;
+  background: #e5e7eb;
+}
+
+.drag-handle--region.drag-handle--active {
+  color: #3b82f6;
+  background: #dbeafe;
+}
+
+/* HEADER DE LA REGIÓN */
+.region-item__header {
+  flex: 1;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #1a1a1a;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.region-item__header:hover {
+  background: #e5e7eb;
+}
+
+.region-item__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* BOTONES DE ACCIÓN DE LA REGIÓN */
+.region-item__actions {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+/* CONTENIDO DE LA REGIÓN: Los elementos */
+.region-item__content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==================== ELEMENT ITEM ====================  */
+
+.element-item {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.element-item:hover {
+  border-color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.element-item--active {
+  border-color: #1a1a1a;
+  background: #fafafa;
+}
+
+.element-item--has-dependency {
+  border-left: 3px solid #f59e0b;
+  padding-left: 8px;
+}
+
+.element-item--dragging {
+  opacity: 0.5;
+  background: #f3f4f6;
+}
+
+/* DRAG HANDLE PEQUEÑO PARA ELEMENTOS */
+.drag-handle--small {
+  padding: 4px 6px;
+  font-size: 12px;
+  flex-shrink: 0;
+  cursor: grab;
+  color: #9ca3af;
+  user-select: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}
+
+.drag-handle--small:hover {
+  color: #1a1a1a;
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.drag-handle--small.drag-handle--active {
+  color: #3b82f6;
+  background: #dbeafe;
+  border-radius: 4px;
+}
+
+/* INFO DEL ELEMENTO */
+.element-item__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.element-item__type {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.element-item__label {
+  font-weight: 500;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+/* ACCIONES DEL ELEMENTO */
+.element-item__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ==================== BOTONES ICONOS ====================  */
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  /* font-size: 18px; */
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-icon:hover {
+  color: #1a1a1a;
+  background: #f3f4f6;
+}
+
+.btn-icon--delete:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+/* ==================== BADGES ====================  */
+
+.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge--info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* ==================== DRAG & DROP STYLES ====================  */
+
+/* Cuando se está arrastrando sobre un contenedor válido */
+.cdk-drop-list-dragging .element-item:last-child {
+  margin-bottom: 8px;
+}
+
+/* Animación suave del elemento siendo arrastrado */
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Preview mientras se arrastra */
+.cdk-drag-preview {
+  background: white;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+  padding: 8px;
+  min-width: 250px;
+}
+
+/* Placeholder visible (espacio que se crea donde irá el elemento) */
+.cdk-drag-placeholder {
+  background: #dbeafe;
+  border: 2px dashed #3b82f6;
+  border-radius: 6px;
+  opacity: 0.4;
+  min-height: 50px;
+}
+
+/* ==================== VISTAS ====================  */
+
+.view-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+}
+
+.action-summary,
+.validation-summary {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 6px;
+  margin-bottom: 12px;
+}
+
+.action-summary__title,
+.validation-summary__title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.action-summary__item,
+.validation-summary__item {
+  background: #f9fafb;
+  margin-top: 4px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.validation-summary__message {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty-state__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+}
+
+span {
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ACORDEÓN */
+.accordion-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  color: #666;
+  transition: transform 0.2s;
+}
+
+.region-item__content-wrapper {
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.25s ease;
+  /* max-height: 2000px; */
+  opacity: 1;
+}
+
+.region-item__content-wrapper.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.region-item--collapsed {
+  margin-bottom: 4px;
+}
+
+.empty-region {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  border: 2px dashed #e0e0e0;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+
+.empty-region mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #ccc;
+}

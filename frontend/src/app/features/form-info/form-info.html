@@ -1,0 +1,150 @@
+<div class="container">
+  <!-- Loading info -->
+  @if (isLoadingInfo) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando información...</p>
+  </div>
+  }
+  @if (!isLoadingInfo && formData) {
+  <div class="main-card">
+    <!-- Header -->
+    <div class="header-with-actions">
+      <div class="header-left">
+        <h1 class="form-title">{{ formData.nombre }}</h1>
+        <mat-chip [color]="getEstadoColor()" selected>
+          {{ formData.estado }}
+        </mat-chip>
+      </div>
+      <div>
+        <button mat-raised-button color="btn btn-primary" (click)="onFillForm()">
+          <mat-icon>edit_note</mat-icon>
+          Llenar Formulario
+        </button>
+        <button mat-raised-button color="btn btn-primary" (click)="onEditForm()"
+          style="margin-left: 5px; margin-right: 5px;">
+          <mat-icon>edit</mat-icon> Editar Formulario
+        </button>
+        <button mat-raised-button color="btn btn-primary" (click)="onViewPreview()">
+          <mat-icon>remove_red_eye</mat-icon>
+          Vista Previa
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <mat-icon class="stat-icon">dynamic_form</mat-icon>
+        <div class="stat-number">{{ formData.totalFields }}</div>
+        <div class="stat-label">Campos Totales</div>
+      </div>
+      <div class="stat-box">
+        <mat-icon class="stat-icon">assignment_turned_in</mat-icon>
+        <div class="stat-number">{{ formData.totalResponses }}</div>
+        <div class="stat-label">Formularios Contestados</div>
+      </div>
+      <div class="stat-box">
+        <mat-icon class="stat-icon">history</mat-icon>
+        <div class="stat-number">v{{ formData.version }}</div>
+        <div class="stat-label">Versión</div>
+      </div>
+    </div>
+
+    <!-- Info general -->
+    <div class="info-section">
+      <h3><mat-icon>info</mat-icon> Información General</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-label">Creado Por</div>
+          <div class="info-item-value">{{ formData.creadoPor }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Fecha de Creación</div>
+          <div class="info-item-value">{{ formatDate(formData.fecha_registro) }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label">Última Actualización</div>
+          <div class="info-item-value">{{ formatDate(formData.fecha_edicion) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main-card" style="margin-top: 15px;">
+    <div class="responses-header">
+      <h2><mat-icon>table_view</mat-icon> Respuestas Registradas</h2>
+      <button mat-raised-button color="btn btn-primary">
+        <mat-icon>move_to_inbox</mat-icon> Descargar XLS
+      </button>
+    </div>
+    @if (isLoadingTable) {
+    <div class="loading-table">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+    } @else {
+
+    <table mat-table [dataSource]="responses" class="responses-table">
+
+      <!-- Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let row">{{ formatDate(row.fecha_registro) }}</td>
+      </ng-container>
+
+      <!-- Usuario -->
+      <ng-container matColumnDef="usuario">
+        <th mat-header-cell *matHeaderCellDef>Ingresado por</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.usuario ? row.usuario.nombres + ' ' + row.usuario.apellidos : '—' }}
+        </td>
+      </ng-container>
+
+      <!-- Departamento -->
+      <ng-container matColumnDef="departamento">
+        <th mat-header-cell *matHeaderCellDef>Departamento</th>
+        <td mat-cell *matCellDef="let row">{{ row.departamento?.nombre || '—' }}</td>
+      </ng-container>
+
+      <!-- Comunidad -->
+      <ng-container matColumnDef="comunidad">
+        <th mat-header-cell *matHeaderCellDef>Comunidad</th>
+        <td mat-cell *matCellDef="let row">{{ row.comunidad?.nombre || '—' }}</td>
+      </ng-container>
+
+      <!-- Personas -->
+      <ng-container matColumnDef="personas">
+        <th mat-header-cell *matHeaderCellDef>Persona(s)</th>
+        <td mat-cell *matCellDef="let row">{{ getPersonasLabel(row) }}</td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button color="primary" (click)="onEditResponse(row)" matTooltip="Editar Respuesta">
+            <mat-icon class="edit-icon">edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="onDeleteResponse(row.id_respuesta)" matTooltip="Eliminar">
+            <mat-icon class="delete-icon">delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Sin datos -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data" colspan="6">
+          <mat-icon>inbox</mat-icon>
+          <p>No hay respuestas registradas aún</p>
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [length]="totalResponses" [pageSize]="pageSize" [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+    }
+  </div>
+  }

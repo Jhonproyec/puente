@@ -1,0 +1,356 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario      Int      @id @default(autoincrement())
+  email           String   @unique
+  password        String
+  nombres         String
+  apellidos       String
+  id_rol          Int
+  estado_registro Boolean  @default(true)
+  fecha_creacion  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+  accesso_global  Boolean  @default(false)
+
+  rol Rol @relation(fields: [id_rol], references: [id_rol])
+
+  formulariosAsignados   FormularioUsuario[]
+  formulariosCreados     Formulario[]          @relation("FormularioCreador")
+  formulariosModificados Formulario[]          @relation("FormularioModificador")
+  respuestas             FormularioRespuesta[]
+  comunidades            UsuarioComunidad[]
+
+  @@index([estado_registro])
+  @@index([id_rol])
+  @@index([fecha_creacion])
+  @@index([estado_registro, fecha_creacion])
+  @@index([email, estado_registro])
+}
+
+model UsuarioComunidad {
+  id_usuario   Int
+  id_comunidad Int
+  usuario      Usuario   @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade)
+  comunidad    Comunidad @relation(fields: [id_comunidad], references: [id_comunidad], onDelete: Cascade)
+
+  @@id([id_usuario, id_comunidad])
+  @@index([id_comunidad])
+}
+
+//************ROLES Y PERMISOS
+enum Accion {
+  VIEW
+  CREATE
+  UPDATE
+  DELETE
+}
+
+model Modulo {
+  id_modulo       Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(255)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  permisos Permiso[]
+}
+
+model Permiso {
+  id_permiso      Int      @id @default(autoincrement())
+  accion          Accion
+  codigo          String   @unique @db.VarChar(150)
+  id_modulo       Int
+  descripcion     String   @db.VarChar(255)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  modulo Modulo       @relation(fields: [id_modulo], references: [id_modulo], onDelete: Cascade)
+  roles  RolPermiso[]
+
+  @@index([codigo, estado_registro])
+  @@index([estado_registro])
+}
+
+model Rol {
+  id_rol          Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(150)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  permisos RolPermiso[]
+  usuarios Usuario[]
+
+  @@index([estado_registro])
+}
+
+model RolPermiso {
+  id_rol     Int
+  id_permiso Int
+
+  rol     Rol     @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade)
+  permiso Permiso @relation(fields: [id_permiso], references: [id_permiso], onDelete: Cascade)
+
+  @@id([id_rol, id_permiso])
+}
+
+//************FIN ROLES Y PERMISOS
+
+// **************CATALOGOS
+model Catalog {
+  id_catalogo     Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(150)
+  tiene_cascada   Boolean  @default(false)
+  campo_filtro    String?
+  tabla_origen    String?
+  estado_registro Boolean  @default(true)
+  fecha_registo   DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  items CatalogItem[]
+
+  @@index([estado_registro])
+}
+
+model CatalogItem {
+  id_catalog_item Int      @id @default(autoincrement())
+  id_catalog      Int
+  nombre          String   @db.VarChar(255)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  catalog Catalog @relation(fields: [id_catalog], references: [id_catalogo], onDelete: Cascade)
+
+  @@unique([id_catalog, nombre])
+  @@index([id_catalog])
+  @@index([estado_registro])
+  @@index([nombre])
+}
+
+model Departamento {
+  id_departamento Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  items      Comunidad[]
+  respuestas FormularioRespuesta[]
+
+  @@index([estado_registro])
+}
+
+model Comunidad {
+  id_comunidad    Int          @id @default(autoincrement())
+  id_departamento Int
+  nombre          String       @db.VarChar(255)
+  estado_registro Boolean      @default(true)
+  fecha_registro  DateTime     @default(now())
+  fecha_edicion   DateTime     @updatedAt
+  departamento    Departamento @relation(fields: [id_departamento], references: [id_departamento], onDelete: Cascade)
+
+  usuarios   UsuarioComunidad[]
+  personas   Persona[]
+  respuestas FormularioRespuesta[]
+  centrosAtencion CentroAtencion[]
+
+  @@unique([id_departamento, nombre])
+  @@index([estado_registro])
+  @@index([id_departamento, estado_registro])
+}
+
+model RangoHito {
+  id_rango_hito   Int      @id @default(autoincrement())
+  nombre          String   @db.VarChar(100)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  items RangoHitoDetalle[]
+
+  @@index([estado_registro])
+}
+
+model RangoHitoDetalle {
+  id_rango_hito_detalle Int      @id @default(autoincrement())
+  id_rango_hito         Int
+  nombre                String   @db.VarChar(100)
+  estado_registro       Boolean  @default(true)
+  fecha_registro        DateTime @default(now())
+  fecha_edicion         DateTime @updatedAt
+
+  rangoHito RangoHito @relation(fields: [id_rango_hito], references: [id_rango_hito], onDelete: Cascade)
+
+  @@unique([id_rango_hito, nombre])
+  @@index([estado_registro])
+  @@index([id_rango_hito, estado_registro])
+}
+
+//************** FIN CATALOGOS
+// **********MODELOS DEL FORMULARIO
+
+enum EstadoForm {
+  BORRADOR
+  PUBLICADO
+}
+
+model Formulario {
+  id_formulario   Int        @id @default(autoincrement())
+  uuid            String     @unique @default(uuid()) @db.VarChar(36)
+  nombre          String     @db.VarChar(255)
+  estado          EstadoForm @default(BORRADOR)
+  version         Int        @default(1)
+  estructura      Json?      @db.JsonB
+  estado_registro Boolean    @default(true)
+
+  // Creador
+  usuario_registro Int
+  creador          Usuario @relation("FormularioCreador", fields: [usuario_registro], references: [id_usuario])
+
+  // Modificador
+  usuario_modifico Int?
+  modificador      Usuario? @relation("FormularioModificador", fields: [usuario_modifico], references: [id_usuario])
+
+  fecha_registro DateTime @default(now())
+  fecha_edicion  DateTime @updatedAt
+
+  // Usuarios asignados
+  usuariosAsignados FormularioUsuario[]
+  respuestas        FormularioRespuesta[]
+
+  @@index([estado])
+  @@index([estado_registro])
+  @@index([estado, usuario_registro])
+  @@index([usuario_registro, estado_registro])
+  @@index([fecha_registro])
+}
+
+model FormularioUsuario {
+  id_formulario Int
+  id_usuario    Int
+
+  formulario Formulario @relation(fields: [id_formulario], references: [id_formulario], onDelete: Cascade)
+  usuario    Usuario    @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade)
+
+  @@id([id_formulario, id_usuario])
+  @@index([id_usuario])
+}
+
+model FormularioRespuesta {
+  id_respuesta    Int      @id @default(autoincrement())
+  id_formulario   Int
+  id_usuario      Int? // usuario que llenó el formulario
+  version_form    Int      @default(1) // versión del formulario al responder
+  datos           Json     @db.JsonB // respuestas raw completas
+  datos_limpios   Json?    @db.JsonB // solo campos visibles con valor
+  id_comunidad    Int? // desnormalizado para reportes
+  id_departamento Int? // desnormalizado para reportes
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  formulario   Formulario                   @relation(fields: [id_formulario], references: [id_formulario], onDelete: Cascade)
+  usuario      Usuario?                     @relation(fields: [id_usuario], references: [id_usuario])
+  comunidad    Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
+  departamento Departamento?                @relation(fields: [id_departamento], references: [id_departamento])
+  personas     FormularioRespuestaPersona[]
+
+  @@index([id_formulario])
+  @@index([id_formulario, version_form])
+  @@index([id_usuario])
+  @@index([id_comunidad])
+  @@index([id_departamento])
+  @@index([fecha_registro])
+  @@index([estado_registro])
+  @@index([id_formulario, id_comunidad, fecha_registro])
+  @@index([id_formulario, id_departamento, fecha_registro])
+}
+
+//******** FIN MODELO DE FORMULARIOS
+
+model Persona {
+  id_persona             Int       @id @default(autoincrement())
+  cui                    String    @unique @db.VarChar(20)
+  nombres                String    @db.VarChar(150)
+  apellidos              String    @db.VarChar(150)
+  fecha_nacimiento       DateTime?
+  sexo                   Int?
+  direccion              String?   @db.VarChar(255)
+  fecha_ingreso_programa DateTime?
+  cui_madre              String?   @db.VarChar(20)
+  tipo_persona           String?   @db.VarChar(20) // 'embarazada', 'nino'
+  id_comunidad           Int?
+  datos_extra            Json?     @db.JsonB // campos adicionales no estructurados
+  estado_registro        Boolean   @default(true)
+  fecha_registro         DateTime  @default(now())
+  fecha_edicion          DateTime  @updatedAt
+
+  comunidad  Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
+  respuestas FormularioRespuestaPersona[]
+
+  @@index([cui])
+  @@index([tipo_persona])
+  @@index([id_comunidad])
+  @@index([fecha_nacimiento])
+  @@index([tipo_persona, id_comunidad])
+  @@index([estado_registro])
+}
+
+model FormularioRespuestaPersona {
+  id_respuesta Int
+  id_persona   Int
+  rol_en_form  String? @db.VarChar(50) // 'embarazada', 'nino'
+
+  respuesta FormularioRespuesta @relation(fields: [id_respuesta], references: [id_respuesta], onDelete: Cascade)
+  persona   Persona             @relation(fields: [id_persona], references: [id_persona])
+
+  @@id([id_respuesta, id_persona])
+  @@index([id_persona])
+  @@index([rol_en_form])
+}
+
+model CatalogoImagenes {
+  id_catalogo_imagen Int      @id @default(autoincrement())
+  nombre             String   @db.VarChar(255)
+  nombre_archivo     String   @db.VarChar(255)
+  ruta               String   @db.VarChar(500)
+  size               Float
+  mime_type          String   @db.VarChar(100)
+  estado_registro    Boolean  @default(true)
+  fecha_registro     DateTime @default(now())
+  fecha_edicion      DateTime @updatedAt
+
+  @@index([estado_registro])
+  @@index([nombre])
+  @@index([fecha_registro])
+}
+
+model CentroAtencion {
+  id_centro       Int       @id @default(autoincrement())
+  id_comunidad    Int
+  nombre          String    @db.VarChar(255)
+  estado_registro Boolean   @default(true)
+  fecha_registro  DateTime  @default(now())
+  fecha_edicion   DateTime  @updatedAt
+
+  comunidad Comunidad @relation(fields: [id_comunidad], references: [id_comunidad], onDelete: Cascade)
+
+  @@unique([id_comunidad, nombre])
+  @@index([id_comunidad, estado_registro])
+  @@index([estado_registro])
+}

@@ -1,0 +1,134 @@
+<div class="container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <h1>Bienvenido, {{getName()}}</h1>
+    <p>Aquí está el resumen de la aplicación</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    @if(canViewReport()){
+    <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>description</mat-icon>
+      </div>
+        <div class="stat-label">Total de Formularios</div>
+        <div class="stat-value">{{ totalForms }}</div>
+        <div class="stat-subtitle">3 activos esta semana</div>
+      </div>
+    }
+
+    @if(canViewTotalAnswer()){
+      <div class="stat-card">
+        <div class="stat-icon">
+          <mat-icon>bar_chart</mat-icon>
+        </div>
+        <div class="stat-label">Respuestas Totales</div>
+        <div class="stat-value">{{ totalResponses | number }}</div>
+        <div class="stat-subtitle">+145 esta semana</div>
+      </div>
+    }
+
+    @if(canViewTotalUser()){
+      <div class="stat-card">
+        <div class="stat-icon">
+          <mat-icon>group</mat-icon>
+        </div>
+        <div class="stat-label">Total de Usuarios</div>
+        <div class="stat-value">{{ totalUsers }}</div>
+        <div class="stat-subtitle">+3 nuevos usuarios</div>
+      </div>
+    }
+
+    <!-- <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-label">Tasa de Completado</div>
+      <div class="stat-value">{{ completionRate }}%</div>
+      <div class="stat-subtitle">Promedio general</div>
+    </div> -->
+  </div>
+
+  <!-- Main Content -->
+  <div class="two-column">
+    <!-- Formularios -->
+     @if(canViewReport()){
+       <div class="section">
+         <div class="section-header">
+           <h2 class="section-title">
+             <mat-icon>edit</mat-icon>
+             Formularios Recientes
+           </h2>
+         </div>
+   
+         <div class="items-list">
+           <div *ngFor="let form of recentForms" class="item-card">
+             <div class="item-name">{{ form.name }}</div>
+             <div class="item-info">
+               <div class="item-info-item">
+                 <mat-icon>assessment</mat-icon>
+                 <span>{{ form.responses }} respuestas</span>
+               </div>
+               <div class="item-info-item">
+                 <span [ngClass]="'info-badge ' + (form.status === 'active' ? 'active' : 'inactive')">
+                   {{ form.status === 'active' ? 'Activo' : 'Inactivo' }}
+                 </span>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     }
+
+    <!-- Usuarios -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <mat-icon>people</mat-icon>
+          Usuarios Activos
+        </h2>
+        @if(canCreateUser()){
+          <button class="btn btn-primary" (click)="manageUsers()">Gestionar</button>
+        }
+      </div>
+
+      <ul class="activity-list">
+        <li *ngFor="let user of activeUsers" class="activity-item">
+          <div class="activity-icon">
+            <mat-icon *ngIf="user.status === 'online'">check_circle</mat-icon>
+            <mat-icon *ngIf="user.status === 'offline'">schedule</mat-icon>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">{{ user.name }}</div>
+            <div class="activity-time">{{ user.role }} • Último acceso {{ user.lastAccess }}</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Activity Section -->
+   @if(canViewReport()){
+     <div class="section">
+       <div class="section-header">
+         <h2 class="section-title">
+           <mat-icon>notifications</mat-icon>
+           Actividad Reciente
+         </h2>
+       </div>
+   
+       <ul class="activity-list">
+         <li *ngFor="let activity of recentActivity" class="activity-item">
+           <div class="activity-icon">
+             <mat-icon>{{ activity.icon }}</mat-icon>
+           </div>
+           <div class="activity-content">
+             <div class="activity-title">{{ activity.title }}</div>
+             <div class="activity-time">{{ activity.time }} • {{ activity.description }}</div>
+           </div>
+         </li>
+       </ul>
+     </div>
+   }
+</div>

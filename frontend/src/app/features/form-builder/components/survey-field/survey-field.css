@@ -1,0 +1,247 @@
+.survey-field {
+    margin: 16px 0;
+}
+
+.survey-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 14px;
+}
+
+.required {
+    color: #f44336;
+    margin-left: 4px;
+}
+
+/* SURVEY OPTIONS */
+.survey-options-text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option-button {
+    padding: 10px 16px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.option-button:hover {
+    border-color: #1976d2;
+    background-color: #f5f5f5;
+}
+
+.option-button.selected {
+    border-color: #4caf50;
+    background-color: #c8e6c9;
+    color: #1b5e20;
+}
+
+/* STARS OPTIONS */
+.survey-options-stars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stars-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.star-button {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.star-button:hover {
+    border-color: #ffc107;
+    background-color: #fffde7;
+}
+
+.star-button.selected {
+    border-color: #ffc107;
+    background-color: #fff9c4;
+}
+
+.stars {
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+.stars span {
+    opacity: 0.3;
+}
+
+.stars span.filled {
+    opacity: 1;
+}
+
+.star-button .label {
+    flex: 1;
+    text-align: left;
+    font-size: 13px;
+}
+
+/* IMAGES OPTIONS */
+.survey-options-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.image-option {
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    background-color: white;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.image-option:hover {
+    border-color: #1976d2;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+}
+
+.image-option.selected {
+    border-color: #4caf50;
+    background-color: #f1f8f5;
+}
+
+.image-option img {
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 4px;
+}
+
+.image-option .label {
+    font-size: 12px;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* ANSWER SAVED */
+.answer-saved {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #e8f5e9;
+    border-left: 3px solid #4caf50;
+    color: #1b5e20;
+    font-size: 13px;
+    border-radius: 2px;
+}
+
+/* SURVEY RESULT */
+.survey-result h4 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.result-item {
+    padding: 12px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    border-left: 3px solid #2196f3;
+}
+
+.result-label {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+}
+
+.result-answer {
+    font-size: 14px;
+    color: #333;
+}
+
+.result-text strong {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.result-stars {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.result-stars .stars {
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+.result-stars span {
+    opacity: 0.3;
+}
+
+.result-stars span.filled {
+    opacity: 1;
+}
+
+.result-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.result-image img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.result-average {
+    padding: 12px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    border-left: 3px solid #2196f3;
+}
+
+.result-average strong {
+    color: #1976d2;
+    font-weight: 700;
+}
+
+.no-fields {
+    padding: 12px;
+    background-color: #fff3e0;
+    color: #e65100;
+    border-left: 3px solid #ff9800;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .survey-options-images {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    }
+}

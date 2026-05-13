@@ -1,0 +1,188 @@
+<div class="survey-properties">
+
+  <!-- ===== CONFIGURACIÓN BÁSICA ===== -->
+  <div class="form-group">
+    <label class="form-label">Etiqueta de la pregunta</label>
+    <input type="text" class="form-input" [ngModel]="element.label" (ngModelChange)="updateLabel($event)"
+      placeholder="Ej: ¿Cómo califica el servicio?" />
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Mensaje de ayuda</label>
+    <input type="text" class="form-input" [ngModel]="element.helpText" (ngModelChange)="updateHelpText($event)"
+      placeholder="Ej: Selecciona una o más opciones" />
+  </div>
+
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" [ngModel]="element.required" (ngModelChange)="updateRequired($event)" />
+      Campo requerido
+    </label>
+  </div>
+
+  <!-- MODO -->
+  <div class="form-group">
+    <label>Modo</label>
+    <select [ngModel]="surveyConfig?.mode" (ngModelChange)="onModeChange($event)" class="form-select">
+      <option value="catalog_question">Pregunta</option>
+      <option value="catalog_subtotal">Subtotal</option>
+      <option value="catalog_stars">Estrellas</option>
+      <option value="result">Resultado manual</option>
+    </select>
+  </div>
+
+  <!-- ===== CATALOG QUESTION ===== -->
+  @if (surveyConfig?.mode === 'catalog_question') {
+
+  <!-- Catálogo -->
+  <div class="form-group">
+    <label>Catálogo</label>
+    <select [ngModel]="surveyConfig?.catalogType" (ngModelChange)="onCatalogChange($event)" class="form-select">
+      <option value="">-- Selecciona un catálogo --</option>
+      @for (catalog of availableCatalogs; track catalog.id) {
+      <option [value]="catalog.id">{{ catalog.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (surveyConfig?.catalogType) {
+
+  <!-- Selección múltiple o simple -->
+  <div class="form-group toggle-group">
+    <label>Tipo de selección</label>
+    <div class="toggle-options">
+      <label class="toggle-option">
+        <input type="radio" [ngModel]="surveyConfig?.multipleSelection"
+          (ngModelChange)="onMultipleSelectionChange($event)" [value]="true" name="multipleSelection" />
+        Múltiple (checkbox)
+      </label>
+      <label class="toggle-option">
+        <input type="radio" [ngModel]="surveyConfig?.multipleSelection"
+          (ngModelChange)="onMultipleSelectionChange($event)" [value]="false" name="multipleSelection" />
+        Simple (radio)
+      </label>
+    </div>
+  </div>
+
+  <!-- Tipo de visualización -->
+  <div class="form-group">
+    <label>Mostrar como</label>
+    <div class="display-type-options">
+      <label class="display-option" [class.active]="surveyConfig?.displayType === 'text'"
+        (click)="onDisplayTypeChange('text')">
+        📝 Texto
+      </label>
+      <label class="display-option" [class.active]="surveyConfig?.displayType === 'images'"
+        (click)="onDisplayTypeChange('images')">
+        🖼️ Imágenes
+      </label>
+    </div>
+  </div>
+
+  <!-- Filtrar opciones específicas -->
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" [checked]="enableSpecificOptions" (change)="toggleEnableSpecificOptions()" />
+      Mostrar solo opciones específicas
+    </label>
+  </div>
+
+  @if (enableSpecificOptions && catalogOptions.length > 0) {
+  <div class="catalog-options-list">
+    <div class="options-header">
+      <span>Opciones disponibles</span>
+      <button type="button" (click)="toggleAllCatalogOptions()" class="btn-link">
+        {{ (surveyConfig?.catalogSelectedIds?.length === catalogOptions.length) ? 'Deseleccionar todas' : 'Seleccionar
+        todas' }}
+      </button>
+    </div>
+    @for (option of catalogOptions; track option.value) {
+    <label class="catalog-option-item">
+      <input type="checkbox" [checked]="isCatalogOptionSelected(option.value)"
+        (change)="toggleCatalogOption(option.value, $any($event.target).checked)" />
+      {{ option.label }}
+    </label>
+    }
+  </div>
+  }
+
+  <!-- Asignar imágenes a opciones -->
+  @if (surveyConfig?.displayType === 'images' && catalogOptions.length > 0) {
+  <div class="form-group">
+    <label>Imágenes por opción</label>
+    <div class="option-images-list">
+      @for (option of catalogOptions; track option.value) {
+      <!-- Solo mostrar las opciones seleccionadas si hay filtro, o todas si no -->
+      @if (!enableSpecificOptions || isCatalogOptionSelected(option.value)) {
+      <div class="option-image-item">
+        <span class="option-image-label">{{ option.label }}</span>
+        @if (getCatalogOptionImage(option.value)) {
+        <div class="option-image-preview">
+          <img [src]="getCatalogOptionImage(option.value)" [alt]="option.label" />
+          <button type="button" (click)="removeOptionImage(option.value)" class="btn-remove">✕</button>
+        </div>
+        } @else {
+        <button type="button" class="btn-upload" (click)="onOptionImageSelected($event, option.value)">
+          Seleccionar imagen
+        </button>
+        }
+      </div>
+      }
+      }
+    </div>
+  </div>
+  }
+  }
+  }
+
+  <!-- ===== CATALOG SUBTOTAL ===== -->
+  @if (surveyConfig?.mode === 'catalog_subtotal') {
+  <div class="form-group">
+    <label>Preguntas a incluir en el subtotal</label>
+    @if (availableCatalogQuestions.length === 0) {
+    <p class="hint">No hay preguntas de catálogo disponibles</p>
+    } @else {
+    @for (q of availableCatalogQuestions; track q.id) {
+    <label class="checkbox-label">
+      <input type="checkbox" [checked]="isFieldLinked(q.id)"
+        (change)="toggleLinkedField(q.id, $any($event.target).checked)" />
+      {{ q.label }}
+    </label>
+    }
+    }
+  </div>
+  }
+
+  <!-- ===== CATALOG STARS ===== -->
+  @if (surveyConfig?.mode === 'catalog_stars') {
+  <div class="form-group">
+    <label>Subtotales a incluir</label>
+    @if (availableSubtotals.length === 0) {
+    <p class="hint">No hay subtotales disponibles</p>
+    } @else {
+    @for (s of availableSubtotals; track s.id) {
+    <label class="checkbox-label">
+      <input type="checkbox" [checked]="isFieldLinked(s.id)"
+        (change)="toggleLinkedField(s.id, $any($event.target).checked)" />
+      {{ s.label }}
+    </label>
+    }
+    }
+  </div>
+  }
+
+  <!-- ===== RESULT (manual) ===== -->
+  @if (surveyConfig?.mode === 'result') {
+  <div class="form-group">
+    <label>Campos vinculados</label>
+    @for (q of availableCatalogQuestions; track q.id) {
+    <label class="checkbox-label">
+      <input type="checkbox" [checked]="isFieldLinked(q.id)"
+        (change)="toggleLinkedField(q.id, $any($event.target).checked)" />
+      {{ q.label }}
+    </label>
+    }
+  </div>
+  }
+
+</div>

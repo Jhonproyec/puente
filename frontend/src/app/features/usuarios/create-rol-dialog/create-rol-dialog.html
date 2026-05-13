@@ -1,0 +1,142 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <h2 mat-dialog-title>
+            <mat-icon class="header-icon">admin_panel_settings</mat-icon>
+            @if(role) {
+                Editar Rol
+            } @else {
+                Crear Nuevo Rol
+            }
+        </h2>
+        <button mat-icon-button mat-dialog-close class="close-button">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content class="dialog-content">
+        <form [formGroup]="createRoleForm" (ngSubmit)="onSubmit()" class="role-form">
+            
+            <!-- Nombre del Rol -->
+            <div class="form-section">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre del Rol</mat-label>
+                    <input matInput formControlName="roleName" placeholder="Ej: Administrador, Vendedor">
+                    <mat-icon matSuffix>label</mat-icon>
+                    <mat-error class="text-error">{{ getFieldError('roleName') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Sección de Permisos -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <mat-icon>security</mat-icon>
+                    Permisos
+                </h3>
+                
+                <div class="permissions-container">
+                    @for (module of permissions; track module) {
+                        <div class="permission-category">
+                            <h4 class="category-title">{{ module.name }}</h4>
+                            <div class="permission-list">
+                                @for (permission of module.permissions; track permission.id_permission) {
+                                    <div class="permission-item">
+                                        <mat-checkbox 
+                                            [checked]="isPermissionChecked(permission.id_permission)"
+                                            (change)="togglePermission(permission.id_permission)"
+                                            class="permission-checkbox">
+                                            {{ permission.descripcion }}
+                                        </mat-checkbox>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (createRoleForm.get('permissions')?.errors?.['required'] && createRoleForm.get('permissions')?.touched) {
+                    <div class="error-message">
+                        <mat-icon>error</mat-icon>
+                        *Debe seleccionar al menos un permiso
+                    </div>
+                }
+            </div>
+
+            <!-- Sección de Formularios Permitidos -->
+            <!-- <div class="form-section">
+                <h3 class="section-title">
+                    <mat-icon>description</mat-icon>
+                    Formularios Permitidos
+                </h3>
+
+                <div class="select-all-container">
+                    <mat-checkbox 
+                        [checked]="selectAllForms()"
+                        (change)="toggleSelectAllForms()"
+                        class="select-all-checkbox">
+                        Seleccionar todos los formularios
+                    </mat-checkbox>
+                </div>
+
+                <div class="forms-container">
+                    @if (dynamicForms.length > 0) {
+                        <div class="form-list">
+                            @for (form of dynamicForms; track form.id) {
+                                <div class="form-item">
+                                    <mat-checkbox 
+                                        [checked]="isFormSelected(form.id)"
+                                        (change)="toggleFormSelection(form.id)"
+                                        class="form-checkbox">
+                                        <span class="form-name">{{ form.name }}</span>
+                                        <span class="form-info">{{ form.totalResponses }} respuestas</span>
+                                    </mat-checkbox>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div class="empty-state">
+                            <mat-icon>folder_open</mat-icon>
+                            <p>No hay formularios disponibles en el sistema</p>
+                        </div>
+                    }
+                </div>
+
+                @if (createRoleForm.get('allowedForms')?.errors?.['required'] && createRoleForm.get('allowedForms')?.touched) {
+                    <div class="error-message">
+                        <mat-icon>error</mat-icon>
+                        *Debe seleccionar al menos un formulario
+                    </div>
+                }
+            </div> -->
+
+            <!-- Mensaje de Error General -->
+            @if (error()) {
+                <div class="error-message error-general">
+                    <mat-icon>error</mat-icon>
+                    {{ error() }}
+                </div>
+            }
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button type="button" class="btn-cancel btn" (click)="onCancel()">
+            Cancelar
+        </button>
+        <button mat-raised-button class="btn btn-primary" type="submit" 
+            (click)="onSubmit()"
+            [disabled]="!createRoleForm.valid || isLoading()">
+            @if (isLoading()) {
+                <div class="text-loading">
+                    <mat-spinner diameter="16" class="spinner"></mat-spinner>
+                    <div>@if(role) { Actualizando... } @else { Creando... }</div>
+                </div> 
+            } @else {
+                @if(role) {
+                    Actualizar Rol
+                } @else {
+                    Crear Rol
+                }
+            }
+        </button>
+    </mat-dialog-actions>
+</div>

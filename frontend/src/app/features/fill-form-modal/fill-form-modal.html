@@ -1,0 +1,518 @@
+<div class="fill-form-modal">
+  <!-- Loading -->
+  @if (isLoading) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando formulario...</p>
+  </div>
+  } @else if (formDefinition) {
+  <!-- Header -->
+  <div class="modal-header">
+    <h2 class="modal-title">{{ formDefinition.name }}</h2>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="isPreviewMode" class="preview-banner">
+    <mat-icon>visibility</mat-icon>
+    <span>Modo previsualización — los cambios no se guardarán</span>
+  </div>
+
+  <!-- Form Content -->
+  <div class="modal-content">
+    @for (regionRepeat of regionRepetitions; track regionRepeat.regionId + '_' + regionRepeat.index) {
+    @let region = getRegionById(regionRepeat.regionId);
+    @if (region && isElementVisible(region.id)) {
+    <div class="region-container" [attr.data-region-id]="regionRepeat.regionId">
+      <h3 class="region-title">
+        {{ regionRepeat.title }}
+        @if (regionRepeat.index > 0) {
+        <span class="repetition-badge">#{{ regionRepeat.index }}</span>
+        }
+      </h3>
+      @if (visibleRegionIds.has(regionRepeat.regionId)) {
+      <div class="form-grid">
+        @for (element of getRegionElements(region); track element.id) {
+        @let elementId = getElementIdForRepetition(element.id, regionRepeat.index);
+        @if (isElementVisible(elementId)) {
+        <div class="form-group-wrapper" [class.full-width]="element.type === 'textarea' || element.type === 'survey' || 
+                      element.type === 'camera' || element.type === 'heading' || 
+                      element.type === 'coordinates'">
+          @if (element.image?.url && element.image?.position === 'above') {
+          <div class="element-image element-image--above">
+            <img [src]="element.image?.url" [alt]="element.image?.altText || ''" />
+          </div>
+          }
+          <!-- ===== TEXT / EMAIL ===== -->
+          @if ((element.type === 'text' || element.type === 'email') ) {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <input matInput [type]="element.type" [(ngModel)]="formResponses[elementId]"
+                (change)="onElementChange(elementId)" [placeholder]="element.placeholder || ''" />
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== CUI (text con fieldRole cui) ===== -->
+          @if ((element.type === 'number') && isCuiField(element)) {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <input matInput mask="0000-00000-0000-00" [dropSpecialCharacters]="true"
+                [(ngModel)]="formResponses[elementId]" placeholder="{{element.placeholder}}"
+                (blur)="onCuiFocus(elementId, region)" />
+              <mat-hint>13 dígitos numéricos</mat-hint>
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== NUMBER ===== -->
+          @if (element.type === 'number' && !isCuiField(element)) {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+
+            @if (isFormulaField(element)) {
+            <div class="formula-result-container">
+              @if (getFormulaResultFormat(element) === 'stars') {
+              <div class="formula-result formula-stars">
+                {{ getFormulaResult(elementId) || '⭐⭐⭐⭐⭐' }}
+              </div>
+              } @else if (getFormulaResultFormat(element) === 'percentage') {
+              <div class="formula-result formula-percentage">
+                <div class="percentage-bar">
+                  <div class="percentage-fill" [style.width.%]="formResponses[elementId] || 0">
+                  </div>
+                </div>
+                <span class="percentage-label">{{ getFormulaResult(elementId) || '0%' }}</span>
+              </div>
+              } @else {
+              <div class="formula-result formula-number">
+                {{ getFormulaResult(elementId) || '0' }}
+              </div>
+              }
+            </div>
+            } @else {
+            <mat-form-field appearance="outline">
+              <input matInput type="number" [(ngModel)]="formResponses[elementId]" (change)="onElementChange(elementId)"
+                [placeholder]="element.placeholder || ''" />
+            </mat-form-field>
+            }
+
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== DATE ===== -->
+          @if (element.type === 'date') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <input matInput [matDatepicker]="datepicker" [(ngModel)]="formResponses[elementId]"
+                (dateChange)="onElementChange(elementId)" [placeholder]="element.placeholder || ''" readonly />
+              <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+              <mat-datepicker #datepicker></mat-datepicker>
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== TEXTAREA ===== -->
+          @if (element.type === 'textarea') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <textarea matInput rows="4" [(ngModel)]="formResponses[elementId]" (change)="onElementChange(elementId)"
+                [placeholder]="element.placeholder || ''"></textarea>
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== SELECT ===== -->
+          @if (element.type === 'select') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <mat-select [(ngModel)]="formResponses[elementId]" (selectionChange)="onElementChange(elementId)">
+                <mat-option value="">-- Selecciona una opción --</mat-option>
+                @for (option of getSelectOptions(element); track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== RADIO ===== -->
+          @if (element.type === 'radio') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <div class="radio-options">
+              <mat-radio-group [(ngModel)]="formResponses[elementId]" (change)="onElementChange(elementId)">
+                @for (option of getSelectOptions(element); track option.value) {
+                <mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
+                }
+              </mat-radio-group>
+            </div>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== CHECKBOX ===== -->
+          @if (element.type === 'checkbox') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <div class="checkbox-options">
+              @if (getSelectOptions(element).length > 0) {
+              @for (option of getSelectOptions(element); track option.value) {
+              <mat-checkbox [checked]="isCheckboxSelected(elementId, option.value)"
+                [disabled]="isCheckboxDisabled(elementId, option.value, option.label)"
+                (change)="onCheckboxChange(elementId, option.value, $event.checked, option.label); onElementChange(elementId)">
+                {{ option.label }}
+              </mat-checkbox>
+              }
+              } @else {
+              <mat-checkbox [(ngModel)]="formResponses[elementId]" (change)="onElementChange(elementId)">
+                {{ element.label }}
+              </mat-checkbox>
+              }
+            </div>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== CAMERA ===== -->
+          @if (element.type === 'camera') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <div class="camera-upload-area">
+              <input type="file" accept="image/*" capture="environment" [id]="'camera_' + elementId"
+                (change)="onCameraCapture(elementId, $event)" hidden />
+              <button type="button" class="btn-camera" (click)="triggerCamera(elementId)">
+                📷 Tomar foto / Adjuntar imagen
+              </button>
+              @if (formResponses[elementId]) {
+              <div class="camera-preview">
+                <img [src]="formResponses[elementId]" alt="Foto capturada" class="camera-preview__img" />
+                <button type="button" class="btn-remove-photo" (click)="formResponses[elementId] = null">
+                  ✕ Eliminar
+                </button>
+              </div>
+              }
+            </div>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+          @if (element.type === 'phone') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <input matInput mask="0000-0000" [ngModel]="formResponses[elementId]"
+                (ngModelChange)="formResponses[elementId] = $event.replace('-', ''); onElementChange(elementId)"
+                placeholder="{{element.placeholder}}" />
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          @if (element.type === 'time') {
+          <div class="field-group" [id]="'field_' + elementId">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <mat-form-field appearance="outline">
+              <input matInput type="time" [(ngModel)]="formResponses[elementId]"
+                (change)="onElementChange(elementId)" />
+            </mat-form-field>
+            @if (hasFieldError(elementId)) {
+            <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+            }
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== COORDINATES ===== -->
+          @if (element.type === 'coordinates') {
+          <div class="field-group full-width">
+            <label class="field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+            <div class="coordinates-group">
+              <small class="help-text">Función para aplicación móvil</small>
+            </div>
+            @if (element.helpText) { <small class="help-text">{{ element.helpText }}</small> }
+          </div>
+          }
+
+          <!-- ===== HEADING ===== -->
+          @if (element.type === 'heading') {
+          <div class="field-group heading-group full-width">
+            <h4 class="heading-title">{{ element.label }}</h4>
+            @if (element.placeholder) {
+            <p class="heading-description">{{ element.placeholder }}</p>
+            }
+          </div>
+          }
+
+          <!-- ===== SURVEY ===== -->
+          @if (element.type === 'survey' && element.surveyConfig) {
+          <div class="field-group survey-field-group" [id]="'field_' + elementId">
+            <label class="field-label survey-field-label">
+              {{ element.label }}
+              @if (element.required) { <span class="required-indicator">*</span> }
+            </label>
+
+            <!-- MANUAL: RESULT -->
+            @if (element.surveyConfig.mode === 'result') {
+            <div class="survey-result-container">
+              @for (linkedId of element.surveyConfig.linkedFieldIds; track linkedId) {
+              <div class="result-item">
+                <span class="result-item-label">{{ getLinkedFieldLabel(linkedId) }}</span>
+                <div class="result-progress">
+                  <mat-progress-bar mode="determinate" [value]="getManualResultPercentage(linkedId)">
+                  </mat-progress-bar>
+                  <span class="result-percentage">{{ getManualResultPercentage(linkedId) | number:'1.0-0' }}%</span>
+                </div>
+              </div>
+              }
+              <div class="result-average">
+                Promedio: <strong>{{ getManualAverage(element) | number:'1.1-1' }} / 5</strong>
+              </div>
+            </div>
+            }
+
+            <!-- CATÁLOGO: QUESTION -->
+            <!-- CATÁLOGO: QUESTION -->
+            @if (element.surveyConfig.mode === 'catalog_question') {
+            <div class="catalog-question" [id]="'field_' + elementId" [class.field-error]="hasFieldError(elementId)">
+
+              @if (getCatalogQuestionOptions(element.id).length === 0) {
+              <p class="loading-hint">Cargando opciones...</p>
+              } @else {
+              <div class="catalog-options"
+                [class.catalog-options--images]="element.surveyConfig.displayType === 'images'">
+
+                @if (element.surveyConfig.multipleSelection) {
+                @for (option of getCatalogQuestionOptions(element.id); track option.value) {
+                <div class="catalog-option-wrapper"
+                  [class.catalog-option-wrapper--image]="element.surveyConfig.displayType === 'images'">
+
+                  <!-- Imagen de la opción si displayType === 'images' -->
+                  @if (element.surveyConfig.displayType === 'images') {
+                  @let optionImage = getOptionImage(element, option.value);
+                  @if (optionImage) {
+                  <div class="option-image-wrap"
+                    (click)="onCatalogQuestionChange(element.id, option, !isCatalogAnswerSelected(element.id, option.value)); fieldErrors.delete(elementId)">
+                    <img [src]="optionImage" [alt]="option.label" class="option-img"
+                      [class.option-img--selected]="isCatalogAnswerSelected(element.id, option.value)" />
+                  </div>
+                  }
+                  }
+
+                  <mat-checkbox [checked]="isCatalogAnswerSelected(element.id, option.value)"
+                    [disabled]="isCatalogAnswerDisabled(element.id, option.value, option.label)"
+                    (change)="onCatalogQuestionChange(element.id, option, $event.checked); fieldErrors.delete(elementId)">
+                    {{ option.label }}
+                    @if (isNoneOption(option.label)) {
+                    <span class="none-badge">(0 pts)</span>
+                    }
+                  </mat-checkbox>
+                </div>
+                }
+                } @else {
+                <mat-radio-group [name]="'radio_' + element.id" class="radio-group">
+                  @for (option of getCatalogQuestionOptions(element.id); track option.value) {
+                  <div class="catalog-option-wrapper"
+                    [class.catalog-option-wrapper--image]="element.surveyConfig.displayType === 'images'">
+
+                    @if (element.surveyConfig.displayType === 'images') {
+                    @let optionImage = getOptionImage(element, option.value);
+                    @if (optionImage) {
+                    <div class="option-image-wrap"
+                      (click)="onCatalogQuestionChange(element.id, option, true); fieldErrors.delete(elementId)">
+                      <img [src]="optionImage" [alt]="option.label" class="option-img"
+                        [class.option-img--selected]="isCatalogAnswerSelected(element.id, option.value)" />
+                    </div>
+                    }
+                    }
+
+                    <mat-radio-button [value]="option.value"
+                      [checked]="isCatalogAnswerSelected(element.id, option.value)"
+                      (change)="onCatalogQuestionChange(element.id, option, true); fieldErrors.delete(elementId)">
+                      {{ option.label }}
+                    </mat-radio-button>
+                  </div>
+                  }
+                </mat-radio-group>
+                }
+
+              </div>
+
+              @if (hasFieldError(elementId)) {
+              <small class="field-error-msg">{{ getFieldError(elementId) }}</small>
+              }
+              }
+            </div>
+            }
+
+            <!-- CATÁLOGO: SUBTOTAL -->
+            @if (element.surveyConfig.mode === 'catalog_subtotal') {
+            <div class="catalog-subtotal">
+
+              <!-- ✅ Si tiene fórmulas, mostrar resultado de fórmula -->
+              @if (isFormulaField(element)) {
+              <div class="subtotal-result">
+                <div class="subtotal-score formula-result">
+                  <strong>{{ getFormulaResult(element.id) || '0' }}</strong>
+                </div>
+              </div>
+              } @else {
+              <!-- Lógica original de linkedFieldIds -->
+              <div class="subtotal-detail">
+                @for (linkedId of element.surveyConfig.linkedFieldIds; track linkedId) {
+                <div class="subtotal-row">
+                  <span class="subtotal-label">{{ getLinkedFieldLabel(linkedId) }}</span>
+                  <span class="subtotal-value">{{ getCatalogQuestionScore(linkedId) | number:'1.2-2' }} pts</span>
+                </div>
+                }
+              </div>
+              <div class="subtotal-result">
+                <mat-progress-bar mode="determinate" [value]="getSubtotalScore(element)"></mat-progress-bar>
+                <div class="subtotal-score">
+                  <strong>{{ getSubtotalScore(element) | number:'1.1-1' }}</strong> / 100
+                </div>
+              </div>
+              }
+
+            </div>
+            }
+
+            <!-- CATÁLOGO: STARS -->
+            @if (element.surveyConfig.mode === 'catalog_stars') {
+            <div class="catalog-stars">
+              <div class="stars-detail">
+                @for (linkedId of element.surveyConfig.linkedFieldIds; track linkedId) {
+                <div class="stars-row">
+                  <span class="stars-label">{{ getLinkedFieldLabel(linkedId) }}</span>
+                  <span class="stars-value">{{ getSubtotalScoreById(linkedId) | number:'1.1-1' }} pts</span>
+                </div>
+                }
+              </div>
+              <div class="stars-result">
+                <div class="stars-display">
+                  @for (i of [1,2,3,4,5]; track i) {
+                  <span [class.star-filled]="i <= getStarsScore(element)"
+                    [class.star-empty]="i > getStarsScore(element)" class="star">⭐</span>
+                  }
+                </div>
+                <p class="stars-score-label">{{ getStarsScore(element) }} de 5 estrellas</p>
+              </div>
+            </div>
+            }
+
+          </div>
+          }
+
+          <!-- ===== IMAGEN BELOW ===== -->
+          @if (element.image?.url && element.image?.position === 'below') {
+          <div class="element-image element-image--below">
+            <img [src]="element.image?.url" [alt]="element.image?.altText || ''" />
+          </div>
+          }
+        </div>
+        }
+        }
+      </div>
+      } @else {
+      <!-- Placeholder para mantener el scroll correcto -->
+      <div class="region-placeholder">
+        <div class="region-placeholder__skeleton"></div>
+      </div>
+      }
+
+
+
+
+    </div>
+    }
+    }
+  </div>
+
+  <!-- Actions -->
+  <div class="modal-actions">
+    <button mat-stroked-button (click)="onCancel()" class="btn-cancel">Cancelar</button>
+    @if(!isPreviewMode){
+    <button mat-raised-button color="primary" (click)="onSubmit()" class="btn btn-primary">
+      Enviar Formulario
+    </button>
+    }
+  </div>
+  }
+</div>

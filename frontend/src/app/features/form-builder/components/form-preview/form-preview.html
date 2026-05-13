@@ -1,0 +1,193 @@
+<div class="form-preview">
+  <div *ngIf="!formDefinition || formDefinition.regions.length === 0" class="empty-state">
+    <div class="empty-state__icon">📋</div>
+    <h3>Comienza a construir tu formulario</h3>
+    <p>Agrega regiones y campos desde el panel izquierdo</p>
+  </div>
+
+  <div *ngIf="formDefinition && formDefinition.regions.length > 0" class="preview-content">
+    <div *ngFor="let region of formDefinition.regions" class="preview-region"
+      [class.preview-region--has-actions]="hasActions(region)">
+      <div class="preview-region__header">
+        {{ region.title }}
+
+        <span *ngIf="getRegionDependency(region)" class="preview-region__dependency">
+          (según: {{ getRegionDependency(region) }})
+        </span>
+
+        <span *ngIf="hasActions(region)">⚡</span>
+      </div>
+
+      <div class="preview-region__content">
+        <div *ngFor="let element of region.elements" class="preview-field"
+          [class.preview-field--has-actions]="hasActions(element)">
+          <!-- LABEL -->
+          <label *ngIf="element.type !== 'heading'" class="preview-field__label"
+            [class.preview-field__label--required]="element.required">
+            {{ element.label }}
+            <span *ngIf="hasActions(element)">⚡</span>
+          </label>
+          <!-- IMAGEN (opcional, aparece entre label e input) -->
+          <div *ngIf="element.image && element.image.url" class="preview-field__image-container">
+            <img [src]="element.image.url" [alt]="element.image.altText" class="preview-field__image" />
+          </div>
+
+          <!-- INPUT/FIELD -->
+          <!-- Text Input -->
+          <input
+            *ngIf="element.type === 'text' || element.type === 'email' || element.type === 'number' || element.type === 'date'"
+            [type]="element.type" class="preview-field__input" [placeholder]="element.placeholder" disabled />
+            <!-- PHONE -->
+          <input
+            *ngIf="element.type === 'phone'"
+            [type]="element.type" class="preview-field__input" [placeholder]="'1234-1234'" disabled />
+          <input
+            *ngIf="element.type === 'coordinates'"
+            [type]="element.type" class="preview-field__input" [placeholder]="'Coordenadas'" disabled />
+          
+
+          <!-- Textarea -->
+          <textarea *ngIf="element.type === 'textarea'" class="preview-field__textarea"
+            [placeholder]="element.placeholder" disabled></textarea>
+
+
+
+
+          <!-- RADIO -->
+          <div *ngIf="element.type === 'radio'" class="preview-field__radio-group">
+            <!-- Si es catálogo -->
+            <div *ngIf="element.catalogType" class="preview-field__radio-option">
+              <input type="radio" [id]="element.id + '_0'" [name]="element.id" value="ejemplo" disabled />
+              <label [for]="element.id + '_0'">{{ getOptionsForDisplay(element)[0] }}</label>
+              <small style="display: block; color: #999; margin-top: 4px;">+ opciones del catálogo</small>
+            </div>
+
+            <!-- Si es manual -->
+            <ng-container *ngIf="!element.catalogType">
+              <div *ngFor="let option of getOptionsForDisplay(element); let i = index"
+                class="preview-field__radio-option">
+                <input type="radio" [id]="element.id + '_' + i" [name]="element.id" [value]="option" disabled />
+                <label [for]="element.id + '_' + i">{{ option }}</label>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- CHECKBOX -->
+          <div *ngIf="element.type === 'checkbox'" class="preview-field__checkbox-group">
+            <!-- Si es catálogo -->
+            <div *ngIf="element.catalogType" class="preview-field__checkbox-option">
+              <input type="checkbox" [id]="element.id + '_0'" value="ejemplo" disabled />
+              <label [for]="element.id + '_0'">{{ getOptionsForDisplay(element)[0] }}</label>
+              <small style="display: block; color: #999; margin-top: 4px;">+ opciones del catálogo</small>
+            </div>
+
+            <!-- Si es manual -->
+            <ng-container *ngIf="!element.catalogType">
+              <div *ngFor="let option of getOptionsForDisplay(element); let i = index"
+                class="preview-field__checkbox-option">
+                <input type="checkbox" [id]="element.id + '_' + i" [value]="option" disabled />
+                <label [for]="element.id + '_' + i">{{ option }}</label>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Heading / Párrafo -->
+          <div *ngIf="element.type === 'heading'" class="preview-field__heading">
+            <h4 class="preview-field__heading-title">{{ element.label }}</h4>
+            <p *ngIf="element.placeholder" class="preview-field__heading-description">
+              {{ element.placeholder }}
+            </p>
+          </div>
+
+          <!-- SELECT -->
+          <select *ngIf="element.type === 'select'" class="preview-field__select"
+            [multiple]="element.multipleSelecction" [attr.size]="element.multipleSelecction ? 4 : null" disabled>
+            <option value="">{{ getPlaceholder(element) }}</option>
+
+            <!-- Si es catálogo -->
+            <ng-container *ngIf="element.catalogType">
+              <option value="ejemplo">
+                {{ getOptionsForDisplay(element)[0] }}
+              </option>
+              <option value="" disabled>
+                --- + opciones del catálogo ---
+              </option>
+            </ng-container>
+
+            <!-- Si es manual -->
+            <ng-container *ngIf="!element.catalogType">
+              <option *ngFor="let option of getOptionsForDisplay(element)" [value]="option">
+                {{ option }}
+              </option>
+            </ng-container>
+          </select>
+
+
+
+          <!-- Camera -->
+          <div *ngIf="element.type === 'camera'" class="preview-field__camera">
+            <div class="preview-field__camera-icon">📷</div>
+            <div>Tomar Foto</div>
+            <div class="preview-field__camera-hint">Disponible en la app móvil</div>
+          </div>
+
+          <!-- LABEL -->
+          <label class="preview-field__helpText">
+            {{ element.helpText }}
+            <span *ngIf="hasActions(element)">⚡</span>
+          </label>
+
+          <!-- Survey Field - Solo visual, sin interacción -->
+          <div *ngIf="element.type === 'survey' && element.surveyConfig" class="preview-survey">
+
+            <!-- MANUAL: QUESTION -->
+            <!-- <div *ngIf="element.surveyConfig.mode === 'question'">
+              <div *ngIf="element.surveyConfig.displayType === 'stars'" class="preview-survey__stars">
+                <span *ngFor="let r of element.surveyConfig.responses">⭐</span>
+              </div>
+              <div *ngIf="element.surveyConfig.displayType === 'images'" class="preview-survey__images">
+                <div *ngFor="let r of element.surveyConfig.responses" class="preview-survey__image-option">
+                  <img *ngIf="r.imageUrl" [src]="r.imageUrl" [alt]="r.label" />
+                  <span>{{ r.label }}</span>
+                </div>
+              </div>
+              <div *ngIf="element.surveyConfig.displayType === 'text'" class="preview-survey__options">
+                <span *ngFor="let r of element.surveyConfig.responses" class="preview-survey__option">
+                  {{ r.label }}
+                </span>
+              </div>
+            </div> -->
+
+            <!-- MANUAL: RESULT -->
+            <div *ngIf="element.surveyConfig.mode === 'result'" class="preview-survey__result">
+              <div class="preview-survey__progress-bar"></div>
+              <span class="preview-survey__hint">Mostrará resultados al responder</span>
+            </div>
+
+            <!-- CATÁLOGO: QUESTION -->
+            <div *ngIf="element.surveyConfig.mode === 'catalog_question'" class="preview-survey__catalog">
+              <span class="preview-survey__hint">☑️ Opciones desde catálogo {{ element.surveyConfig.catalogType
+                }}</span>
+              <small>Selección múltiple · 1 punto dividido entre todas las opciones</small>
+            </div>
+
+            <!-- CATÁLOGO: SUBTOTAL -->
+            <div *ngIf="element.surveyConfig.mode === 'catalog_subtotal'" class="preview-survey__subtotal">
+              <div class="preview-survey__progress-bar"></div>
+              <span class="preview-survey__hint">🧮 Subtotal de {{ (element.surveyConfig.linkedFieldIds?.length || 0) }}
+                pregunta(s) · Resultado 0-100</span>
+            </div>
+
+            <!-- CATÁLOGO: STARS -->
+            <div *ngIf="element.surveyConfig.mode === 'catalog_stars'" class="preview-survey__stars-result">
+              <span>⭐⭐⭐⭐⭐</span>
+              <span class="preview-survey__hint">⭐ Ponderación de {{ (element.surveyConfig.linkedFieldIds?.length || 0)
+                }} subtotal(es)</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

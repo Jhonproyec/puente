@@ -1,0 +1,307 @@
+<div class="page-container">
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1>Centro de Catálogos</h1>
+                <p>Administra todos tus catálogos de forma rápida y sencilla</p>
+            </div>
+            <div class="header-actions">
+                <button *ngIf="selectedCatalogs.size > 0" class="btn btn-danger" (click)="deleteSelectedCatalogs()">
+                    <mat-icon>delete_sweep</mat-icon>
+                    Eliminar seleccionados ({{ selectedCatalogs.size }})
+                </button>
+                @if(canCreate()) {
+                <button class="btn btn-primary" (click)="openNewCatalogModal()">
+                    <mat-icon>create_new_folder</mat-icon>
+                    Nuevo Catálogo
+                </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if(canView()){
+    <div class="catalog-container">
+
+        <!-- BÚSQUEDA -->
+        <div class="search-section">
+            <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Buscar catálogos...</mat-label>
+                <input matInput [(ngModel)]="searchTerm" placeholder="Ej: Departamentos, Comunidades...">
+                <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div *ngIf="isLoadingCatalogs" class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Cargando catálogos disponibles...</p>
+        </div>
+
+        <!-- CATÁLOGOS ACCORDION -->
+        <div *ngIf="!isLoadingCatalogs" class="catalogs-container">
+
+            <div *ngIf="filterCatalogs().length === 0" class="empty-state">
+                <mat-icon>folder_open</mat-icon>
+                <p>No se encontraron catálogos que coincidan con tu búsqueda</p>
+            </div>
+
+            <!-- BARRA DE SELECCIÓN MÚLTIPLE -->
+            <div class="selection-bar" *ngIf="filterCatalogs().length > 0">
+                <mat-checkbox [checked]="isAllSelected()" [indeterminate]="isSomeSelected()"
+                    (change)="toggleSelectAll($event)">
+                    Seleccionar todos
+                </mat-checkbox>
+                <span *ngIf="selectedCatalogs.size > 0" class="selection-count">
+                    {{ selectedCatalogs.size }} catálogo(s) seleccionado(s)
+                </span>
+            </div>
+
+            <!-- ACCORDION -->
+            <mat-accordion>
+                <div *ngFor="let catalog of filterCatalogs()" class="catalog-panel-wrapper"
+                    [class.is-selected]="selectedCatalogs.has(catalog.id)">
+
+                    <div class="catalog-checkbox-wrap">
+                        <mat-checkbox [checked]="selectedCatalogs.has(catalog.id)"
+                            (change)="toggleCatalogSelection(catalog.id, $event)">
+                        </mat-checkbox>
+                    </div>
+
+                    <mat-expansion-panel class="catalog-expansion-panel" [disabled]="catalog.isLoading"
+                        (opened)="onPanelOpenClose(catalog, true)" (closed)="onPanelOpenClose(catalog, false)">
+
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="catalog-title">
+                                <mat-icon class="catalog-icon">folder</mat-icon>
+                                <span class="catalog-name">{{ catalog.name }}</span>
+                                @if(canUpdate()) {
+                                <button mat-icon-button (click)="openEditCatalogModal(catalog, $event)">
+                                    <mat-icon class="edit-icon">edit</mat-icon>
+                                </button>
+                                }
+                            </mat-panel-title>
+                            <mat-panel-description class="catalog-description">
+                                <span class="item-count" *ngIf="catalog.count">
+                                    {{ catalog.count }} elementos
+                                </span>
+                                <mat-spinner *ngIf="catalog.isLoading" diameter="20"></mat-spinner>
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+
+                        <!-- CONTENT -->
+                        <div class="panel-content">
+
+                            <div *ngIf="catalog.isLoading && (!catalog.items || catalog.items.length === 0)"
+                                class="loading-table">
+                                <mat-spinner diameter="40"></mat-spinner>
+                                <p>Cargando datos del catálogo...</p>
+                            </div>
+
+                            <div class="catalog-toolbar"
+                                *ngIf="!catalog.isLoading || (catalog.items && catalog.items.length > 0)">
+                                @if(canCreate()){
+                                <button mat-raised-button class="btn btn-primary" (click)="openAddModal(catalog.id)"
+                                    [disabled]="catalog.isLoading">
+                                    <mat-icon>add</mat-icon>
+                                    Agregar
+                                </button>
+                                }
+                            </div>
+
+                            <div class="table-container"
+                                *ngIf="catalog.items && catalog.items.length > 0 && !catalog.isLoading">
+                                <table mat-table [dataSource]="catalog.items" class="catalog-table">
+
+                                    <!-- ID -->
+                                    <ng-container matColumnDef="id">
+                                        <th mat-header-cell *matHeaderCellDef>ID</th>
+                                        <td mat-cell *matCellDef="let element; let i = index">
+                                            <span class="id-badge">{{ i + 1 }}</span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- PADRE (departamento / comunidad) — solo si aplica -->
+                                    <ng-container matColumnDef="padre">
+                                        <th mat-header-cell *matHeaderCellDef>
+                                            {{ getParentLabelForCatalog(catalog.id) }}
+                                        </th>
+                                        <td mat-cell *matCellDef="let element">
+                                            <span class="parent-badge">{{ element.padre ?? '—' }}</span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- NOMBRE -->
+                                    <ng-container matColumnDef="nombre">
+                                        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                                        <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
+                                    </ng-container>
+
+                                    <!-- ACCIONES -->
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                                        <td mat-cell *matCellDef="let element" class="actions-cell">
+                                            @if(canUpdate()){
+                                            <button mat-icon-button matTooltip="Editar"
+                                                (click)="openEditModal(catalog.id, element)">
+                                                <mat-icon class="edit-icon">edit</mat-icon>
+                                            </button>
+                                            }
+                                            @if(canDelete()){
+                                            <button mat-icon-button matTooltip="Eliminar"
+                                                (click)="deleteItem(catalog.id, element)">
+                                                <mat-icon class="delete-icon">delete</mat-icon>
+                                            </button>
+                                            }
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="getColumnsForCatalog(catalog.id)"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: getColumnsForCatalog(catalog.id);"></tr>
+                                </table>
+                            </div>
+
+                            <div *ngIf="catalog.items && catalog.items.length === 0 && !catalog.isLoading"
+                                class="empty-table">
+                                <mat-icon>inbox</mat-icon>
+                                <p>No hay registros en este catálogo</p>
+                            </div>
+
+                        </div>
+                    </mat-expansion-panel>
+                </div>
+            </mat-accordion>
+        </div>
+    </div>
+    }
+</div>
+
+<!-- ─── MODAL AGREGAR / EDITAR ITEM ─────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <mat-icon class="modal-icon">{{ editingItem ? 'edit' : 'add_circle' }}</mat-icon>
+                {{ editingItem ? 'Editar Registro' : 'Agregar Nuevo Registro' }}
+            </h2>
+            <button mat-icon-button (click)="closeModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <form [formGroup]="form" class="modal-body" (ngSubmit)="saveItem()">
+
+            <!-- Verificando dependencias -->
+            <div *ngIf="isLoadingMetadata" class="loading-metadata">
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Verificando dependencias...</span>
+            </div>
+
+            <!-- Fila: Departamento + Comunidad -->
+            <div class="form-row" *ngIf="!isLoadingMetadata && (needsDepartamento() || needsComunidad())">
+
+                <mat-form-field appearance="outline" [class.full-width]="!needsComunidad()">
+                    <mat-label>Departamento</mat-label>
+                    <mat-select [value]="selectedDepartamentoId" (selectionChange)="onDepartamentoChange($event.value)">
+                        <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
+                            {{ dep.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-hint *ngIf="!selectedDepartamentoId && needsComunidad()">
+                        Selecciona primero el departamento
+                    </mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" *ngIf="needsComunidad()">
+                    <mat-label>Comunidad</mat-label>
+                    <mat-select [value]="selectedComunidadId"
+                        [disabled]="!selectedDepartamentoId || isLoadingComunidades"
+                        (selectionChange)="onComunidadChange($event.value)">
+                        <mat-option *ngIf="isLoadingComunidades" disabled>
+                            <mat-spinner diameter="16" style="display:inline-block; margin-right:8px;"></mat-spinner>
+                            Cargando...
+                        </mat-option>
+                        <mat-option *ngFor="let com of comunidades" [value]="com.id">
+                            {{ com.nombre }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+            </div>
+
+            <!-- Fila: Nombre (siempre ancho completo por estar solo) -->
+            <div class="form-row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="nombre" placeholder="Ingresa el nombre">
+                    <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+                        El nombre es requerido
+                    </mat-error>
+                    <mat-error *ngIf="form.get('nombre')?.hasError('minlength')">
+                        Mínimo 2 caracteres
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+        </form>
+
+        <div class="modal-footer">
+            <button mat-stroked-button (click)="closeModal()">Cancelar</button>
+            <button mat-raised-button class="btn btn-primary" (click)="saveItem()" [disabled]="isSaving()">
+                @if(isSaving()) {
+                <mat-spinner diameter="16" class="spinner"></mat-spinner>
+                {{ editingItem ? 'Actualizando...' : 'Creando...' }}
+                } @else {
+                {{ editingItem ? 'Actualizar' : 'Guardar' }}
+                }
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ─── MODAL NUEVO / EDITAR CATÁLOGO ───────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="isNewCatalogModalOpen" (click)="closeNewCatalogModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <mat-icon class="modal-icon">{{ editingCatalog ? 'edit' : 'create_new_folder' }}</mat-icon>
+                {{ editingCatalog ? 'Editar Catálogo' : 'Crear Nuevo Catálogo' }}
+            </h2>
+            <button mat-icon-button (click)="closeNewCatalogModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <form [formGroup]="newCatalogForm" class="modal-body" (ngSubmit)="saveNewCatalog()">
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Nombre del Catálogo</mat-label>
+                    <input matInput formControlName="name" placeholder="Ej: Departamentos, Municipios...">
+                    <mat-error *ngIf="newCatalogForm.get('name')?.hasError('required')">
+                        El nombre es requerido
+                    </mat-error>
+                    <mat-error *ngIf="newCatalogForm.get('name')?.hasError('minlength')">
+                        Mínimo 2 caracteres
+                    </mat-error>
+                </mat-form-field>
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button mat-stroked-button (click)="closeNewCatalogModal()">Cancelar</button>
+            <button mat-raised-button color="primary" (click)="saveNewCatalog()" [disabled]="isSavingCatalog()">
+                @if(isSavingCatalog()) {
+                <mat-spinner diameter="16" class="spinner"></mat-spinner>
+                {{ editingCatalog ? 'Actualizando...' : 'Creando...' }}
+                } @else {
+                {{ editingCatalog ? 'Actualizar' : 'Crear Catálogo' }}
+                }
+            </button>
+        </div>
+
+    </div>
+</div>

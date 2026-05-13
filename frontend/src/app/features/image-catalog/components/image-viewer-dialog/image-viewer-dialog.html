@@ -1,0 +1,25 @@
+<div class="viewer-container">
+
+  <!-- HEADER -->
+  <div class="viewer-header">
+    <span class="viewer-name">{{ data.image.name }}</span>
+    <div class="viewer-actions">
+      <button mat-icon-button (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- IMAGEN -->
+  <div class="viewer-body">
+    <img [src]="data.image.path" [alt]="data.image.name">
+  </div>
+
+  <!-- FOOTER -->
+  <div class="viewer-footer">
+    <span class="viewer-meta">{{ data.image.size | fileSize }}</span>
+    <span class="viewer-meta">{{ data.image.mime_type }}</span>
+    <span class="viewer-meta">{{ data.image.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+  </div>
+
+</div>

@@ -1,0 +1,176 @@
+<div class="structure-panel">
+
+  <!-- ── HEADER STICKY (solo tabs + botones) ── -->
+  <div class="structure-panel__sticky-header">
+
+    <div class="view-tabs">
+      <button class="view-tabs__tab" [class.view-tabs__tab--active]="currentView === 'structure'"
+        (click)="onChangeView('structure')">Estructura</button>
+      <button class="view-tabs__tab" [class.view-tabs__tab--active]="currentView === 'actions'"
+        (click)="onChangeView('actions')">Acciones</button>
+      <button class="view-tabs__tab" [class.view-tabs__tab--active]="currentView === 'validations'"
+        (click)="onChangeView('validations')">Validaciones</button>
+    </div>
+
+    <div *ngIf="currentView === 'structure'" class="add-buttons">
+      <button class="btn-add btn-add--region" (click)="onAddRegion()">
+        <mat-icon>folder</mat-icon><span>Región</span>
+      </button>
+      <button class="btn-add" (click)="onAddElement()">
+        <mat-icon>add</mat-icon><span>Campo</span>
+      </button>
+      <button class="btn-add" (click)="addSurveyField()">
+        <mat-icon>add</mat-icon><span>Encuesta</span>
+      </button>
+      <button class="btn-add btn-add--persona" (click)="onAddPersonRegion()">
+        <mat-icon>person</mat-icon><span>Persona</span>
+      </button>
+    </div>
+
+  </div>
+  <!-- ── FIN HEADER STICKY ── -->
+
+  <!-- ── CONTENIDO SCROLLEABLE (fuera del sticky-header) ── -->
+  <div class="structure-panel__content">
+
+    <!-- STRUCTURE VIEW -->
+    <div *ngIf="currentView === 'structure'">
+      <div class="elements-list" cdkDropList [cdkDropListData]="formDefinition?.regions ?? []"
+        (cdkDropListDropped)="dropRegion($event)">
+
+        <div *ngFor="let region of formDefinition?.regions; let i = index" cdkDrag
+          [cdkDragData]="{ type: 'region', id: region.id, index: i }" class="region-item"
+          [class.region-item--selected]="isRegionSelected(region.id)"
+          [class.region-item--has-dependency]="hasActions(region)"
+          [class.region-item--collapsed]="!isRegionExpanded(region.id)">
+
+          <div class="region-item__header-wrapper">
+            <div cdkDragHandle class="drag-handle drag-handle--region">
+              <mat-icon>drag_indicator</mat-icon>
+            </div>
+            <div class="region-item__header" (click)="toggleRegion(region.id); onSelectRegion(region.id)">
+              <div class="region-item__info">
+                <mat-icon class="accordion-icon">
+                  {{ isRegionExpanded(region.id) ? 'expand_less' : 'expand_more' }}
+                </mat-icon>
+                <span>{{ region.title }}</span>
+                <span *ngIf="!isRegionExpanded(region.id)" class="badge badge--info">
+                  {{ region.elements.length }} campos
+                </span>
+                <span *ngIf="hasActions(region)" class="badge badge--warning">
+                  <mat-icon>bolt</mat-icon> Condicional
+                </span>
+              </div>
+            </div>
+            <div class="region-item__actions">
+              <button class="btn-icon" (click)="onOpenProperties(region.id, 'region'); $event.stopPropagation()"
+                title="Propiedades">
+                <mat-icon>settings</mat-icon>
+              </button>
+              <button class="btn-icon" (click)="onOpenActions(region.id, 'region'); $event.stopPropagation()"
+                title="Acciones">
+                <mat-icon>bolt</mat-icon>
+              </button>
+              <button class="btn-icon btn-icon--delete" (click)="onDeleteRegion(region.id); $event.stopPropagation()"
+                title="Eliminar">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="region-item__content-wrapper" [class.collapsed]="!isRegionExpanded(region.id)">
+            <div cdkDropListGroup>
+              <div class="region-item__content" cdkDropList [cdkDropListData]="region.elements"
+                (cdkDropListDropped)="dropElement($event)">
+
+                <div *ngFor="let element of region.elements; let i = index" cdkDrag
+                  [cdkDragData]="{ type: 'element', id: element.id, regionId: region.id, index: i }"
+                  class="element-item" [class.element-item--active]="isElementSelected(element.id)"
+                  [class.element-item--has-dependency]="hasActions(element)">
+
+                  <div cdkDragHandle class="drag-handle drag-handle--small">
+                    <mat-icon>drag_indicator</mat-icon>
+                  </div>
+                  <div class="element-item__info" (click)="onSelectElement(element.id, region.id)">
+                    <div class="element-item__type">
+                      {{ element.type }}
+                      <span *ngIf="element.multipleSelecction" class="badge badge--info">Multi</span>
+                    </div>
+                    <div class="element-item__label">{{ element.label }}</div>
+                    <div *ngIf="hasActions(element)" class="badge badge--warning">
+                      <mat-icon>bolt</mat-icon> Condicional
+                    </div>
+                  </div>
+                  <div class="element-item__actions">
+                    <button class="btn-icon"
+                      (click)="onOpenProperties(element.id, 'element', region.id); $event.stopPropagation()"
+                      title="Propiedades">
+                      <mat-icon>settings</mat-icon>
+                    </button>
+                    <button class="btn-icon"
+                      (click)="onOpenActions(element.id, 'element', region.id); $event.stopPropagation()"
+                      title="Acciones">
+                      <mat-icon>bolt</mat-icon>
+                    </button>
+                    <button class="btn-icon"
+                      (click)="onOpenValidations(element.id, region.id); $event.stopPropagation()" title="Validaciones">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button class="btn-icon" (click)="onOpenFormulas(element.id, region.id); $event.stopPropagation()"
+                      title="Fórmulas">
+                      <mat-icon>functions</mat-icon>
+                    </button>
+                    <button class="btn-icon btn-icon--delete" [disabled]="isPersonIdentifier(element)"
+                      [style.opacity]="isPersonIdentifier(element) ? '0.3' : '1'"
+                      (click)="onDeleteElementSafe(element); $event.stopPropagation()"
+                      [title]="isPersonIdentifier(element) ? 'Campo requerido' : 'Eliminar'">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <div *ngIf="region.elements.length === 0" class="empty-region">
+                  <mat-icon>inbox</mat-icon>
+                  <span>Sin campos. Arrastra aquí o usa "Agregar Campo"</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS VIEW -->
+    <div *ngIf="currentView === 'actions'" class="actions-view">
+      <h3 class="view-title"><mat-icon>list</mat-icon> Todas las Acciones Dinámicas</h3>
+      <div *ngIf="getAllActions().length === 0" class="empty-state">
+        <div class="empty-state__icon"><mat-icon>bolt</mat-icon></div>
+        <p>No hay acciones dinámicas configuradas</p>
+      </div>
+      <div *ngFor="let item of getAllActions()" class="action-summary">
+        <h4 class="action-summary__title">
+          {{ item.region ? 'Región: ' + item.region.title : 'Campo: ' + item.element?.label }}
+        </h4>
+        <div *ngFor="let action of item.actions" class="action-summary__item">{{ action.name }}</div>
+      </div>
+    </div>
+
+    <!-- VALIDATIONS VIEW -->
+    <div *ngIf="currentView === 'validations'" class="validations-view">
+      <h3 class="view-title"><mat-icon>check_circle</mat-icon> Todas las Validaciones</h3>
+      <div *ngIf="getAllValidations().length === 0" class="empty-state">
+        <div class="empty-state__icon">✓</div>
+        <p>No hay validaciones configuradas</p>
+      </div>
+      <div *ngFor="let item of getAllValidations()" class="validation-summary">
+        <h4 class="validation-summary__title">Campo: {{ item.element.label }}</h4>
+        <div *ngFor="let validation of item.validations" class="validation-summary__item">
+          <div>{{ getValidationDescription(validation) }}</div>
+          <div class="validation-summary__message">Mensaje: "{{ validation.message }}"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

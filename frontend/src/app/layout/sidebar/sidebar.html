@@ -1,0 +1,120 @@
+<div class="sidebar-container">
+    <div class="sidebar-header">
+        <div class="logo">
+            <img src="images/logo.png" alt="logo de la empresa">
+        </div>
+    </div>
+
+    <div class="sidebar-content">
+        <mat-nav-list class="nav-list">
+
+            <!-- Items estáticos -->
+            @for (item of staticItems(); track item.route) {
+            <mat-list-item class="nav-item" [class.active]="isActive(item)" (click)="navigateTo(item.route)">
+                <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span matListItemTitle class="nav-label">{{ item.label }}</span>
+                @if (isActive(item)) {
+                <div class="active-indicator"></div>
+                }
+            </mat-list-item>
+            }
+
+            <!-- Divisor solo si hay formularios
+            @if (filteredDynamicItems().length > 0) {
+            <mat-divider></mat-divider>
+            <p class="section-label">Formularios</p>
+            } -->
+
+            <!-- Items dinámicos (formularios) -->
+            @for (item of filteredDynamicItems(); track item.id) {
+            @if (!showAddMenuItem || !item.isDynamic) {
+            @if (!item.isEditing) {
+            <mat-list-item class="nav-item dynamic-item" [class.active]="isActive(item)"
+                (click)="onMenuItemClick(item, $event)" (dblclick)="startEditItem(item, $event)">
+                <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span matListItemTitle class="nav-label">{{ item.label }}</span>
+                @if (isActive(item)) {
+                <div class="active-indicator"></div>
+                }
+                @if (item.showActions) {
+                <div class="item-actions" (click)="$event.stopPropagation()">
+                    <button class="btn-action btn-edit" (click)="editForm(item, $event)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </div>
+                }
+            </mat-list-item>
+            }
+            @if (item.isEditing) {
+            <div class="edit-item-container">
+                <input type="text" class="edit-item-input" [(ngModel)]="item.editingLabel"
+                    placeholder="Nombre del formulario..."
+                    (keypress)="$event.key === 'Enter' ? saveEditItem(item, $event) : null">
+                <div class="edit-item-controls">
+
+                    <button class="btn-control btn-save" (click)="saveEditItem(item, $event)">
+                        @if(isSaving()){
+                        <div class="loading-form">
+                            <mat-spinner class="spinner" diameter="16"></mat-spinner>
+                        </div>
+                        }@else{
+                        <mat-icon>check</mat-icon>
+                        }
+                    </button>
+                    <button class="btn-control btn-cancel" (click)="cancelEditItem(item)">
+
+                        <mat-icon>close</mat-icon>
+
+                    </button>
+                    <button class="btn-control btn-delete" (click)="deleteItem(item, $event)">
+                        @if(isDeleting()){
+                        <div class="loading-form">
+                            <mat-spinner class="spinner" diameter="16"></mat-spinner>
+                        </div>
+                        }@else{
+                        <mat-icon>delete</mat-icon>
+                        }
+                    </button>
+                </div>
+            </div>
+            }
+            }
+            }
+
+            <!-- Botón agregar formulario -->
+            @if (canCreate()) {
+            <mat-list-item class="add-form-btn" (click)="toggleAddMenuItem()">
+                <mat-icon matListItemIcon class="nav-icon">add_circle_outline</mat-icon>
+                <span matListItemTitle class="nav-label">Agregar Formulario</span>
+
+            </mat-list-item>
+            @if (showAddMenuItem) {
+            <div class="add-form-input-container">
+                <input type="text" class="add-form-input" [(ngModel)]="newMenuItemLabel"
+                    placeholder="Nombre del formulario..." (keypress)="handleKeyPress($event)" autofocus>
+                <div class="input-controls">
+                    <button class="btn-save" (click)="addNewMenuItem()">
+                        @if(isSaving()){
+                        <div class="loading-form">
+                            <mat-spinner class="spinner" diameter="16"></mat-spinner>
+                        </div>
+                        }@else{
+                        Guardar
+                        }
+                    </button>
+                    <button class="btn-cancel" (click)="toggleAddMenuItem()">Cancelar</button>
+                </div>
+            </div>
+            }
+            }
+
+        </mat-nav-list>
+    </div>
+
+    <div class="sidebar-footer">
+        <button mat-list-item class="logout-button" (click)="logout()">
+            <mat-icon matListItemIcon>exit_to_app</mat-icon>
+            <span matListItemTitle>Cerrar Sesión</span>
+        </button>
+    </div>
+</div>

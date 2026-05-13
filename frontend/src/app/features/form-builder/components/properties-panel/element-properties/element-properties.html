@@ -1,0 +1,233 @@
+<!-- Region Properties -->
+<div *ngIf="isRegion()" class="properties-form">
+  <div class="form-group">
+    <label class="form-label">Título de la Región</label>
+    <input type="text" class="form-input" [value]="asRegion().title"
+      (input)="updateRegionTitle($any($event.target).value)" />
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Mostrar Región Según:</label>
+    <div class="format-row">
+      <select class="form-select" [(ngModel)]="selectedNumericField"
+        (change)="updateRegionTriggerField($any($event.target).value)">
+        <option value="" selected>Seleccionar</option>
+        <option *ngFor="let field of allNumericFields" [value]="field.id">
+          {{ field.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+</div>
+<!-- Element Properties -->
+<div *ngIf="isElement() && asElement().type !== 'survey'" class="properties-form">
+  <!-- Element Type -->
+  <div class="form-group">
+    <label class="form-label">Tipo de Campo</label>
+    <select class="form-select" [ngModel]="asElement().type" (ngModelChange)="updateElementProperty('type', $event)">
+      <option *ngFor="let type of elementTypes" [value]="type.value">
+        {{ type.label }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Label -->
+  <div class="form-group" *ngIf="!isHeadingType()">
+    <label class="form-label">Etiqueta (Label)</label>
+    <input type="text" class="form-input" [value]="asElement().label"
+      (input)="updateElementProperty('label', $any($event.target).value)" />
+  </div>
+
+  <!-- ===== HEADING / PÁRRAFO ===== -->
+  <div *ngIf="isHeadingType()" class="heading-section">
+    <div class="form-group">
+      <label class="form-label">Título</label>
+      <input type="text" class="form-input" [value]="asElement().label"
+        (input)="updateElementProperty('label', $any($event.target).value)" placeholder="Ej: Información importante" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción / Párrafo</label>
+      <textarea class="form-input" rows="3" [value]="asElement().placeholder || ''"
+        (input)="updateElementProperty('placeholder', $any($event.target).value)"
+        placeholder="Escribe el texto descriptivo aquí..."></textarea>
+      <small class="help-text">Este texto se mostrará como información al usuario, no es un campo de entrada.</small>
+    </div>
+  </div>
+
+  <!-- Placeholder -->
+  <div *ngIf="showPlaceholder()" class="form-group">
+    <label class="form-label">Placeholder</label>
+    <input type="text" class="form-input" [value]="asElement().placeholder"
+      (input)="updateElementProperty('placeholder', $any($event.target).value)" />
+  </div>
+
+  <!-- Help Text (NUEVO - Aparece en todos) -->
+  <div class="form-group" *ngIf="!isHeadingType()">
+    <label class="form-label">Texto de Ayuda</label>
+    <input type="text" class="form-input" [value]="(asElement().helpText || '')"
+      (input)="updateHelpText($any($event.target).value)" placeholder="Texto de ayuda para el usuario" />
+    <small class="help-text">Se mostrará debajo del campo en el formulario</small>
+  </div>
+
+  <!-- Required -->
+  <div class="form-group" *ngIf="!isHeadingType()">
+    <label class="form-checkbox">
+      <input type="checkbox" [checked]="asElement().required"
+        (change)="updateElementProperty('required', $any($event.target).checked)" />
+      <span>Campo Obligatorio</span>
+    </label>
+  </div>
+
+  <!-- Multiple Selection -->
+  <div *ngIf="showMultipleSelection()" class="form-group">
+    <label class="form-checkbox">
+      <input type="checkbox" [checked]="asElement().multipleSelecction"
+        (change)="updateElementProperty('multipleSelecction', $any($event.target).checked)" />
+      <span>Permitir Selección Múltiple</span>
+    </label>
+  </div>
+
+  <!-- Options Selector -->
+  <div *ngIf="showOptionsSelector()" class="options-section">
+    <!-- Catalog Selector -->
+    <div class="form-group">
+      <label class="form-label">Catálogo de Opciones</label>
+      <select class="form-select" [value]="asElement().catalogType || ''"
+        (change)="onCatalogChange($any($event.target).value)">
+        <option value="">Sin catálogo (manual)</option>
+        <option *ngFor="let catalog of availableCatalogs" [value]="catalog.id">
+          {{ catalog.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- SECCIÓN: Opciones Específicas -->
+    <div *ngIf="showEnableSpecificOptionsSection()" class="specific-options-section">
+      <div class="form-group">
+        <label class="form-checkbox">
+          <input type="checkbox" [checked]="enableSpecificOptions" (change)="toggleEnableSpecificOptions()" />
+          <span>Habilitar opciones específicas</span>
+        </label>
+        <small class="help-text">Si desactivas esto, se mostrarán todas las opciones del catálogo</small>
+      </div>
+
+      <div *ngIf="loadingCatalog" class="loading-state">
+        <div class="spinner"></div>
+        <span>Cargando catálogo...</span>
+      </div>
+
+      <div *ngIf="showCatalogOptionsSelection() && !loadingCatalog" class="form-group">
+        <label class="form-label">Opciones Disponibles</label>
+        <div class="options-selector">
+          <button class="select-all-btn" (click)="toggleAllCatalogOptions()" *ngIf="catalogOptions.length > 0">
+            ✓ Seleccionar Todo / Deseleccionar Todo
+          </button>
+
+          <div class="options-list">
+            <div *ngFor="let option of catalogOptions" class="option-checkbox">
+              <input type="checkbox" [id]="'catalog_' + option.value" [checked]="isCatalogOptionSelected(option.value)"
+                (change)="toggleCatalogOption(option.value, $any($event.target).checked)" />
+              <label [for]="'catalog_' + option.value">{{ option.label }}</label>
+            </div>
+
+            <div *ngIf="catalogOptions.length === 0" class="no-options">
+              No hay opciones disponibles
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: Cascada (SIEMPRE VISIBLE) -->
+    <div *ngIf="showCascadeSection()" class="cascade-section">
+      <!-- Checkbox SIEMPRE visible (NO se oculta) -->
+      <div class="form-group">
+        <label class="form-checkbox">
+          <input type="checkbox" [checked]="isCascadeEnabled"
+            (change)="toggleCascadeEnabled($any($event.target).checked)" />
+          <span>Este campo depende de otra selección (Cascada)</span>
+        </label>
+        <small class="help-text">Marca esta opción si este campo debe filtrar según la selección de otro campo</small>
+      </div>
+
+      <!-- En element-properties.html, sección CASCADE -->
+
+      <div *ngIf="isCascadeEnabled" class="cascade-config">
+        <div class="form-group">
+          <label class="form-label">Campo que dispara el filtro:</label>
+          <select class="form-select" [(ngModel)]="cascadeTriggerFieldId"
+            (change)="onCascadeTriggerChange($any($event.target).value)"> <!-- ← Agregar (change) -->
+            <option value="">Seleccionar campo</option>
+            <option *ngFor="let field of getSelectFieldsForCascade()" [value]="field.id">
+              {{ field.label }}
+            </option>
+          </select>
+        </div>
+
+        <input type="hidden" class="form-input" [value]="selectedCascadeFilterKey" readonly
+          placeholder="Se asigna automáticamente" />
+
+        <!-- Preview de configuración -->
+        <div *ngIf="cascadeTriggerFieldId && selectedCascadeFilterKey" class="cascade-preview">
+          <p><strong>✓ Cascada Configurada</strong></p>
+          <p class="preview-text">
+            Cuando selecciones <strong>{{ cascadeTriggerFieldLabel }}</strong>,
+            se filtrarán las opciones por el campo <code>{{ selectedCascadeFilterKey }}</code>
+          </p>
+        </div>
+      </div>
+
+      <!-- Cascada ya configurada (mostrar cuando NO está en edición) -->
+      <div *ngIf="cascadeConfig && cascadeConfig.enabled && !isCascadeEnabled" class="cascade-configured">
+        <div class="cascade-badge">
+          ✓ Cascada Configurada
+        </div>
+        <p class="configured-text">
+          Este campo depende de: <strong>{{ cascadeConfig.triggerFieldLabel }}</strong>
+          <br />
+          Filtra por: <code>{{ cascadeConfig.filterKey }}</code>
+        </p>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: Opciones Manuales -->
+    <div *ngIf="showManualOptionsSection()" class="manual-options-section">
+      <div class="form-group">
+        <label class="form-label">Agregar Opciones Personalizadas</label>
+
+        <div class="add-custom-option">
+          <input type="text" class="form-input" [(ngModel)]="newOptionText" placeholder="Nueva opción"
+            (keyup.enter)="addManualOption()" />
+          <button class="btn btn--primary btn--small" (click)="addManualOption()">
+            Agregar
+          </button>
+        </div>
+
+        <div *ngIf="manualOptions.length > 0" class="manual-options-list">
+          <div *ngFor="let option of manualOptions; let i = index" class="manual-option-item">
+            <div class="option-content">
+              <span class="option-index">#{{ i + 1 }}</span>
+              <input type="text" class="option-input" [value]="option.nombre"
+                (blur)="editManualOption(option.id, $any($event.target).value)"
+                (keyup.enter)="editManualOption(option.id, $any($event.target).value)" />
+            </div>
+            <button class="btn-remove" (click)="removeManualOption(option.id)" title="Eliminar opción">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="manualOptions.length === 0" class="no-options">
+          No hay opciones personalizadas. Agrega una para comenzar.
+        </div>
+      </div>
+    </div>
+  </div>
+  @if(!isHeadingType()){
+    <app-element-image-editor *ngIf="isElement()" [element]="asElement()"></app-element-image-editor>
+  }
+</div>
+
+<div *ngIf="isElement() && asElement().type === 'survey'" class="properties-form">
+  <app-survey-properties [element]="asElement()"></app-survey-properties>
+</div>

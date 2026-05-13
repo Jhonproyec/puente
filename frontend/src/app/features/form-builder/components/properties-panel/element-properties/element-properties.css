@@ -1,0 +1,426 @@
+/* FORM GROUPS */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+
+/* ==================== LOADING STATE ==================== */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: #f0f4ff;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 500;
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e0e7ff;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== OPTIONS SECTIONS ==================== */
+.options-section {
+  margin-top: 24px;
+}
+
+.specific-options-section,
+.manual-options-section {
+  padding: 16px;
+  background: #f7fafc;
+  border-left: 4px solid #667eea;
+  border-radius: 6px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-input,
+.form-select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background: white;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  &::placeholder {
+    color: #a0aec0;
+  }
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2d3748;
+  margin-top: 10px;
+
+  input {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+  }
+
+  span {
+    font-weight: 500;
+  }
+
+  &:hover {
+    color: #667eea;
+  }
+}
+
+.help-text {
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 6px;
+  font-style: italic;
+  display: block;
+}
+
+/* ==================== OPTIONS SELECTOR ==================== */
+.options-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.select-all-btn {
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #667eea;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #667eea;
+    background: #f7fafc;
+  }
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.option-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: white;
+  }
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+  }
+
+  label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 13px;
+    color: #2d3748;
+    flex: 1;
+  }
+}
+
+.no-options {
+  padding: 16px;
+  text-align: center;
+  color: #a0aec0;
+  font-size: 13px;
+  font-style: italic;
+  background: white;
+  border-radius: 4px;
+  border: 1px dashed #cbd5e0;
+}
+
+/* ==================== MANUAL OPTIONS ==================== */
+.add-custom-option {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 13px;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+  }
+
+  button {
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+
+    &:hover {
+      background: #5568d3;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}
+
+.manual-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.manual-option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .option-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+
+    .option-index {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a0aec0;
+      background: #f7fafc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .option-input {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #2d3748;
+      background: white;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      &::placeholder {
+        color: #cbd5e0;
+      }
+    }
+  }
+
+  .btn-remove {
+    padding: 6px 10px;
+    background: #fee;
+    color: #e53e3e;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #fdd;
+      color: #c53030;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+/* ==================== BUTTONS ==================== */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+
+}
+
+/* ==================== PROPERTIES FORM ==================== */
+.properties-form {
+  padding: 16px 0;
+}
+
+.format-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* ==================== SCROLLBAR ==================== */
+.options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.options-list::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+
+  &:hover {
+    background: #a0aec0;
+  }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .options-list {
+    max-height: 200px;
+  }
+
+  .add-custom-option {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .manual-option-item {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .option-content {
+      width: 100%;
+    }
+
+    .btn-remove {
+      align-self: flex-end;
+    }
+  }
+
+  .format-row {
+    flex-direction: column;
+  }
+
+  .specific-options-section,
+  .manual-options-section {
+    padding: 12px;
+    margin-top: 10px;
+  }
+}
+.configured-text{
+  margin-top: 20px;
+}
+

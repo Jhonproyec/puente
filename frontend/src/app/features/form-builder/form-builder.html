@@ -1,0 +1,51 @@
+<!-- src/app/components/form-builder/form-builder.component.html -->
+
+<div class="form-builder">
+  <!-- Header -->
+  <header class="form-builder__header">
+    <div class="header__left">
+      <button (click)="goBack()" mat-raised-button class="btn"><mat-icon>keyboard_backspace</mat-icon> Regresar</button>
+      <h1 class="header__title">Constructor de Formularios</h1>
+      <input
+        type="text"
+        class="header__name-input"
+        [(ngModel)]="formName"
+        (ngModelChange)="onFormNameChange($event)"
+        placeholder="Nombre del formulario"
+      />
+    </div>
+
+    <div class="header__actions">
+      <button class="btn" (click)="onSaveForm('BORRADOR')">
+        Guardar Borrador
+      </button>
+      <button class="btn" (click)="onPreviewForm()">
+        Previsualizar
+      </button>
+      <button class="btn btn-primary" (click)="onSaveForm('PUBLICADO')">
+        Publicar Formulario
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="form-builder__container">
+    <!-- Left Panel: Structure -->
+    <aside class="form-builder__panel form-builder__panel--left">
+      <app-structure-panel
+        [currentView]="currentView"
+        (viewChange)="changeView($event)"
+      ></app-structure-panel>
+    </aside>
+
+    <!-- Center Panel: Preview -->
+    <!-- <main class="form-builder__panel form-builder__panel--center">
+      <app-form-preview></app-form-preview>
+    </main> -->
+
+    <!-- Right Panel: Properties -->
+    <aside class="form-builder__panel form-builder__panel--right">
+      <app-properties-panel></app-properties-panel>
+    </aside>
+  </div>
+</div>

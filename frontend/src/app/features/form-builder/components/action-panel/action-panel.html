@@ -1,0 +1,179 @@
+<div class="actions-panel">
+  <div class="panel-header">
+    <h3>⚡ Acciones Dinámicas</h3>
+    <button class="btn btn--small btn--secondary" (click)="onBackToProperties()">
+      ← Propiedades
+    </button>
+  </div>
+
+  <!-- Acciones existentes -->
+  <div *ngIf="target.actions && target.actions.length > 0" class="actions-list">
+    <div *ngFor="let action of target.actions; let i = index" class="action-item"
+      [class.action-item--editing]="editingIndex === i" (click)="selectActionForEdit(action, i)">
+      <div class="action-item__header">
+        <span class="action-item__title">Acción {{ i + 1 }}</span>
+        <div class="action-item__buttons">
+          <span *ngIf="editingIndex === i" class="action-item__badge">editando</span>
+          <button class="btn-icon btn-icon--delete" (click)="removeAction(i); $event.stopPropagation()">×</button>
+        </div>
+      </div>
+      <div class="action-item__description">{{ action.name }}</div>
+    </div>
+  </div>
+
+  <p class="panel-subtitle">{{ getTargetLabel() }}</p>
+
+  <!-- TABS -->
+  <div class="formula-mode-tabs">
+    <button [class.active]="formulaMode() === 'predefinida'" (click)="formulaMode.set('predefinida')" class="tab-btn">
+      <span>📋</span> Acción Predefinida
+    </button>
+    <button [class.active]="formulaMode() === 'personalizada'" (click)="formulaMode.set('personalizada')"
+      class="tab-btn">
+      <span>🧮</span> Condición Personalizada
+    </button>
+  </div>
+
+  <!-- =================== ACCIÓN PREDEFINIDA =================== -->
+  @if(formulaMode() === 'predefinida'){
+  <div class="add-action-form">
+    <div class="form-group">
+      <label class="form-label">Nombre de la acción</label>
+      <input type="text" class="form-input" [(ngModel)]="newAction.name"
+        placeholder="Ej: Mostrar si es mayor de edad" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Campo Disparador</label>
+      <select class="form-select" [(ngModel)]="selectedTriggerElement" (ngModelChange)="onTriggerFieldChange($event)">
+        <option [ngValue]="null">Seleccionar campo</option>
+        <option *ngFor="let el of allElements" [ngValue]="el">
+          {{ el.label }}
+          <span *ngIf="el.type === 'survey'"> (Survey)</span>
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Operador</label>
+      <select class="form-select" [(ngModel)]="newAction.operator">
+        <option *ngFor="let type of actionTypes" [value]="type.value">{{ type.label }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Acción</label>
+      <div style="display: flex; gap: 20px;">
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="newAction.visibility" value="show" name="visibility"> Mostrar
+        </label>
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="newAction.visibility" value="hide" name="visibility"> Ocultar
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group" *ngIf="needsValue() && !isBetweenType()">
+      <label class="form-label">Valor de Comparación</label>
+      <div *ngIf="triggerFieldOptions().length > 0">
+        <select class="form-select" [(ngModel)]="newAction.value">
+          <option value="">-- Selecciona una opción --</option>
+          <option *ngFor="let option of triggerFieldOptions()" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+      <input *ngIf="triggerFieldOptions().length === 0" [type]="getInputType()" class="form-input"
+        [(ngModel)]="newAction.value" placeholder="Ingresa el valor" />
+    </div>
+
+    <div *ngIf="isBetweenType()" class="form-group">
+      <label class="form-label">Tipo de Rango</label>
+      <div style="display: flex; gap: 20px;">
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="newAction.betweenType" value="number" name="betweenType"> Números
+        </label>
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="newAction.betweenType" value="date" name="betweenType"> Fechas
+        </label>
+        <label *ngIf="triggerFieldOptions().length > 0" style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="newAction.betweenType" value="catalog" name="betweenType"> Opciones del
+          catálogo
+        </label>
+      </div>
+    </div>
+
+    <div *ngIf="isBetweenType() && newAction.betweenType === 'catalog'" class="form-group">
+      <label class="form-label">Opciones que deben estar incluidas</label>
+      <div class="catalog-between-options">
+        <label *ngFor="let option of triggerFieldOptions()"
+          style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <input type="checkbox" [checked]="isCatalogOptionInBetween(option.value)"
+            (change)="toggleCatalogBetweenOption(option.value, $event)" />
+          {{ option.label }}
+        </label>
+      </div>
+      <small class="help-text">Se cumple si TODAS las opciones seleccionadas están marcadas</small>
+    </div>
+
+    <div *ngIf="isBetweenType() && newAction.betweenType !== 'catalog'" class="form-group">
+      <label class="form-label">Desde</label>
+      <input [type]="newAction.betweenType === 'date' ? 'date' : 'number'" class="form-input"
+        [(ngModel)]="newAction.value" placeholder="Valor inicial" />
+    </div>
+
+    <div *ngIf="isBetweenType() && newAction.betweenType !== 'catalog'" class="form-group">
+      <label class="form-label">Hasta</label>
+      <input [type]="newAction.betweenType === 'date' ? 'date' : 'number'" class="form-input"
+        [(ngModel)]="newAction.valueEnd" placeholder="Valor final" />
+    </div>
+    <div class="action-form-footer">
+      <button *ngIf="editingIndex !== null" class="btn btn--secondary" (click)="cancelEdit()">
+        Cancelar
+      </button>
+      <button class="btn btn--primary" (click)="addAction()">
+        {{ editingIndex !== null ? '✓ Actualizar Acción' : '+ Agregar Acción' }}
+      </button>
+    </div>
+    <!-- <button class="btn btn--primary" (click)="addAction()">+ Agregar Acción</button> -->
+  </div>
+  }
+
+  <!-- =================== CONDICIÓN PERSONALIZADA =================== -->
+  @if(formulaMode() === 'personalizada'){
+  <div class="add-action-form">
+    <div class="form-group">
+      <label class="form-label">Nombre de la condición</label>
+      <input type="text" class="form-input" [(ngModel)]="customActionName"
+        placeholder="Ej: Mostrar si puntaje es alto" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Acción</label>
+      <div style="display: flex; gap: 20px;">
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="customActionVisibility" value="show" name="customVisibility"> Mostrar
+        </label>
+        <label style="display: flex; align-items: center; gap: 5px;">
+          <input type="radio" [(ngModel)]="customActionVisibility" value="hide" name="customVisibility"> Ocultar
+        </label>
+      </div>
+    </div>
+
+    <app-expression-editor [availableFields]="allNumericFields" [surveyOptions]="surveyOptionsMap"
+      (expressionChange)="onExpressionChanged($event)">
+    </app-expression-editor>
+    <div class="action-form-footer">
+      <button *ngIf="editingIndex !== null" class="btn btn--secondary" (click)="cancelEdit()">
+        Cancelar
+      </button>
+      <button class="btn btn--primary" [disabled]="!currentExpression.isValid" (click)="addCustomAction()">
+        {{ editingIndex !== null ? '✓ Actualizar Condición' : '+ Agregar Condición' }}
+      </button>
+    </div>
+    <!-- <button class="btn btn--primary" [disabled]="!currentExpression.isValid" (click)="addCustomAction()">
+      + Agregar Condición
+    </button> -->
+  </div>
+  }
+</div>

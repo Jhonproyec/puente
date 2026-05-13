@@ -1,0 +1,13 @@
+
+.mat-mdc-form-field {
+  margin-bottom: 23px;
+}
+
+.loading-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  color: #666;
+  font-size: 14px;
+}

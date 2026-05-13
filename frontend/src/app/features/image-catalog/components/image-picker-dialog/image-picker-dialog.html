@@ -1,0 +1,17 @@
+    <div class="picker-dialog">
+      <div class="picker-header">
+        <h2 class="picker-title">
+          <mat-icon>photo_library</mat-icon>
+          Seleccionar imagen
+        </h2>
+        <button mat-icon-button (click)="close()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="picker-body">
+        <app-image-picker
+          mode="select"
+          (imageSelected)="onImageSelected($event)"
+        />
+      </div>
+    </div>

@@ -1,0 +1,25 @@
+<div class="image-editor">
+    <h4>🖼️ Imagen del Campo (Opcional)</h4>
+
+    <!-- Mostrar imagen actual si existe -->
+    <div *ngIf="element.image && element.image.url" class="current-image">
+        <img [src]="element.image.url" [alt]="element.image.altText" />
+        <p class="image-info">{{ element.image.altText }}</p>
+        <button type="button" (click)="removeImage()" class="btn-remove">
+            🗑️ Eliminar Imagen
+        </button>
+    </div>
+
+    <!-- Formulario para agregar imagen -->
+    <div *ngIf="!element.image || !element.image.url" class="image-form">
+        <div class="file-upload-area">
+            <button type="button" (click)="openImagePicker()" class="btn-upload-file">
+                🖼️ Seleccionar del catálogo
+            </button>
+            <p class="upload-hint">
+                Selecciona una imagen del catálogo de imágenes
+            </p>
+        </div>
+    </div>
+
+</div>

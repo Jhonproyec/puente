@@ -1,0 +1,209 @@
+    .image-editor {
+        border: 1px solid #e0e0e0;
+        padding: 16px;
+        border-radius: 4px;
+        background-color: #fafafa;
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .image-editor h4 {
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .current-image {
+        text-align: center;
+        margin-bottom: 16px;
+        padding: 12px;
+        background-color: white;
+        border-radius: 4px;
+    }
+
+    .current-image img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .image-info {
+        font-size: 12px;
+        color: #666;
+        margin: 8px 0;
+        font-style: italic;
+    }
+
+    /* Tabs */
+    .upload-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .tab-btn {
+        padding: 8px 12px;
+        border: none;
+        background-color: transparent;
+        color: #666;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+        color: #1976d2;
+    }
+
+    .tab-btn.active {
+        color: #1976d2;
+        border-bottom-color: #1976d2;
+    }
+
+    .tab-content {
+        background-color: white;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        padding: 20px;
+        text-align: center;
+        background-color: #f9f9f9;
+        margin-bottom: 12px;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .btn-upload-file {
+        padding: 10px 16px;
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+
+    .btn-upload-file:hover {
+        background-color: #0b7dda;
+    }
+
+    .upload-info {
+        margin: 12px 0 0 0;
+        font-size: 12px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .upload-hint {
+        margin: 8px 0 0 0;
+        font-size: 11px;
+        color: #999;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #333;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #1976d2;
+        box-shadow: 0 0 4px rgba(25, 118, 210, 0.2);
+    }
+
+    button {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 8px;
+        margin-top: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-add,
+    .btn-update {
+        background-color: #000;
+        color: white;
+    }
+
+    .btn-add:hover:not(:disabled),
+    .btn-update:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2) !important;
+        transition: ease .2s;
+
+    }
+
+    .btn-add:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .btn-remove {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .btn-remove:hover {
+        background-color: #da190b;
+    }
+
+    .btn-edit {
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background-color: #0b7dda;
+    }
+
+    .btn-cancel {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e68900;
+    }
+
+    .edit-form {
+        margin-top: 12px;
+        padding: 12px;
+        background-color: white;
+        border-radius: 4px;
+        border-left: 3px solid #2196f3;
+    }

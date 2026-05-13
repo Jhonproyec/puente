@@ -1,0 +1,90 @@
+<div class="validations-panel">
+  <div class="panel-header">
+    <h3>✓ Validaciones</h3>
+    <button class="btn btn--small btn--secondary" (click)="onBackToProperties()">
+      ← Propiedades
+    </button>
+  </div>
+
+  <p class="panel-subtitle">Campo: {{ element.label }}</p>
+
+  <!-- Validaciones existentes -->
+  <div *ngIf="element.validations!.length > 0" class="validations-list">
+    <div *ngFor="let validation of element.validations; let i = index" class="validation-item">
+      <div class="validation-item__header">
+        <span class="validation-item__title">Validación {{ i + 1 }}</span>
+        <button class="btn-icon btn-icon--delete" (click)="removeValidation(i)">×</button>
+      </div>
+      <div class="validation-item__description">
+        {{ getValidationDescription(validation) }}
+      </div>
+      <div class="validation-item__message">
+        Mensaje: "{{ validation.message }}"
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!element.validations!.length" class="empty-state">
+    <p>No hay validaciones configuradas</p>
+  </div>
+
+  <!-- Agregar validación -->
+  <div class="add-validation-form">
+
+    <div class="form-group">
+      <label class="form-label">Tipo de Validación</label>
+      <select class="form-select" [(ngModel)]="newValidation.operator">
+        <option value="">Seleccionar validación</option>
+        <option *ngFor="let op of availableOperators" [ngValue]="op.value">
+          {{ op.label }}
+        </option>
+      </select>
+    </div>
+
+    <div *ngIf="isCustomFormula" class="form-group">
+      <app-expression-editor [availableFields]="allNumericFields" [surveyOptions]="surveyOptionsMap"
+        (expressionChange)="onExpressionChanged($event)">
+      </app-expression-editor>
+    </div>
+
+    <!-- Valor simple -->
+    <div class="form-group" *ngIf="needsValue && !isBetween">
+      <label class="form-label">{{ valueLabel }}</label>
+      <input [type]="isDateField ? 'date' : 'text'" class="form-input" [(ngModel)]="newValidation.valueFrom"
+        placeholder="Ingresa el valor" />
+    </div>
+
+    <!-- Entre: valor inicial -->
+    <div class="form-group" *ngIf="isBetween">
+      <label class="form-label">{{ isDateField ? 'Fecha mínima' : 'Valor inicial' }}</label>
+      <input [type]="isDateField ? 'date' : 'number'" class="form-input" [(ngModel)]="newValidation.valueFrom"
+        placeholder="{{ isDateField ? 'YYYY-MM-DD' : 'Valor mínimo' }}" />
+    </div>
+
+    <!-- Entre: fecha actual como máximo (solo para date) -->
+    <div class="form-group" *ngIf="isBetween && isDateField">
+      <label class="form-checkbox">
+        <input type="checkbox" [(ngModel)]="newValidation.useTodayAsMax" />
+        <span>Usar fecha actual como máximo</span>
+      </label>
+      <small class="help-text">Al marcar esto, la fecha máxima será el día en que se llena el formulario</small>
+    </div>
+
+    <!-- Entre: valor final (oculto si useTodayAsMax) -->
+    <div class="form-group" *ngIf="isBetween && !newValidation.useTodayAsMax">
+      <label class="form-label">{{ isDateField ? 'Fecha máxima' : 'Valor final' }}</label>
+      <input [type]="isDateField ? 'date' : 'number'" class="form-input" [(ngModel)]="newValidation.valueTo"
+        placeholder="{{ isDateField ? 'YYYY-MM-DD' : 'Valor máximo' }}" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Mensaje de Error</label>
+      <input type="text" class="form-input" [(ngModel)]="newValidation.message"
+        placeholder="Se generará automáticamente si lo dejas vacío" />
+    </div>
+
+    <button class="btn btn--primary" (click)="addValidation()">
+      + Agregar Validación
+    </button>
+  </div>
+</div>

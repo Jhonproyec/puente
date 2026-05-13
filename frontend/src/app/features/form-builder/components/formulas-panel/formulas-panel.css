@@ -1,0 +1,446 @@
+.formulas-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* HEADER */
+.panel-header {
+  background: #fff;
+  color: #000;
+  padding: 0;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: black;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-title h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* TABS */
+.formula-mode-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border: 2px solid transparent;
+  background-color: #f0f0f0;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-btn.active {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* CONTENT */
+.formula-mode-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 16px;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 8px;
+}
+
+/* FORM GROUPS */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.count-badge {
+  background-color: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.help-text {
+  display: block;
+  margin-top: 4px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* FIELDS GRID */
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.field-checkbox:hover {
+  background-color: #f0f0f0;
+  border-color: #667eea;
+}
+
+.checkbox-input {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+}
+
+.checkbox-label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  margin: 0;
+}
+
+.field-type-icon {
+  font-size: 16px;
+}
+
+/* WEIGHTS */
+.weights-section {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+}
+
+.weights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weight-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weight-item label {
+  margin-bottom: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.weight-input {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.weight-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.weight-total {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.normalize-btn {
+  padding: 4px 12px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.normalize-btn:hover {
+  background-color: #5568d3;
+}
+
+/* FORMAT */
+.format-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.format-details {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.format-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.preview {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.preview-value {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* BUTTONS */
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.btn-primary {
+  background-color: #667eea;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #5568d3;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 12px;
+  flex: none;
+  width: auto;
+}
+
+/* FÓRMULAS EXISTENTES */
+.formulas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formula-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.formula-item:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.formula-info {
+  flex: 1;
+}
+
+.formula-info strong {
+  display: block;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.formula-description,
+.formula-type {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.formula-expression {
+  background-color: #fff;
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #333;
+  margin: 4px 0;
+  border-left: 2px solid #667eea;
+  padding-left: 8px;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .fields-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .weights-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    flex: none;
+  }
+}
+
+/* SCROLLBAR */
+.formula-mode-content::-webkit-scrollbar,
+.suggestions-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.formula-mode-content::-webkit-scrollbar-track,
+.suggestions-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.formula-mode-content::-webkit-scrollbar-thumb,
+.suggestions-dropdown::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.formula-mode-content::-webkit-scrollbar-thumb:hover,
+.suggestions-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}

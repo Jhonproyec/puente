@@ -1,0 +1,143 @@
+<!-- Toolbar -->
+<div class="print-toolbar no-print">
+  <div class="toolbar-left">
+    <span class="toolbar-title">Vista Previa — {{ formName }}</span>
+  </div>
+  <button class="btn-print" (click)="onPrint()">
+    <mat-icon>print</mat-icon> Descargar / Imprimir PDF
+  </button>
+</div>
+
+<!-- Loading -->
+@if (isLoading) {
+  <div class="loading-container no-print">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando formulario...</p>
+  </div>
+}
+
+@if (!isLoading) {
+<div class="form-document">
+
+  <!-- Encabezado -->
+  <div class="document-header">
+    <h1 class="document-title">{{ formName }}</h1>
+    <div class="document-meta">
+      <span>Fecha: ___________________________</span>
+      <span>Responsable: ___________________________</span>
+    </div>
+  </div>
+
+  <!-- Regiones -->
+  @for (region of regions; track region.id) {
+  <div class="region-block">
+
+    <div class="region-header">
+      <h2 class="region-title">{{ region.title }}</h2>
+    </div>
+
+    <div class="elements-grid">
+      @for (element of region.elements; track element.id) {
+
+        <!-- HEADING -->
+        @if (element.type === 'heading') {
+          <div class="element-heading full-width">
+            <h3 class="heading-label">{{ element.label }}</h3>
+            @if (element.placeholder) {
+              <p class="heading-description">{{ element.placeholder }}</p>
+            }
+          </div>
+        }
+
+        <!-- Campos normales -->
+        @if (element.type !== 'heading') {
+        <div class="element-block"
+          [class.full-width]="element.type === 'textarea'">
+
+          <!-- Label -->
+          <div class="element-label">
+            {{ element.label }}
+            @if (element.required) { <span class="required-star">*</span> }
+          </div>
+
+          <!-- ===== TEXTO / NÚMERO / EMAIL / PHONE / DATE / TIME / COORDINATES ===== -->
+          @if (['text','number','email','phone','date','time','coordinates'].includes(element.previewType) 
+            || element.previewType === 'text') {
+            <div class="field-line"></div>
+          }
+
+          <!-- ===== TEXTAREA ===== -->
+          @if (element.previewType === 'textarea') {
+            <div class="field-textarea"></div>
+          }
+
+          <!-- ===== SELECT (sin cascada) ===== -->
+          @if (element.previewType === 'select' && !element.cascadeLabel) {
+            <div class="field-options">
+              @if (element.resolvedOptions?.length) {
+                @for (opt of element.resolvedOptions; track opt.id) {
+                  <div class="option-row">
+                    <span class="option-circle">○</span>
+                    <span class="option-label">{{ opt.nombre }}</span>
+                  </div>
+                }
+              } @else {
+                <div class="field-line"></div>
+              }
+            </div>
+          }
+
+          <!-- ===== RADIO ===== -->
+          @if (element.previewType === 'radio') {
+            <div class="field-options">
+              @if (element.resolvedOptions?.length) {
+                @for (opt of element.resolvedOptions; track opt.id) {
+                  <div class="option-row">
+                    <span class="option-circle">○</span>
+                    <span class="option-label">{{ opt.nombre }}</span>
+                  </div>
+                }
+              } @else {
+                <div class="field-line"></div>
+              }
+            </div>
+          }
+
+          <!-- ===== CHECKBOX ===== -->
+          @if (element.previewType === 'checkbox') {
+            <div class="field-options">
+              @if (element.resolvedOptions?.length) {
+                @for (opt of element.resolvedOptions; track opt.id) {
+                  <div class="option-row">
+                    <span class="option-square">☐</span>
+                    <span class="option-label">{{ opt.nombre }}</span>
+                  </div>
+                }
+              } @else {
+                <div class="field-line"></div>
+              }
+            </div>
+          }
+        </div>
+        }
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Footer firma -->
+  <div class="document-footer">
+    <div class="signature-line">
+      <div class="signature-box">
+        <div class="sig-line"></div>
+        <span>Firma del responsable</span>
+      </div>
+      <div class="signature-box">
+        <div class="sig-line"></div>
+        <span>Sello</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+}

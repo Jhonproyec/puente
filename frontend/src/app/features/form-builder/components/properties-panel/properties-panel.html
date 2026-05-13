@@ -1,0 +1,32 @@
+<div class="properties-panel">
+  <div class="properties-panel__header">Propiedades</div>
+
+  <div class="properties-panel__content">
+    <!-- Empty State -->
+    <div *ngIf="!selectedElement" class="empty-state">
+      <div class="empty-state__icon">⚙️</div>
+      <p>Selecciona un elemento para editar sus propiedades</p>
+    </div>
+
+    <!-- Properties Mode -->
+    <app-element-properties *ngIf="selectedElement && panelMode === 'properties'" [element]="selectedElement"
+      [elementType]="selectedType"></app-element-properties>
+
+    <!-- Actions Mode -->
+    <app-action-panel *ngIf="selectedElement && panelMode === 'actions'" [target]="selectedElement"
+      [targetType]="selectedType" (backToProperties)="backToProperties()"></app-action-panel>
+
+    <!-- Validations Mode -->
+    <app-validation-panel *ngIf="selectedElement && panelMode === 'validations' && isElementType()"
+      [element]="selectedElement" (backToProperties)="backToProperties()"></app-validation-panel>
+
+    <app-formulas-panel *ngIf="selectedElement && panelMode === 'formulas'" [target]="selectedElement"
+      [targetType]="selectedType" (backToProperties)="backToProperties()"></app-formulas-panel>
+
+    <!-- Validations not available for regions -->
+    <div *ngIf="selectedElement && panelMode === 'validations' && isRegionType()" class="empty-state">
+      <div class="empty-state__icon">✓</div>
+      <p>Las validaciones solo se aplican a campos individuales</p>
+    </div>
+  </div>
+</div>
