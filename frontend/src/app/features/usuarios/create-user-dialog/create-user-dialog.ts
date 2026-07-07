@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -15,19 +15,23 @@ import { CreateUserRequest } from '../../../core/models/user.model';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RoleService } from '../../../core/services/role.service';
+import { NgxMaskDirective } from 'ngx-mask';
 
 interface Departamento { id: number; nombre: string; }
 interface Comunidad { id: number; nombre: string; departamentoId: number; }
 
 @Component({
   selector: 'app-create-user-dialog',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, NgxMatSelectSearchModule,
+    NgxMaskDirective,
   ],
   templateUrl: './create-user-dialog.html',
-  styleUrl: './create-user-dialog.css'
+  styleUrl: './create-user-dialog.css',
 })
 export class CreateUserDialog implements OnInit, OnDestroy {
   createUserForm: FormGroup;
@@ -67,6 +71,7 @@ export class CreateUserDialog implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private rolService: RoleService,
     private cdr: ChangeDetectorRef,
+
   ) {
     this.isEditMode = userId != null;
 
@@ -75,6 +80,7 @@ export class CreateUserDialog implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
+      dpi: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(15)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       repeatPassword: ['', [Validators.required, Validators.minLength(8)]],
       role: ['', [Validators.required]],
@@ -174,7 +180,6 @@ export class CreateUserDialog implements OnInit, OnDestroy {
   private _loadUserForEdit(): void {
     this.userService.getUserById(this.userId!).subscribe({
       next: (response) => {
-        console.log(response);
         if (response != null) {
           const u = response;
           this._fillForm(u);
@@ -201,6 +206,7 @@ export class CreateUserDialog implements OnInit, OnDestroy {
       email: u.email,
       role: u.rol?.id_rol?.toString() ?? '',
       forms: (u.forms ?? []).map((f: any) => f.formulario?.id_formulario),
+      dpi: u.dpi
     });
 
     // ── Departamentos y comunidades ─────────────────────────────────────────
@@ -239,13 +245,17 @@ export class CreateUserDialog implements OnInit, OnDestroy {
           this.filteredComunidades.next(response.slice());
           this._lastFetchedDeptoIds = [...deptoIds];
 
-          // Si comunidadesUsuario es null → access_global, seleccionar todas
           const comunidadIds = comunidadesUsuario == null
             ? response.map((c: any) => c.id)
             : comunidadesUsuario.map((c: any) => c.id);
 
           this.createUserForm.get('comunidades')?.setValue(comunidadIds, { emitEvent: false });
-          this.isAllComunidades.set(true);  // siempre true en ambos casos aquí
+
+          // 👇 calcula isAllComunidades en función de si realmente son todas
+          this.isAllComunidades.set(
+            comunidadIds.length === response.length && response.length > 0
+          );
+
           this.cdr.detectChanges();
         }
       },
@@ -365,6 +375,7 @@ export class CreateUserDialog implements OnInit, OnDestroy {
       this.userService.updateUser(payload).subscribe({
         next: (user) => {
           if (user != null) {
+            this.notificationService.showSuccess("Usuario actualizado correctamente");
             this.dialogRef.close(user);
           } else {
             this.notificationService.showError('Error al actualizar el usuario');
@@ -396,6 +407,7 @@ export class CreateUserDialog implements OnInit, OnDestroy {
     if (field?.errors && field.touched) {
       if (field.errors['required']) return '*Este campo es requerido';
       if (field.errors['email']) return '*Ingresa un email válido';
+      if (field.errors['dpi']) return '*Debe ingresar un DPI válido';
       if (field.errors['minlength']) return `*Debe tener al menos ${field.errors['minlength'].requiredLength} caracteres`;
     }
     return '';

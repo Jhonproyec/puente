@@ -4,16 +4,20 @@ import { CreateUserRequest, User } from '../../models/user.model';
 import { environment } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../notification.service';
+import { CacheService } from '../cache.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   readonly BASE_URL = environment.BASE_URL;
+    private readonly ID_USUARIOS_CATALOG = environment.ID_USUARIOS_CATALOG
+
 
   constructor(
     private http: HttpClient,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private cacheService: CacheService,
   ) { }
   getUsers(page: number, limit: number): Observable<User[]> {
     return this.http.get(`${this.BASE_URL}/user`, {
@@ -56,6 +60,7 @@ export class UserService {
     return this.http.post(`${this.BASE_URL}/auth/register`, userData).pipe(
       map((response: any) => {
         if (response.success) {
+          this.cacheService.delete(`CATALOG:items:${this.ID_USUARIOS_CATALOG}`);
           return response.data;
         } else {
           return null;
@@ -72,6 +77,7 @@ export class UserService {
     return this.http.put(`${this.BASE_URL}/user/update`, userData).pipe(  
       map((response:any) => {
         if(response.success){
+          this.cacheService.delete(`CATALOG:items:${this.ID_USUARIOS_CATALOG}`);
           return response.data;
         }else{
           return null;
@@ -89,6 +95,7 @@ export class UserService {
       map((response:any) => {
         if(response.success){
           this.notificationService.showSuccess("Usuario eliminado correctamente");
+          this.cacheService.delete(`CATALOG:items:${this.ID_USUARIOS_CATALOG}`);
           return response.success;
         }else{
           console.log(response);
@@ -117,6 +124,22 @@ export class UserService {
         this.notificationService.showError("Error al actualizar la contraseña");
         console.error(error);
         return throwError(() => error);
+      })
+    )
+  }
+
+  generarQrUsuario(idUsuario: number):Observable<any>{
+    return this.http.get(`${this.BASE_URL}/user/${idUsuario}/qr`).pipe( 
+      map((response: any) => {
+        if(response.success){
+          return response.data;
+        }else{
+          return null;
+        }
+      }),
+      catchError((error:any) => {
+        console.error("Error al generar QR del usuario", error);
+        return throwError(() => error.error);
       })
     )
   }

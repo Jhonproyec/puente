@@ -88,4 +88,8 @@ export class FormPreview implements OnInit {
   hasConditions(element: ResolvedElement): boolean {
     return (element.actions?.length || 0) > 0;
   }
+
+  getElements(region: ResolvedRegion): ResolvedElement[] {
+  return region.elements;
+}
 }

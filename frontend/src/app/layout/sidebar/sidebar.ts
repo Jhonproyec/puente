@@ -80,6 +80,7 @@ export class Sidebar implements OnInit {
 
   private readonly ALL_MENU_ITEMS: MenuItem[] = [
     { label: 'Inicio', icon: 'home', route: '/dashboard', permission: null },
+    { label: 'Centros Nútreme', icon: 'account_balance', route: '/centro-nutreme', permission: 'CREATE_CATALOG' },
     { label: 'Catalogos', icon: 'library_books', route: '/catalogos', permission: 'CREATE_CATALOG' },
     { label: 'Imágenes', icon: 'crop_original', route: '/images', permission: 'CREATE_CATALOG' },
     { label: 'Roles', icon: 'vpn_key', route: '/roles', permission: 'CREATE_ROLE' },

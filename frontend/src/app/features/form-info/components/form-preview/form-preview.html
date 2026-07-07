@@ -37,7 +37,7 @@
     </div>
 
     <div class="elements-grid">
-      @for (element of region.elements; track element.id) {
+      @for (element of getElements(region); track element.id) {
 
         <!-- HEADING -->
         @if (element.type === 'heading') {

@@ -1,4 +1,3 @@
-// import { AuthenticatedRequestInterface } from '@/interface/authInterface';
 import { ApiResponseInterface } from '@/interface/apiResponseInterface';
 import { RegisterUserDataInterface } from '@/interface/authInterface';
 import { authService } from '@/services/auth.service';
@@ -10,7 +9,7 @@ class AuthController {
     try {
       const {
         comunidades, departamentos, email, firstName,
-        forms, lastName, password, role
+        forms, lastName, password, role, dpi
       } = req.body;
       const data: RegisterUserDataInterface = {
         comunidades,
@@ -20,7 +19,8 @@ class AuthController {
         forms,
         lastName,
         password,
-        role
+        role,
+        dpi
       }
       const result = await authService.register(data);
       const response: ApiResponseInterface = {

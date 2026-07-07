@@ -981,17 +981,143 @@
 .region-placeholder__skeleton {
   height: 80px;
   border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    var(--color-background-secondary) 25%,
-    var(--color-background-tertiary) 50%,
-    var(--color-background-secondary) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--color-background-secondary) 25%,
+      var(--color-background-tertiary) 50%,
+      var(--color-background-secondary) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
 }
 
 @keyframes skeleton-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.temp-code-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.temp-code-input {
+  flex: 1;
+}
+
+.btn-generar-codigo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  height: 40px;
+  transition: background 0.15s;
+}
+
+.btn-generar-codigo:hover {
+  background: #1565c0;
+}
+
+.btn-copiar-codigo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: #555;
+}
+
+.btn-copiar-codigo:hover {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+
+/* ===== EVALUATION TABLE ===== */
+.eval-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.eval-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.eval-table__group-header {
+  background: #f3f4f6;
+  text-align: center;
+  padding: 8px 12px;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.eval-table__desc-header,
+.eval-table__desc-subheader {
+  background: #f9fafb;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  min-width: 200px;
+}
+
+.eval-table__col-header {
+  background: #f9fafb;
+  text-align: center;
+  padding: 6px 12px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.eval-table__row:nth-child(even) {
+  background: #f9fafb;
+}
+
+.eval-table__row:hover {
+  background: #eff6ff;
+}
+
+.eval-table__desc-cell {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  color: #1a1a1a;
+  min-width: 200px;
+}
+
+.eval-table__cell {
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.eval-table__cell input[type="radio"],
+.eval-table__cell input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #000000;
 }

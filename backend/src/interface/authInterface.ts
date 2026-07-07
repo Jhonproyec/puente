@@ -23,7 +23,8 @@ export interface RegisterUserDataInterface {
   role: number;
   departaments: Array<number> | null;
   comunidades: Array<number> | null;
-  forms: Array<number>
+  forms: Array<number>;
+  dpi: string;
 }
 
 export interface LoginUserDataInterface {
@@ -47,4 +48,5 @@ export interface UserPayloadInterface {
   deparaments?: Array<number>| null;
   comunidades?: Array<number>| null;
   access_global?: boolean;
+  dpi: string;
 }

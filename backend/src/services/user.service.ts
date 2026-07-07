@@ -4,49 +4,20 @@ import { logger } from '@/config/logger';
 import { UserPayloadInterface } from '@/interface/authInterface';
 import { UserProfileInterface } from '@/interface/userInterface';
 import { ConflictError } from '@/utils/appError';
-// import { ConflictError, NotFoundError, UnauthorizedError } from '@/utils/appError';
-// import bcrypt from 'bcryptjs';
+import { qrService } from './qr.service';
+import { cacheService } from './cache.service';
+import bcrypt from 'bcryptjs';
 
-// const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS!);
 
-
+const ID_USUARIOS_CATALOG = `${process.env.ID_USUARIOS_CATALOG}`;
 class UserService {
-  // async getUserProfile(userId: number): Promise<UserProfileInterface> {
-  //   try {
-  //     // const user = await prisma.user.findUnique({
-  //     //   where: { idUser: userId },
-  //     //   select: {
-  //     //     idUser: true,
-  //     //     email: true,
-  //     //     firstName: true,
-  //     //     lastName: true,
-  //     //     role: true,
-  //     //     isActive: true,
-  //     //     createdAt: true,
-  //     //     updatedAt: true,
-  //     //     lastLogin: true,
-  //     //   },
-  //     // });
-
-  //     // if (!user) {
-  //     //   throw new NotFoundError('Usuario no encontrado');
-  //     // }
-
-  //     // return this.setUser(user);
-  //     return {} as UserProfileInterface;
-  //   } catch (error) {
-  //     logger.error('Error al editar el usuario: ', error);
-  //     throw error;
-  //   }
-  // }
-
   async updateUserProfile(
     userId: number,
     updateData: UserPayloadInterface
   ): Promise<any> {
     try {
       const result = await prisma.$transaction(async (tx) => {
-        if(userId == 1){
+        if (userId == 1) {
           throw new ConflictError("No tiene permisos para modificar este usuario");
         }
 
@@ -58,6 +29,14 @@ class UserService {
           throw new ConflictError('El correo ingresado ya existe');
         }
 
+        const existingDpi = await tx.usuario.findFirst({
+          where: { dpi: updateData.dpi, estado_registro: true, id_usuario: { not: userId } }
+        });
+
+        if (existingDpi) {
+          throw new ConflictError('El dpi ingresado ya está asignado a un usuario');
+        }
+
         const accessGlobal =
           !updateData.comunidades?.length &&
           !updateData.deparaments?.length;
@@ -67,7 +46,8 @@ class UserService {
           apellidos: updateData.lastName,
           email: updateData.email,
           id_rol: Number(updateData.rol),
-          accesso_global: accessGlobal
+          accesso_global: accessGlobal,
+          dpi: updateData.dpi,
         };
 
         const newUser = await tx.usuario.update({
@@ -108,12 +88,14 @@ class UserService {
       const data = {
         idUser: result.id_usuario,
         email: result.email,
-        firstName: result.nombres, 
+        firstName: result.nombres,
         lastName: result.apellidos,
         access_global: result.accesso_global,
         rol: result.rol.nombre,
-        estado_registro: result.estado_registro
+        estado_registro: result.estado_registro,
+        dpi: result.dpi,
       }
+      cacheService.delete(`catalogs:item:items:${ID_USUARIOS_CATALOG}`);
       return data;
 
     } catch (error) {
@@ -133,6 +115,7 @@ class UserService {
           apellidos: true,
           accesso_global: true,
           email: true,
+          dpi: true,
           rol: {
             select: {
               id_rol: true,
@@ -177,6 +160,7 @@ class UserService {
         idUser: user.id_usuario,
         lastName: user.apellidos,
         rol: user.rol,
+        dpi: user.dpi,
         forms: user.formulariosAsignados,
         email: user.email,
         comunidades: user.accesso_global
@@ -194,31 +178,6 @@ class UserService {
       throw error;
     }
   }
-
-  // async getUserByEmail(email: string): Promise<UserProfileInterface | null> {
-  //   try {
-  //     // const user = await prisma.user.findUnique({
-  //     //   where: { email },
-  //     //   select: {
-  //     //     idUser: true,
-  //     //     email: true,
-  //     //     firstName: true,
-  //     //     lastName: true,
-  //     //     role: true,
-  //     //     isActive: true,
-  //     //     createdAt: true,
-  //     //     updatedAt: true,
-  //     //     lastLogin: true,
-  //     //   },
-  //     // });
-
-  //     // return this.setUser(user);
-  //     return null
-  //   } catch (error) {
-  //     logger.error('Error al obtener el usuario por email:', error);
-  //     throw error;
-  //   }
-  // }
 
   async getAllUsers(
     page: number = 1,
@@ -247,6 +206,7 @@ class UserService {
             apellidos: true,
             accesso_global: true,
             estado_registro: true,
+            dpi: true,
             rol: {
               select: {
                 id_rol: true,
@@ -269,6 +229,7 @@ class UserService {
         access_global: user.accesso_global,
         rol: user.rol.nombre,
         estado_registro: user.estado_registro,
+        dpi: user.dpi
       }));
 
       return {
@@ -300,7 +261,7 @@ class UserService {
         },
         where: { id_usuario: userId },
       });
-
+      cacheService.delete(`catalogs:item:items:${ID_USUARIOS_CATALOG}`);
       logger.info(`User deleted: ${user.email}`);
     } catch (error) {
       logger.error('Error deleting user:', error);
@@ -308,49 +269,80 @@ class UserService {
     }
   }
 
-  // async changePassword(idUser: number, oldPassword: string, newPassword: string) {
-  //   try {
-  //   //   const user = await prisma.user.findUnique({
-  //   //     where: { idUser: idUser }
-  //   //   });
-  //   //   if (!user) {
-  //   //     throw new NotFoundError("Usuario no encontrado");
-  //   //   }
+  async generarQrUsuarioOnDemand(id_usuario: number): Promise<{ qr_path: string }> {
+    const usuario = await prisma.usuario.findFirst({
+      where: { id_usuario: id_usuario }
+    });
+    if (!usuario) throw new ConflictError("Usuario no encontrado");
+    if (usuario.dpi == null) throw new ConflictError("Debe ingresar el CUI para el usuario para generar el QR");
 
-  //   //   if (!user.isActive) {
-  //   //     throw new NotFoundError("La cuenta está desactivada");
-  //   //   }
+    if (usuario.qr_path) {
+      return { qr_path: usuario.qr_path };
+    }
+
+    const { qr_path } = await qrService.generarQrUsuario(
+      usuario.id_usuario,
+      usuario.dpi,
+      `${usuario.nombres} ${usuario.apellidos}`
+    );
+
+    await prisma.usuario.update({
+      where: { id_usuario },
+      data: { qr_path }
+    });
+
+    logger.info(`QR generado bajo demanda para usuario ${id_usuario}`);
+    return { qr_path };
+  }
+
+  async updateMyName(
+    userId: number,
+    nombres: string,
+    apellidos: string
+  ): Promise<void> {
+    try {
+      await prisma.usuario.update({
+        where: { id_usuario: userId },
+        data: { nombres, apellidos }
+      });
+      cacheService.delete(`catalogs:item:items:${ID_USUARIOS_CATALOG}`);
+      logger.info(`Nombre actualizado para usuario ${userId}`);
+    } catch (error) {
+      logger.error('Error al actualizar nombre:', error);
+      throw error;
+    }
+  }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    try {
+      const user = await prisma.usuario.findUnique({
+        where: { id_usuario: userId },
+        select: { password: true }
+      });
+
+      if (!user) throw new ConflictError('Usuario no encontrado');
+
+      const isValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isValid) throw new ConflictError('La contraseña actual es incorrecta');
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await prisma.usuario.update({
+        where: { id_usuario: userId },
+        data: { password: hashed }
+      });
+
+      logger.info(`Contraseña actualizada para usuario ${userId}`);
+    } catch (error) {
+      logger.error('Error al cambiar contraseña:', error);
+      throw error;
+    }
+  }
 
 
-  //   //   const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-  //   //   if (!isPasswordValid) {
-  //   //     throw new UnauthorizedError('La contraseña actual no coincide con la contraseña guardada');
-  //   //   }
-
-  //   //   const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-  //   //   await prisma.user.update({
-  //   //     where: { idUser: idUser },
-  //   //     data: { password: hashedPassword }
-  //   //   });
-  //   //   logger.info("Contraseña actualizada");
-  //   } catch (error) {
-  //     logger.error("Error al actualizar la contraseña: ", error);
-  //     throw error;
-  //   }
-  // }
-
-  // setUser = (user: any): UserProfileInterface => {
-  //   const dataUser: UserProfileInterface = {
-  //     email: user.email,
-  //     firstName: user.firstName,
-  //     lastName: user.lastName,
-  //     idUser: user.idUser,
-  //     isActive: user.isActive,
-  //     role: user.role,
-  //   };
-  //   return dataUser;
-  // };
 }
 
 export const userService = new UserService();

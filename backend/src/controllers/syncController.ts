@@ -1,11 +1,11 @@
+import { AuthenticatedRequestInterface } from "@/interface/authInterface";
 import { syncService } from "@/services/sync.service";
-import { Request, Response, NextFunction } from "express";
+import {  Response, NextFunction } from "express";
 
 export class SyncController {
-  async initialSync(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async initialSync(req: AuthenticatedRequestInterface, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = 3;
-      console.log(req.query);
+      const userId = req.user!.id;
       const data = await syncService.getInitialSyncData(userId);
       res.status(200).json({ success: true, data });
     } catch (error) {

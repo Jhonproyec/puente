@@ -18,6 +18,10 @@ import { formResponseRouter } from './routes/formResponse.routes';
 import { imagesCatalog } from './routes/imageCatalog.routes';
 import path from 'path';
 import syncRouter from './routes/sync.routes';
+import { familiaRouter } from './routes/familia.routes';
+import { syncUploadRouter } from './routes/syncUpload.routes';
+import hitosRoutes from './routes/hitos.routes';
+import { centroNutremeRouter } from './routes/centroNutreme.routes';
 
 
 export function createServer(): Application {
@@ -107,7 +111,11 @@ export function createServer(): Application {
   );
   // TODO IMPLEMENTAR HEAL RUTAS
   // app.use('/health', healR)
-
+  app.use('/public', express.static(path.join(__dirname, '../public'), {
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    }
+  }));
   // API Routes
   const apiPrefix = process.env.API_PREFIX || '/api';
   const apiVersion = process.env.API_VERSION || 'v1';
@@ -119,7 +127,12 @@ export function createServer(): Application {
   app.use(`${apiPrefix}/${apiVersion}/form-responses`, apiLimiter, formResponseRouter);
   app.use(`${apiPrefix}/${apiVersion}/image-catalog`, apiLimiter, imagesCatalog);
   app.use(`${apiPrefix}/${apiVersion}/sync`, apiLimiter, syncRouter);
-  
+  app.use(`${apiPrefix}/${apiVersion}/familias`, apiLimiter, familiaRouter);
+  app.use(`${apiPrefix}/${apiVersion}/sync-upload`, syncUploadRouter);
+  app.use(`${apiPrefix}/${apiVersion}/hitos`, hitosRoutes);
+  app.use(`${apiPrefix}/${apiVersion}/centros-nutreme`, centroNutremeRouter);
+
+
 
 
 

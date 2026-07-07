@@ -10,6 +10,7 @@ import { ConflictError, UnauthorizedError } from '@/utils/appError';
 import bcrypt from 'bcryptjs';
 import { EstadoForm } from '@prisma/client';
 import { Response } from 'express';
+import { cacheService } from './cache.service';
 
 
 const COOKIE_OPTIONS = {
@@ -19,6 +20,7 @@ const COOKIE_OPTIONS = {
   path: '/'
 };
 
+  const ID_USUARIOS_CATALOG = `${process.env.ID_USUARIOS_CATALOG}`;
 class AuthService {
   private readonly jwtSecret: string;
   private readonly jwtRefreshSecret: string;
@@ -67,6 +69,15 @@ class AuthService {
           throw new ConflictError('El correo ingresado ya existe');
         }
 
+        const existeDpi = await tx.usuario.findFirst({
+          where: { dpi: userData.dpi },
+        });
+
+        if(existeDpi){
+          throw new ConflictError('El DPI ingresado ya existe');
+        }
+
+
         const hashedPassword = await bcrypt.hash(
           userData.password,
           this.saltRounds
@@ -83,7 +94,8 @@ class AuthService {
             nombres: userData.firstName,
             password: hashedPassword,
             id_rol: Number(userData.role),
-            accesso_global: accessGlobal
+            accesso_global: accessGlobal,
+            dpi: userData.dpi
           }
         });
 
@@ -114,6 +126,7 @@ class AuthService {
             apellidos: true,
             accesso_global: true,
             estado_registro: true,
+            dpi: true,
             rol: {
               select: {
                 id_rol: true,
@@ -149,8 +162,12 @@ class AuthService {
         lastName: result?.apellidos,
         access_global: result?.accesso_global,
         estado_registro: result?.estado_registro,
-        rol: result?.rol.nombre
+        rol: result?.rol.nombre,
+        dpi: result?.dpi,
       };
+
+  
+      cacheService.delete(`catalogs:item:items:${ID_USUARIOS_CATALOG}`);
 
       return formattedUser;
 
@@ -307,7 +324,7 @@ class AuthService {
           ]
         },
         select: { uuid: true, nombre: true },
-        orderBy: {id_formulario: 'asc'}
+        orderBy: { id_formulario: 'asc' }
       });
     }
 
@@ -328,7 +345,7 @@ class AuthService {
       prisma.formulario.findMany({
         where: { estado: EstadoForm.BORRADOR, usuario_registro: userId },
         select: { uuid: true, nombre: true },
-        orderBy: {id_formulario: 'asc'}
+        orderBy: { id_formulario: 'asc' }
       })
     ]);
 

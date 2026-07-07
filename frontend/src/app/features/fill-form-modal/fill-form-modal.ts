@@ -27,6 +27,10 @@ import { FormulaService } from '../../core/services/formula.service';
 import { NgxMaskDirective } from 'ngx-mask';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { FamiliaService } from '../../core/services/familia.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { REGION_MADRE } from '../../core/constants/form-regions.constants';
+import { environment } from '../../../environments/environment';
 
 interface RegionRepetition {
   index: number;
@@ -61,6 +65,7 @@ interface CascadeOption {
     MatIcon,
     MatProgressBarModule,
     NgxMaskDirective,
+    MatTooltipModule,
   ],
   templateUrl: './fill-form-modal.html',
   styleUrl: './fill-form-modal.css'
@@ -85,6 +90,9 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   // Regiones que ya entraron al viewport y deben renderizarse
   visibleRegionIds: Set<string> = new Set();
   private intersectionObserver: IntersectionObserver | null = null;
+  //Generar el código temporal
+  codigosGenerados: Map<string, string> = new Map();
+  codigoCopiado: Map<string, boolean> = new Map();
 
   constructor(
     public dialogRef: MatDialogRef<FillFormModal>,
@@ -105,6 +113,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     private surveyAnswersService: SurveyAnswersService,
     private authService: AuthService,
     private formulaService: FormulaService,
+    private familiaService: FamiliaService,
   ) { }
 
   ngOnInit(): void {
@@ -123,8 +132,21 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
+  // ngAfterViewInit(): void {
+  //   setTimeout(() => {
+  //     this.initIntersectionObserver();
+  //     this.cdr.markForCheck();
+  //   }, 300);
+  // }
   ngAfterViewInit(): void {
     setTimeout(() => {
+      // ✅ Log para identificar el mat-form-field sin control
+      document.querySelectorAll('mat-form-field').forEach((el, i) => {
+        const control = el.querySelector('input, textarea, mat-select, select');
+        if (!control) {
+          console.error(`❌ mat-form-field #${i} sin control:`, el.innerHTML.substring(0, 200));
+        }
+      });
       this.initIntersectionObserver();
       this.cdr.markForCheck();
     }, 300);
@@ -227,33 +249,38 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     this.catalogSurveyService.clearAll();
     this.visibleRegionIds.clear();
 
-    this.formDefinition.regions.forEach(r => this.visibleRegionIds.add(r.id));
+    this.getAllRegionsFlat(this.formDefinition.regions).forEach(r => this.visibleRegionIds.add(r.id));
 
-    // ✅ 1. Inicializar campos vacíos
-    this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
+    this.getAllRegionsFlat(this.formDefinition.regions).forEach(region => {
+      this.getElements(region).forEach(element => {
         if (element.type === 'checkbox' && element.multipleSelecction) {
           this.formResponses[element.id] = [];
         } else if (element.type === 'heading') {
-          // sin respuesta
         } else {
           this.formResponses[element.id] = '';
         }
       });
     });
-
     // ✅ 2. Precargar respuestas existentes ANTES de evaluar acciones
-    if (this.data.mode === 'edit' && this.data.existingResponses) {
-      Object.assign(this.formResponses, this.data.existingResponses);
-    }
-
-    if (this.data.mode === 'edit' && this.data.existingResponses) {
+    if (this.data.existingResponses) {
       Object.assign(this.formResponses, this.data.existingResponses);
 
-      // ✅ Restaurar respuestas de catalog_question en el servicio
       Object.entries(this.data.existingResponses).forEach(([key, value]) => {
-        if (value && typeof value === 'object' && 'selectedIds' in value && 'score' in value) {
-          this.catalogSurveyService.restoreAnswer(key, value.selectedIds, value.score);
+        if (key.startsWith('__catalog__') &&
+          value && typeof value === 'object' &&
+          'selectedIds' in value) {
+          const surveyId = key.replace('__catalog__', '');
+          const selectedIds = (value as any).selectedIds || [];
+          const score = (value as any).score ?? 0;
+
+          // 👇 Verificar si el survey es de selección simple
+          const allElements = this.getAllElementsFlat(this.formDefinition?.regions ?? []);
+          const element = allElements.find(el => el.id === surveyId);
+          const isMultiple = element?.surveyConfig?.multipleSelection ?? true;
+
+          const idsToRestore = isMultiple ? selectedIds : selectedIds.slice(0, 1); // 👈 solo el primero si es simple
+
+          this.catalogSurveyService.restoreAnswer(surveyId, idsToRestore, score);
         }
       });
     }
@@ -277,8 +304,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   private loadCatalogQuestionOptions(): void {
     if (!this.formDefinition) return;
 
-    const surveyElements = this.formDefinition.regions
-      .flatMap(r => r.elements)
+    const surveyElements = this.getAllElementsFlat(this.formDefinition.regions)
       .filter(el =>
         el.type === 'survey' &&
         el.surveyConfig?.mode === 'catalog_question' &&
@@ -355,7 +381,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     checked: boolean
   ): void {
     const options = this.getCatalogQuestionOptions(elementId);
-    const allElements = this.formDefinition?.regions.flatMap(r => r.elements) || [];
+    const allElements = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
     const element = allElements.find(el => el.id === elementId);
     const isMultiple = element?.surveyConfig?.multipleSelection ?? true;
 
@@ -386,7 +412,26 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const noneIds = options.filter(o => this.isNoneOption(o.label)).map(o => o.value);
-    this.catalogSurveyService.saveAnswer(elementId, currentIds, options.length, noneIds);
+
+    // ✅ Obtener el catalogType del survey (está en surveyConfig)
+    const catalogType = element?.surveyConfig?.catalogType;
+
+    // ✅ Labels de las opciones seleccionadas (para el score especial)
+    const selectedLabelsForScore = options
+      .filter(o => currentIds.some(id => String(id) === String(o.value)))
+      .map(o => o.label);
+
+    // ✅ Si el catálogo tiene puntaje especial, calcularlo (undefined si no aplica)
+    const scoreEspecial = this.calcularScoreEspecial(catalogType, selectedLabelsForScore);
+
+    // ✅ Guardar la respuesta con el score (especial o proporcional)
+    this.catalogSurveyService.saveAnswer(
+      elementId,
+      currentIds,
+      options.length,
+      noneIds,
+      scoreEspecial
+    );
 
     // ✅ Sincronizar en formResponses y userResponses
     const selectedOpts = options.filter(o => currentIds.some(id => String(id) === String(o.value)));
@@ -399,6 +444,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
 
     this.onElementChange(elementId);
   }
+
   getCatalogQuestionScore(elementId: string): number {
     return this.catalogSurveyService.getScore(elementId);
   }
@@ -411,7 +457,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getSubtotalScoreById(fieldId: string): number {
-    const allElements = this.formDefinition?.regions.flatMap(r => r.elements) || [];
+    const allElements = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
     const element = allElements.find(el => el.id === fieldId);
     if (!element) return 0;
 
@@ -448,7 +494,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   // =================== SURVEY: MANUAL ===================
 
   getLinkedFieldLabel(fieldId: string): string {
-    const allElements = this.formDefinition?.regions.flatMap(r => r.elements) || [];
+    const allElements = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
     return allElements.find(el => el.id === fieldId)?.label || fieldId;
   }
 
@@ -470,54 +516,42 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     if (!this.formDefinition) return;
 
     // Contar cuántos catálogos hay para saber cuándo terminan todos
-    const elementsWithCatalog = this.formDefinition.regions
-      .flatMap(r => r.elements)
+    const elementsWithCatalog = this.getAllElementsFlat(this.formDefinition.regions)
       .filter(el => el.catalogType != null);
 
     if (elementsWithCatalog.length === 0) return;
 
     let loaded = 0;
 
-    this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
-        if (!element.catalogType) return;
-
-        this.catalogService.getCatalogData(Number(element.catalogType)).subscribe({
-          next: (catalogData) => {
-            let options = catalogData.map(item => ({
-              value: item.id,
-              label: item.nombre
-            }));
-
-            const hasSpecificOptions =
-              (element as any).enableSpecificOptions === true &&
-              Array.isArray(element.selectedOptions) &&
-              element.selectedOptions.length > 0;
-
-            if (hasSpecificOptions) {
-              const allowedIds = element.selectedOptions.map(id => String(id));
-              options = options.filter(opt => allowedIds.includes(String(opt.value)));
-            }
-
-            this.cascadeOptions.set(element.id, options);
-            loaded++;
-
-            // ✅ Re-evaluar acciones cuando TODOS los catálogos hayan cargado
-            if (loaded === elementsWithCatalog.length) {
-              this.evaluateAllActions();
-              this.cdr.markForCheck();
-            }
-          },
-          error: () => {
-            loaded++;
-            if (loaded === elementsWithCatalog.length) {
-              this.evaluateAllActions();
-              this.cdr.markForCheck();
-            }
+    elementsWithCatalog.forEach(element => {
+      this.catalogService.getCatalogData(Number(element.catalogType)).subscribe({
+        next: (catalogData) => {
+          let options = catalogData.map(item => ({ value: item.id, label: item.nombre }));
+          const hasSpecificOptions =
+            (element as any).enableSpecificOptions === true &&
+            Array.isArray(element.selectedOptions) &&
+            element.selectedOptions.length > 0;
+          if (hasSpecificOptions) {
+            const allowedIds = element.selectedOptions.map(id => String(id));
+            options = options.filter(opt => allowedIds.includes(String(opt.value)));
           }
-        });
+          this.cascadeOptions.set(element.id, options);
+          loaded++;
+          if (loaded === elementsWithCatalog.length) {
+            this.evaluateAllActions();
+            this.cdr.markForCheck();
+          }
+        },
+        error: () => {
+          loaded++;
+          if (loaded === elementsWithCatalog.length) {
+            this.evaluateAllActions();
+            this.cdr.markForCheck();
+          }
+        }
       });
     });
+
   }
 
   isNoneOption(label: string): boolean {
@@ -532,8 +566,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
 
     // ✅ Buscar en cascadeOptions o en opciones manuales
     const catalogOptions = this.cascadeOptions.get(elementId) || [];
-    const element = this.formDefinition?.regions
-      .flatMap(r => r.elements)
+    const element = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
       .find(e => e.id === elementId);
     const options = catalogOptions.length > 0
       ? catalogOptions
@@ -544,14 +577,14 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
       return selectedOption && this.isNoneOption(selectedOption.label);
     });
   }
+
   onCheckboxChange(elementId: string, value: string | number, checked: boolean, optionLabel: string): void {
 
     if (!Array.isArray(this.formResponses[elementId])) {
       this.formResponses[elementId] = [];
     }
 
-    const element = this.formDefinition?.regions
-      .flatMap(r => r.elements)
+    const element = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
       .find(e => e.id === elementId);
 
     const isMultiple = element?.multipleSelecction !== false; // default: múltiple
@@ -580,8 +613,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
           );
         } else {
           // ✅ Para opciones manuales sin catálogo, buscar en getSelectOptions
-          const element = this.formDefinition?.regions
-            .flatMap(r => r.elements)
+          const element = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
             .find(e => e.id === elementId);
           const manualOptions = element ? this.getSelectOptions(element) : [];
 
@@ -651,8 +683,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   private filterCascadeOptions(elementId: string): void {
     if (!this.formDefinition) return;
 
-    const element = this.formDefinition.regions
-      .flatMap(r => r.elements)
+    const element = this.getAllElementsFlat(this.formDefinition.regions)
       .find(e => e.id === elementId);
 
     if (!element) return;
@@ -770,7 +801,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     this.repeatingRegions.clear();
     this.regionRepetitions = [];
 
-    this.formDefinition.regions.forEach((region) => {
+    const processRootRegion = (region: FormRegion) => {
       if (region.repeatConfig && (region.repeatConfig as any).enabled) {
         const triggerFieldId = (region.repeatConfig as any).triggerFieldId;
         const currentValue = this.formResponses[triggerFieldId] || 0;
@@ -784,7 +815,18 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
             regionId: region.id,
             title: `${region.title} #${i}`
           });
-          // ✅ NO agregar a visibleElements aquí
+
+          // 👇 Agregar subregiones por cada repetición del padre
+          region.children.forEach(child => {
+            if ((child as FormRegion).type === 'region') {
+              const subRegion = child as FormRegion;
+              this.regionRepetitions.push({
+                index: i,
+                regionId: subRegion.id,
+                title: `${subRegion.title} #${i}`
+              });
+            }
+          });
         }
       } else {
         this.regionRepetitions.push({
@@ -792,10 +834,11 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
           regionId: region.id,
           title: region.title
         });
+        // subregiones sin repetición se renderizan inline
       }
-    });
+    };
 
-    // ✅ Evaluar TODO después de tener el mapa de repeticiones actualizado
+    this.formDefinition.regions.forEach(region => processRootRegion(region));
     this.evaluateAllActions();
   }
   /**
@@ -803,14 +846,19 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
    */
   getRegionById(regionId: string): FormRegion | undefined {
     if (!this.formDefinition) return undefined;
-    return this.formDefinition.regions.find(r => r.id === regionId);
+    const found = this.getAllRegionsFlat(this.formDefinition.regions)
+      .find(r => r.id === regionId);
+    return found ?? undefined;
   }
 
   /**
    * Obtener elementos de una región específica
    */
+  // temporal en getRegionElements
   getRegionElements(region: FormRegion): FormElement[] {
-    return region.elements;
+    return region.children.filter(
+      c => (c as FormRegion).type !== 'region'
+    ) as FormElement[];
   }
 
   /**
@@ -832,45 +880,120 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
 
   private evaluateAllActions(): void {
     if (!this.formDefinition) return;
-
     this.visibleElements.clear();
 
-    // PASO 1: Regiones sin acciones visibles por defecto
-    this.formDefinition.regions.forEach(region => {
-      if (!region.actions || region.actions.length === 0) {
-        this.visibleElements.add(region.id);
+    const allRegions = this.getAllRegionsFlat(this.formDefinition.regions);
+
+    // PASO 1: Visibilidad por defecto
+    allRegions.forEach(region => {
+      const hasActions = region.actions && region.actions.length > 0;
+
+      if (!hasActions) {
+        if (region.parentRegionId) {
+          // Subregión sin acciones: visible por cada rep del padre
+          const parentReps = this.repeatingRegions.get(region.parentRegionId) || 0;
+          if (parentReps === 0) {
+            this.visibleElements.add(region.id);
+          } else {
+            for (let i = 1; i <= parentReps; i++) {
+              this.visibleElements.add(this.getElementIdForRepetition(region.id, i));
+            }
+          }
+        } else {
+          // Región raíz sin acciones: siempre visible
+          this.visibleElements.add(region.id);
+        }
+      }
+    });
+
+    // Regiones repetibles: agregar rep1, rep2... como visibles
+    this.repeatingRegions.forEach((numReps, regionId) => {
+      for (let i = 1; i <= numReps; i++) {
+        this.visibleElements.add(this.getElementIdForRepetition(regionId, i));
       }
     });
 
     // PASO 2: Evaluar acciones de REGIONES
-    this.formDefinition.regions.forEach(region => {
-      if (region.actions && region.actions.length > 0) {
-        if (region.actions.length > 1) {
-          const operator = (region as any).actionsOperator || 'AND';
-          const results = region.actions.map(action => this.evaluateActionCondition(action));
-          const shouldShow = operator === 'OR'
-            ? results.some(r => r)
-            : results.every(r => r);
-          this.applyActionResult(shouldShow, region.id, 'region');
-        } else {
-          this.evaluateAction(region.actions[0], region.id, 'region');
+    allRegions.forEach(region => {
+      if (!region.actions || region.actions.length === 0) return;
+
+      const parentReps = region.parentRegionId
+        ? (this.repeatingRegions.get(region.parentRegionId) || 0)
+        : 0;
+
+      const evaluateForRep = (repIndex: number) => {
+        const resolvedActions = region.actions.map(action => ({
+          ...action,
+          triggerField: repIndex > 0
+            ? this.getElementIdForRepetition(action.triggerField, repIndex)
+            : action.triggerField
+        }));
+
+        const shouldShow = region.actions.length > 1
+          ? (() => {
+            const operator = (region as any).actionsOperator || 'AND';
+            const results = resolvedActions.map(a => this.evaluateActionCondition(a));
+            return operator === 'OR'
+              ? results.some(r => r)
+              : results.every(r => r);
+          })()
+          : this.evaluateActionCondition(resolvedActions[0]);
+
+        const regionId = repIndex > 0
+          ? this.getElementIdForRepetition(region.id, repIndex)
+          : region.id;
+
+        this.applyActionResult(shouldShow, regionId, 'region');
+      };
+
+      if (parentReps === 0) {
+        evaluateForRep(0);
+      } else {
+        for (let i = 1; i <= parentReps; i++) {
+          evaluateForRep(i);
         }
       }
     });
 
     // PASO 3: Elementos sin acciones visibles por defecto
-    this.formDefinition.regions.forEach(region => {
-      if (!this.visibleElements.has(region.id)) return;
+    allRegions.forEach(region => {
+      // Determinar qué IDs de región están visibles
+      const parentReps = region.parentRegionId
+        ? (this.repeatingRegions.get(region.parentRegionId) || 0)
+        : 0;
+      const ownReps = this.repeatingRegions.get(region.id) || 0;
 
-      region.elements.forEach(element => {
+      const getRegionVisibleIds = (): string[] => {
+        if (ownReps > 0) {
+          // Región repetible: sus reps son las visibles
+          return Array.from({ length: ownReps }, (_, i) =>
+            this.getElementIdForRepetition(region.id, i + 1)
+          ).filter(id => this.visibleElements.has(id));
+        } else if (parentReps > 0) {
+          // Subregión de repetible
+          return Array.from({ length: parentReps }, (_, i) =>
+            this.getElementIdForRepetition(region.id, i + 1)
+          ).filter(id => this.visibleElements.has(id));
+        } else {
+          return this.visibleElements.has(region.id) ? [region.id] : [];
+        }
+      };
+
+      const visibleRegionIds = getRegionVisibleIds();
+      if (visibleRegionIds.length === 0) return;
+
+      // Determinar repeticiones para los elementos
+      const elementReps = ownReps > 0 ? ownReps
+        : parentReps > 0 ? parentReps
+          : 0;
+
+      this.getElements(region).forEach(element => {
         const isResultField = element.type === 'survey' &&
           element.surveyConfig?.mode === 'result';
         if (!element.actions || element.actions.length === 0) {
           if (!isResultField) {
-            // ✅ Agregar tanto el ID base como todos los IDs de repetición
             this.visibleElements.add(element.id);
-            const repetitions = this.repeatingRegions.get(region.id) || 0;
-            for (let i = 1; i <= repetitions; i++) {
+            for (let i = 1; i <= elementReps; i++) {
               this.visibleElements.add(this.getElementIdForRepetition(element.id, i));
             }
           }
@@ -878,18 +1001,19 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    // PASO 4: Evaluar acciones de ELEMENTOS (incluyendo repeticiones)
-    this.formDefinition.regions.forEach(region => {
-      const repetitions = this.repeatingRegions.get(region.id) || 0;
+    // PASO 4: Evaluar acciones de ELEMENTOS
+    allRegions.forEach(region => {
+      const ownReps = this.repeatingRegions.get(region.id) || 0;
+      const parentReps = region.parentRegionId
+        ? (this.repeatingRegions.get(region.parentRegionId) || 0)
+        : 0;
+      const repetitions = ownReps > 0 ? ownReps : parentReps;
 
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         if (!element.actions || element.actions.length === 0) return;
-
-        // ✅ Evaluar para el índice 0 (región no repetida)
         if (repetitions === 0) {
           this.evaluateElementActions(element, 0);
         } else {
-          // ✅ Evaluar para cada repetición
           for (let i = 1; i <= repetitions; i++) {
             this.evaluateElementActions(element, i);
           }
@@ -946,7 +1070,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   private evaluateActionCondition(action: any): boolean {
     let triggerValue = this.formResponses[action.triggerField];
 
-    const allElements = this.formDefinition?.regions.flatMap(r => r.elements) || [];
+    const allElements = this.getAllElementsFlat(this.formDefinition?.regions ?? []);
     const triggerElement = allElements.find(el => el.id === action.triggerField);
 
     if (triggerElement?.type === 'survey' &&
@@ -1079,6 +1203,29 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
         conditionMet = !result.error && result.result !== 0;
         break;
       }
+      case 'show_if_any_of':
+      case 'hide_if_any_of': {
+        let values: (string | number)[] = [];
+        try { values = JSON.parse(actionValue); } catch { values = []; }
+        const current = Array.isArray(triggerValue) ? triggerValue : [String(triggerValue)];
+        // ✅ Se cumple si AL MENOS UNO de los valores requeridos está en el trigger
+        conditionMet = values.some(required =>
+          current.some(selected => String(selected) === String(required))
+        );
+        break;
+      }
+
+      case 'show_if_all_of':
+      case 'hide_if_all_of': {
+        let values: (string | number)[] = [];
+        try { values = JSON.parse(actionValue); } catch { values = []; }
+        const current = Array.isArray(triggerValue) ? triggerValue : [String(triggerValue)];
+        // ✅ Se cumple si TODOS los valores requeridos están en el trigger
+        conditionMet = values.every(required =>
+          current.some(selected => String(selected) === String(required))
+        );
+        break;
+      }
       default:
         conditionMet = false;
     }
@@ -1099,12 +1246,12 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
       this.visibleElements.delete(elementId);
 
       if (targetType === 'region' && this.formDefinition) {
-        const region = this.formDefinition.regions.find(r => r.id === elementId);
+        const allRegions = this.getAllRegionsFlat(this.formDefinition.regions);
+        const region = allRegions.find(r => r.id === elementId);
         if (region) {
-          region.elements.forEach(el => {
+          this.getElements(region).forEach(el => {
             if (!this.isElementATrigger(el.id)) {
               this.visibleElements.delete(el.id);
-              // ✅ Respetar el tipo al limpiar
               if (el.type === 'checkbox' && el.multipleSelecction) {
                 this.formResponses[el.id] = [];
               } else {
@@ -1113,11 +1260,11 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
             }
           });
         }
-      } else if (targetType === 'element') {
+      }
+      else if (targetType === 'element') {
         if (!this.isElementATrigger(elementId)) {
           // ✅ Buscar el elemento para saber su tipo
-          const el = this.formDefinition?.regions
-            .flatMap(r => r.elements)
+          const el = this.getAllElementsFlat(this.formDefinition?.regions ?? [])
             .find(e => e.id === elementId);
           if (el?.type === 'checkbox' && el?.multipleSelecction) {
             this.formResponses[elementId] = [];
@@ -1132,12 +1279,10 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   // ✅ NUEVO: Verificar si un elemento es trigger de alguna acción
   private isElementATrigger(elementId: string): boolean {
     if (!this.formDefinition) return false;
-
-    for (const region of this.formDefinition.regions) {
-      // Verificar acciones de la región
+    const allRegions = this.getAllRegionsFlat(this.formDefinition.regions);
+    for (const region of allRegions) {
       if (region.actions?.some(a => a.triggerField === elementId)) return true;
-      // Verificar acciones de cada elemento
-      for (const element of region.elements) {
+      for (const element of this.getElements(region)) {
         if (element.actions?.some(a => a.triggerField === elementId)) return true;
       }
     }
@@ -1151,14 +1296,12 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     if (!this.formDefinition) return;
 
     this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         const isResultField = element.type === 'survey' && element.surveyConfig?.mode === 'result';
-
         if (isResultField && element.surveyConfig?.linkedFieldIds) {
           const hasLinkedResponse = element.surveyConfig.linkedFieldIds.some(
             linkedId => this.formResponses[linkedId]
           );
-
           if (hasLinkedResponse) {
             this.visibleElements.add(element.id);
           } else {
@@ -1177,7 +1320,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     // ✅ Cascadas van inmediato (afectan opciones visibles)
     if (this.formDefinition) {
       this.formDefinition.regions.forEach(region => {
-        region.elements.forEach(element => {
+        this.getElements(region).forEach(element => {
           const cascadeConfig = (element as any).cascadeConfig;
           if (cascadeConfig && cascadeConfig.triggerFieldId === elementId) {
             this.filterCascadeOptions(element.id);
@@ -1258,15 +1401,17 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
       const region = this.getRegionById(regionRepeat.regionId);
       if (!region || !this.isElementVisible(region.id)) continue;
 
-      for (const element of region.elements) {
+      for (const element of this.getElements(region)) {
         const elementId = this.getElementIdForRepetition(element.id, regionRepeat.index);
-        if (!this.isElementVisible(element.id)) continue;
+        if (!this.isElementVisible(elementId)) continue;
 
         const value = this.formResponses[elementId];
         const isEmpty = value === null || value === undefined || value === '' ||
           (Array.isArray(value) && value.length === 0);
 
         if (element.required && isEmpty) {
+          if (element.type === 'coordinates') continue;
+
           this.fieldErrors.set(elementId, `El campo "${element.label}" es obligatorio`);
           continue; // ✅ No return, seguir validando
         }
@@ -1410,18 +1555,23 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
    * Enviar formulario
    */
   onSubmit(): void {
+    const isValid = this.validateForm();
+    if (!isValid) return;
+
+
     if (!this.validateForm()) return;
 
     // ✅ Consolidar respuestas de survey
     this.formDefinition?.regions.forEach(region => {
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         if (element.type !== 'survey' || !element.surveyConfig) return;
         const mode = element.surveyConfig.mode;
         if (mode === 'catalog_question') {
-          this.formResponses[element.id] = {
-            selectedIds: this.catalogSurveyService.getSelectedIds(element.id),
-            score: this.catalogSurveyService.getScore(element.id)
-          };
+          const selectedIds = this.catalogSurveyService.getSelectedIds(element.id);
+          const score = this.catalogSurveyService.getScore(element.id);
+
+          this.formResponses[element.id] = { selectedIds, score };
+          this.formResponses[`__catalog__${element.id}`] = { selectedIds, score };
         } else if (mode === 'catalog_subtotal') {
           // ✅ Si tiene fórmula custom, usar el resultado de la fórmula
           if (this.isFormulaField(element)) {
@@ -1432,16 +1582,17 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
         } else if (mode === 'catalog_stars') {
           this.formResponses[element.id] = this.getStarsScore(element);
         }
-        // else if (mode === 'question') {
-        //   this.formResponses[element.id] = this.surveyAnswersService.getSurveyAnswer(element.id);
-        // }
       });
-    });
 
+    });
     if (this.data.mode === 'edit' && this.data.id_respuesta) {
       this.formResponseService.updateResponse(
         this.data.id_respuesta,
-        this.formResponses
+        {
+          datos: this.formResponses,
+          visibleElements: Array.from(this.visibleElements),
+          id_formulario: this.data.formKey,
+        }
       ).subscribe({
         next: (response) => {
           if (response.success) {
@@ -1451,7 +1602,8 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
         },
         error: () => this.showSnackBar('❌ Error al actualizar', 'error')
       });
-    } else {
+    }
+    else {
 
       // ✅ Construir payload completo
       const payload = {
@@ -1463,6 +1615,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
         },
         visibleElements: Array.from(this.visibleElements) // Set -> Array
       };
+
 
       // ✅ Llamar al servicio
       this.formResponseService.saveFormResponse(payload).subscribe({
@@ -1540,22 +1693,23 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Helper para identificar si es campo CUI por fieldRole
+  // En fill-form-modal.ts temporalmente
   isCuiField(element: FormElement): boolean {
-    return (element as any).fieldRole === 'cui' ||
+    const result = (element as any).fieldRole === 'cui' ||
       (element as any).fieldRole === 'cui_madre';
+    return result;
   }
 
   onCuiFocus(elementId: string, region: FormRegion): void {
     const cui = this.formResponses[elementId] || '';
-    console.log(cui);
     if (cui.length !== 13 && cui.length !== 15) return;
 
-    const fieldRole = region.elements.find(e => e.id === elementId)?.fieldRole;
+    const fieldRole = this.getElements(region).find(e => e.id === elementId)?.fieldRole;
     const isMadre = fieldRole === 'cui_madre';
     if (!isMadre) {
       this.formResponseService.getPersonaByCui(cui).subscribe({
         next: (persona) => {
-          region.elements.forEach(element => {
+          this.getElements(region).forEach(element => {
             const role = (element as any).fieldRole;
             if (!role) return;
 
@@ -1630,7 +1784,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
 
     // ✅ Primera pasada: evaluar fórmulas que dependen del campo cambiado
     this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         if (!element.formulas?.length) return;
 
         element.formulas.forEach(formula => {
@@ -1661,7 +1815,8 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
             updatedFields.push(element.id);
           }
         });
-      });
+      })
+
     });
 
     // ✅ Segunda pasada: evaluar fórmulas que dependen de campos recién calculados
@@ -1669,7 +1824,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
       if (updatedId === changedElementId) return; // ya procesado
 
       this.formDefinition!.regions.forEach(region => {
-        region.elements.forEach(element => {
+        this.getElements(region).forEach(element => {
           if (!element.formulas?.length) return;
 
           element.formulas.forEach(formula => {
@@ -1703,7 +1858,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
 
     // ✅ Tercera pasada: recalcular campos catalog_stars que usen campos actualizados
     this.formDefinition!.regions.forEach(region => {
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         if (element.surveyConfig?.mode !== 'catalog_stars') return;
         const linkedIds = element.surveyConfig?.linkedFieldIds || [];
         const dependsOnUpdated = linkedIds.some(id => updatedFields.includes(id));
@@ -1720,7 +1875,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
     if (!this.formDefinition) return;
 
     this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
+      this.getElements(region).forEach(element => {
         if (!element.formulas?.length) return;
 
         element.formulas.forEach(formula => {
@@ -1733,7 +1888,7 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
           this.formResponses[element.id] = result.value;
           this.formulaResults.set(element.id, result.formattedValue);
         });
-      });
+      })
     });
 
     this.cdr.markForCheck();
@@ -1746,4 +1901,296 @@ export class FillFormModal implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
+  // ══════════════════════════════════════════
+  // CÓDIGO TEMPORAL
+  // ══════════════════════════════════════════
+
+  isTempCodeField(element: FormElement): boolean {
+    return (element as any).generateTempCode === true;
+  }
+
+  getCodigoGenerado(elementId: string): string {
+    return this.codigosGenerados.get(elementId) || '';
+  }
+
+  fueCopiadoElCodigo(elementId: string): boolean {
+    return this.codigoCopiado.get(elementId) || false;
+  }
+
+  onGenerarCodigo(element: FormElement, elementId: string): void {
+    // Obtener nombres y apellidos de la misma región
+    const region = this.formDefinition?.regions
+      .find(r => this.getElements(r).some(e => e.id === element.id));
+
+    if (!region) return;
+
+    const getNombreField = (fieldRole: string, repIndex: number): string => {
+      const el = this.getElements(region).find((e: any) => e.fieldRole === fieldRole);
+      if (!el) return '';
+      const id = repIndex > 0 ? `${el.id}_rep${repIndex}` : el.id;
+      return this.formResponses[id] || '';
+    };
+
+    // Detectar si es repetición
+    const repMatch = elementId.match(/_rep(\d+)$/);
+    const repIndex = repMatch ? parseInt(repMatch[1]) : 0;
+
+    const nombres = getNombreField('nombres', repIndex);
+    const apellidos = getNombreField('apellidos', repIndex);
+
+    // Obtener id_comunidad de las respuestas
+    const id_comunidad = this.getComunidadFromResponses();
+
+    // Obtener fecha de inscripción
+    const fechaEl = this.getElements(region).find(
+      (e: any) => e.fieldRole === 'fecha_ingreso_programa'
+    );
+    const fechaId = fechaEl
+      ? (repIndex > 0 ? `${fechaEl.id}_rep${repIndex}` : fechaEl.id)
+      : null;
+
+    let fecha_inscripcion = fechaId
+      ? this.formResponses[fechaId]
+      : null;
+
+    // Si no tiene fecha de inscripción usar la fecha actual
+    if (!fecha_inscripcion) {
+      fecha_inscripcion = new Date().toISOString().split('T')[0];
+    } else if (fecha_inscripcion instanceof Date) {
+      fecha_inscripcion = fecha_inscripcion.toISOString().split('T')[0];
+    } else if (typeof fecha_inscripcion === 'object' &&
+      typeof fecha_inscripcion.format === 'function') {
+      fecha_inscripcion = fecha_inscripcion.format('YYYY-MM-DD');
+    }
+
+    if (!nombres || !apellidos) {
+      this.showSnackBar(
+        'Ingresa nombres y apellidos antes de generar el código',
+        'error'
+      );
+      return;
+    }
+
+    if (!id_comunidad) {
+      this.showSnackBar(
+        'Selecciona la comunidad antes de generar el código',
+        'error'
+      );
+      return;
+    }
+
+    this.familiaService.generarCodigoTemporal({
+      nombres,
+      apellidos,
+      id_comunidad,
+      fecha_inscripcion
+    }).subscribe({
+      next: (res) => {
+        const codigo = res.data.codigo;
+        this.codigosGenerados.set(elementId, codigo);
+        this.formResponses[elementId] = codigo;
+        this.codigoCopiado.set(elementId, false);
+        this.onElementChange(elementId);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.showSnackBar('Error al generar el código', 'error');
+      }
+    });
+  }
+
+  onCopiarCodigo(elementId: string): void {
+    const codigo = this.codigosGenerados.get(elementId) ||
+      this.formResponses[elementId];
+    if (!codigo) return;
+
+    navigator.clipboard.writeText(codigo).then(() => {
+      this.codigoCopiado.set(elementId, true);
+      this.cdr.markForCheck();
+
+      // Resetear el ícono de copiado después de 2 segundos
+      setTimeout(() => {
+        this.codigoCopiado.set(elementId, false);
+        this.cdr.markForCheck();
+      }, 2000);
+    });
+  }
+
+  private getComunidadFromResponses(): number | null {
+    if (!this.formDefinition) return null;
+
+    for (const region of this.formDefinition.regions) {
+      for (const element of this.getElements(region)) {
+        const catalogType = (element as any).catalogType;
+        if (!catalogType) continue;
+
+        // Buscar el elemento que tenga cascadeConfig nulo y
+        // sea el campo de comunidad por su catalogType
+        const valor = this.formResponses[element.id];
+        if (!valor) continue;
+
+        // Verificar si este catálogo es de comunidad
+        const opciones = this.cascadeOptions.get(element.id);
+        if (opciones && element.catalogType) {
+          // Si tiene valor y es un select de catálogo, asumir que puede ser comunidad
+          // El campo comunidad tiene cascadeConfig con filterKey: 'id_departamento'
+          const cascadeConfig = (element as any).cascadeConfig;
+          if (cascadeConfig?.filterKey === 'id_departamento') {
+            return Number(valor);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  isRegionMadre(regionId: string) {
+    return regionId == REGION_MADRE;
+  }
+
+  //Detectar si la imagen viene del servidor
+  isServerImage(value: any): boolean {
+    return typeof value === 'string' &&
+      (value.startsWith('/uploads/') || value.startsWith('/public/'));
+  }
+
+  //Construir URL completa del servidor
+  getServerImageUrl(ruta: string): string {
+    const base = environment.BASE_URL.replace('/api/v1', '');
+    return `${base}${ruta}`;
+  }
+
+  onSelectChange(elementId: string): void {
+    this.onElementChange(elementId);
+    this.cdr.markForCheck(); // ✅ refresco inmediato de la UI
+  }
+
+  //Comparar valores del select normalizando tipos (número vs string)
+  compareSelectValues(a: any, b: any): boolean {
+    if (a === null || a === undefined || b === null || b === undefined) {
+      return a === b;
+    }
+    return String(a) === String(b);
+  }
+
+  // Puntajes especiales por catalogType y label (escala 0-1)
+  private readonly puntajesEspeciales: Record<string, Record<string, number>> = {
+    '66': {
+      'bueno': 1.0,   // → 100
+      'regular': 0.5,   // → 50
+      'malo': 0.0,   // → 0
+    }
+  };
+
+  // ✅ Calcular score especial por label si el catálogo lo tiene configurado
+  private calcularScoreEspecial(
+    catalogType: string | null | undefined,
+    selectedLabels: string[]
+  ): number | undefined {
+    if (!catalogType) return undefined;
+    const mapa = this.puntajesEspeciales[String(catalogType)];
+    if (!mapa) return undefined;
+
+    // ✅ Tomar el primero seleccionado (selección única) y normalizar el label
+    if (selectedLabels.length === 0) return 0;
+
+    const label = selectedLabels[0]
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+
+    return mapa[label] ?? 0;
+  }
+
+  private getElements(region: FormRegion): FormElement[] {
+    return region.children.filter(
+      c => (c as FormRegion).type !== 'region'
+    ) as FormElement[];
+  }
+
+  private getSubRegions(region: FormRegion): FormRegion[] {
+    return region.children.filter(
+      c => (c as FormRegion).type === 'region'
+    ) as FormRegion[];
+  }
+
+  private getAllElementsFlat(regions: FormRegion[]): FormElement[] {
+    return regions.flatMap(r => [
+      ...this.getElements(r),
+      ...this.getAllElementsFlat(this.getSubRegions(r))
+    ]);
+  }
+
+  private getAllRegionsFlat(regions: FormRegion[]): FormRegion[] {
+    return regions.flatMap(r => [
+      r,
+      ...this.getAllRegionsFlat(
+        r.children.filter(c => (c as FormRegion).type === 'region') as FormRegion[]
+      )
+    ]);
+  }
+
+
+  // ══════════════════════════════════════════
+  // EVALUATION TABLE
+  // ══════════════════════════════════════════
+
+  getTableResponse(elementId: string, rowId: string, groupId: string): any {
+    const value = this.formResponses[`${elementId}_${rowId}_${groupId}`];
+    return value;
+  }
+
+  setTableSingleResponse(elementId: string, rowId: string, groupId: string, colId: string): void {
+    this.formResponses[`${elementId}_${rowId}_${groupId}`] = colId;
+    this.onElementChange(elementId);
+  }
+
+  getTableMultipleResponse(elementId: string, rowId: string, colId: string): boolean {
+    return !!this.formResponses[`${elementId}_${rowId}_${colId}`];
+  }
+
+  setTableMultipleResponse(elementId: string, rowId: string, colId: string, checked: boolean): void {
+    this.formResponses[`${elementId}_${rowId}_${colId}`] = checked;
+    this.onElementChange(elementId);
+  }
+
+  getTableGlobalResponse(elementId: string, rowId: string): any {
+    return this.formResponses[`${elementId}_${rowId}`];
+  }
+
+  setTableGlobalResponse(elementId: string, rowId: string, colId: string): void {
+    this.formResponses[`${elementId}_${rowId}`] = colId;
+    this.onElementChange(elementId);
+  }
+
+  getTotalColumns(element: FormElement): number {
+    const config = element.evaluationTableConfig;
+    if (!config) return 0;
+    return config.columnGroups.reduce((total, g) => total + g.columns.length, 0);
+  }
+
+  getRegionChildrenOrdered(region: FormRegion): { type: 'element' | 'region', data: FormElement | FormRegion }[] {
+    return region.children.map(child => ({
+      type: (child as FormRegion).type === 'region' ? 'region' : 'element',
+      data: child
+    }));
+  }
+
+  isChildRegion(child: FormElement | FormRegion): boolean {
+    return (child as FormRegion).type === 'region';
+  }
+
+  asRegion(child: FormElement | FormRegion): FormRegion {
+    return child as FormRegion;
+  }
+
+  asElement(child: FormElement | FormRegion): FormElement {
+    return child as FormElement;
+  }
+
+  isParentRepeating(region: FormRegion): boolean {
+    const repeatConfig = (region as any).repeatConfig;
+    return repeatConfig?.enabled === true;
+  }
 }

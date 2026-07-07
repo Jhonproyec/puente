@@ -11,6 +11,7 @@ import { Router } from "@angular/router";
 export class AuthService {
   private readonly BASE_URL = environment.BASE_URL;
 
+
   currentUser = signal<User | null>(null);
   forms = signal<FormSession[]>([]);
   isLoggedIn = computed(() => this.currentUser() !== null);

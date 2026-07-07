@@ -15,5 +15,6 @@ export interface UserProfileInterface{
   comunidades?: any;
   access_global: boolean;
   email: string;
+  dpi: string | null;
 }
 

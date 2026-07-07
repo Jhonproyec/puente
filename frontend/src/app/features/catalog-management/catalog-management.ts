@@ -128,14 +128,16 @@ export class CatalogManagement {
 
     this.catalogService.getAvailableCatalogs().subscribe({
       next: (catalogs) => {
-        this.catalogs = catalogs.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          isLoading: false,
-          isExpanded: false,
-          items: [],
-          count: cat.totalItems,
-        }));
+        this.catalogs = catalogs
+          .filter(cat => cat.name !== 'Centro Nútreme' && cat.name !== 'Usuarios') // ocultar del mantenimiento
+          .map(cat => ({
+            id: cat.id,
+            name: cat.name,
+            isLoading: false,
+            isExpanded: false,
+            items: [],
+            count: cat.totalItems,
+          }));
 
         this.isLoadingCatalogs = false;
         this.cdr.markForCheck();
@@ -431,8 +433,8 @@ export class CatalogManagement {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        this.notificationService.showError('Error al guardar el item');
-        console.error(error);
+        this.notificationService.showError(error?.message ?? 'Error al guardar el item');
+        this.isSaving.set(false);
       },
       complete: () => this.isSaving.set(false)
     });

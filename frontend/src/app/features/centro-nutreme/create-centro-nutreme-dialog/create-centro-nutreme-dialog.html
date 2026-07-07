@@ -1,0 +1,140 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon class="header-icon">add_location_alt</mat-icon>
+      {{ isEditMode ? 'Editar Centro Nútreme' : 'Agregar Centro Nútreme' }}
+    </h2>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    @if(isLoadingForm()) {
+    <div class="loading-form">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando datos...</p>
+    </div>
+    } @else {
+    <form [formGroup]="form" class="centro-form">
+
+      <!-- Código y Nombre -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="codigo" placeholder="Ej: CN-001">
+          <mat-error>{{ getFieldError('codigo') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Nombre del Centro</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Centro Nútreme Norte">
+          <mat-error>{{ getFieldError('nombre') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Departamento -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Departamento</mat-label>
+          <mat-select formControlName="id_departamento">
+            <mat-option>
+              <ngx-mat-select-search
+                [formControl]="departamentoFilterCtrl"
+                placeholderLabel="Buscar departamento..."
+                noEntriesFoundLabel="No se encontraron resultados">
+              </ngx-mat-select-search>
+            </mat-option>
+            @for(depto of filteredDepartamentos | async; track depto.id) {
+            <mat-option [value]="depto.id">{{ depto.nombre }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ getFieldError('id_departamento') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Comunidad -->
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Comunidad</mat-label>
+          <mat-select formControlName="id_comunidad">
+            <mat-option>
+              <ngx-mat-select-search
+                [formControl]="comunidadFilterCtrl"
+                placeholderLabel="Buscar comunidad..."
+                noEntriesFoundLabel="No se encontraron resultados">
+              </ngx-mat-select-search>
+            </mat-option>
+            @if(isLoadingComunidades()) {
+            <mat-option disabled>
+              <mat-spinner diameter="16"></mat-spinner>
+              Cargando...
+            </mat-option>
+            } @else if(!form.get('id_departamento')?.value) {
+            <mat-option disabled>Selecciona un departamento primero</mat-option>
+            } @else {
+            @for(com of filteredComunidades | async; track com.id) {
+            <mat-option [value]="com.id">{{ com.nombre }}</mat-option>
+            }
+            }
+          </mat-select>
+          <mat-error>{{ getFieldError('id_comunidad') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Personal a cargo -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Personal a cargo</mat-label>
+          <mat-select formControlName="id_usuario">
+            <mat-option>
+              <ngx-mat-select-search
+                [formControl]="usuarioFilterCtrl"
+                placeholderLabel="Buscar usuario..."
+                noEntriesFoundLabel="No se encontraron resultados">
+              </ngx-mat-select-search>
+            </mat-option>
+            <mat-option [value]="null">— Sin asignar —</mat-option>
+            @for(usuario of filteredUsuarios | async; track usuario.idUser) {
+            <mat-option [value]="usuario.idUser">
+              {{ getNombreUsuario(usuario) }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Coordenadas GPS -->
+        <!-- <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Coordenadas GPS</mat-label>
+          <input matInput formControlName="coordenadas" placeholder="Ej: 14.6407, -90.5133">
+          <mat-icon matSuffix>gps_fixed</mat-icon>
+          <mat-hint>Formato: latitud, longitud</mat-hint>
+        </mat-form-field> -->
+      </div>
+
+      @if(error()) {
+      <div class="error-message">
+        <mat-icon>error</mat-icon>
+        {{ error() }}
+      </div>
+      }
+
+    </form>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()" class="btn-cancel btn">
+      Cancelar
+    </button>
+    <button mat-raised-button class="btn btn-primary" (click)="onSubmit()"
+      [disabled]="form.invalid || isLoading()">
+      @if(isLoading()) {
+      <div class="text-loading">
+        <mat-spinner diameter="16" class="spinner"></mat-spinner>
+        <span>Guardando...</span>
+      </div>
+      } @else {
+      {{ isEditMode ? 'Actualizar' : 'Crear Centro' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

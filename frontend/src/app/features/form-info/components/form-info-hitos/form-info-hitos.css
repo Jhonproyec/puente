@@ -1,0 +1,85 @@
+.hitos-container {
+  margin-top: 15px;
+}
+
+.main-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.responses-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.responses-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.responses-table {
+  width: 100%;
+}
+
+.loading-table {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.no-data mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.badge-total {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-warn {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge-warn--hidden {
+  opacity: 0.3;
+}

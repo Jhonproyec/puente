@@ -82,8 +82,35 @@ export class FormResponseService {
     );
   }
 
-  updateResponse(id_respuesta: number, datos: Record<string, any>): Observable<any> {
-    return this.http.put<any>(`${this.URL}/${id_respuesta}`, { datos }).pipe(
+  getResponseById(id_respuesta: number): Observable<any> {
+    return this.http.get(`${this.URL}/detail/${id_respuesta}`).pipe(
+      map((response: any) => {
+        if (response.success) return response.data;
+        throw new Error(response.message);
+      }),
+      catchError(error => {
+        console.error('❌ Error al obtener respuesta:', error);
+        return throwError(() => new Error('Error al obtener respuesta'));
+      })
+    );
+  }
+
+  updateResponse(
+    id_respuesta: number,
+    payload: {
+      datos: Record<string, any>;
+      visibleElements: string[];
+      id_formulario: string; // 👈 agregar
+    }
+  ): Observable<any> {
+    return this.http.put<any>(
+      `${this.URL}/${id_respuesta}`,
+      {
+        datos: payload.datos,
+        visibleElements: payload.visibleElements,
+        id_formulario: payload.id_formulario, // 👈 agregar
+      }
+    ).pipe(
       map(response => response),
       catchError(error => {
         console.error('Error al actualizar respuesta', error);
@@ -102,6 +129,24 @@ export class FormResponseService {
         console.error('Error al buscar persona por CUI', error);
         return throwError(() => new Error('Persona no encontrada'));
       })
+    );
+  }
+
+  getEvaluacionesDocentes(filters?: {
+    page?: number;
+    limit?: number;
+    fecha_desde?: string;
+    fecha_hasta?: string;
+  }): Observable<any> {
+    const params: any = {};
+    if (filters?.page) params['page'] = filters.page;
+    if (filters?.limit) params['limit'] = filters.limit;
+    if (filters?.fecha_desde) params['fecha_desde'] = filters.fecha_desde;
+    if (filters?.fecha_hasta) params['fecha_hasta'] = filters.fecha_hasta;
+
+    return this.http.get<any>(`${this.URL}/docentes`, { params }).pipe(
+      map(res => res.data),
+      catchError(err => throwError(() => err))
     );
   }
 }

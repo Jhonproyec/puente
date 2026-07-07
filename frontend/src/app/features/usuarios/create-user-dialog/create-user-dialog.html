@@ -16,176 +16,187 @@
             <p>Cargando datos...</p>
         </div>
         }@else {
-            <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()" class="user-form">
-    
-                <!-- Nombre y Apellido -->
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Nombre</mat-label>
-                        <input matInput formControlName="firstName" placeholder="Ej: Juan">
-                        <mat-error class="text-error">{{ getFieldError('firstName') }}</mat-error>
-                    </mat-form-field>
-    
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Apellido</mat-label>
-                        <input matInput formControlName="lastName" placeholder="Ej: Pérez">
-                        <mat-error class="text-error">{{ getFieldError('lastName') }}</mat-error>
-                    </mat-form-field>
-                </div>
-    
+        <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()" class="user-form">
+
+            <!-- Nombre y Apellido -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="firstName" placeholder="Ej: Juan">
+                    <mat-error class="text-error">{{ getFieldError('firstName') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Apellido</mat-label>
+                    <input matInput formControlName="lastName" placeholder="Ej: Pérez">
+                    <mat-error class="text-error">{{ getFieldError('lastName') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>DPI</mat-label>
+                    <input matInput mask="0000-00000-0000" [dropSpecialCharacters]="true" formControlName="dpi"
+                        placeholder="Ingresar DPI">
+                    <mat-hint>13 dígitos numéricos</mat-hint>
+                    <mat-error class="text-error">{{ getFieldError('dpi') }}</mat-error>
+                </mat-form-field>
                 <!-- Email -->
-                <mat-form-field appearance="outline" class="full-width">
+                <mat-form-field appearance="outline" class="half-width">
                     <mat-label>Correo Electrónico</mat-label>
                     <input matInput formControlName="email" type="email" placeholder="usuario@empresa.com">
                     <mat-icon matSuffix>email</mat-icon>
                     <mat-error class="text-error">{{ getFieldError('email') }}</mat-error>
                 </mat-form-field>
-    
-                <!-- Contraseña -->
-                @if (userId == null) {
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Contraseña</mat-label>
-                        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
-                            placeholder="Mínimo 8 caracteres">
-                        <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
-                            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                        </button>
-                        <mat-error class="text-error">{{ getFieldError('password') }}</mat-error>
-                    </mat-form-field>
-    
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Repetir Contraseña</mat-label>
-                        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="repeatPassword"
-                            placeholder="Mínimo 8 caracteres">
-                        <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
-                            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                        </button>
-                        <mat-error class="text-error">{{ getFieldError('repeatPassword') }}</mat-error>
-                    </mat-form-field>
-                </div>
-                }
-    
-                <div class="form-row">
-    
-                    <!-- Departamentos -->
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Departamentos</mat-label>
-                        <mat-select formControlName="departamentos" multiple>
-    
-                            <!-- Buscador -->
-                            <mat-option>
-                                <ngx-mat-select-search [formControl]="departamentoFilterCtrl"
-                                    placeholderLabel="Buscar departamento..."
-                                    noEntriesFoundLabel="No se encontraron resultados">
-                                </ngx-mat-select-search>
-                            </mat-option>
-    
-                            <!-- Seleccionar / deseleccionar todos -->
-                            <mat-option [value]="SELECT_ALL_VALUE" (click)="toggleSelectAllDepartamentos()">
-                                {{ isAllDeptos() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
-                            </mat-option>
-    
-                            <!-- Lista filtrada -->
-                            <mat-option *ngFor="let depto of filteredDepartamentos | async" [value]="depto.id">
-                                {{ depto.nombre }}
-                            </mat-option>
-    
-                        </mat-select>
-                        <mat-error class="text-error">{{ getFieldError('departamentos') }}</mat-error>
-                    </mat-form-field>
-    
-                    <!-- Comunidades -->
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Comunidades</mat-label>
-    
-                        <!-- (openedChange) = true al abrir, false al cerrar → solo disparamos al abrir -->
-                        <mat-select formControlName="comunidades" multiple (openedChange)="$event && onComunidadesOpened()">
-    
-                            <!-- Buscador local (filtra las comunidades ya cargadas) -->
-                            <mat-option>
-                                <ngx-mat-select-search [formControl]="comunidadFilterCtrl"
-                                    placeholderLabel="Buscar comunidad..."
-                                    noEntriesFoundLabel="No se encontraron resultados">
-                                </ngx-mat-select-search>
-                            </mat-option>
-    
-                            <!-- Estado: cargando -->
-                            @if (isLoadingComunidades()) {
-                            <mat-option disabled>
-                                <div class="loading-option">
-                                    <mat-spinner diameter="16"></mat-spinner>
-                                    <span>Cargando comunidades...</span>
-                                </div>
-                            </mat-option>
-                            }
-    
-                            <!-- Estado: sin departamentos seleccionados -->
-                            @else if (!(createUserForm.get('departamentos')?.value?.length)) {
-                            <mat-option disabled>Primero selecciona un departamento</mat-option>
-                            }
-    
-                            <!-- Estado: sin resultados -->
-                            @else if ((filteredComunidades | async)?.length === 0) {
-                            <mat-option disabled>No hay comunidades disponibles</mat-option>
-                            }
-    
-                            <!-- Lista de comunidades -->
-                            @else {
-    
-                            <mat-option [value]="SELECT_ALL_VALUE" (click)="toggleSelectAllComunidades()">
-                                {{ isAllComunidades() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
-                            </mat-option>
-    
-                            <mat-option *ngFor="let com of filteredComunidades | async" [value]="com.id">
-                                {{ com.nombre }}
-                            </mat-option>
-                            }
-    
-                        </mat-select>
-                        <mat-error class="text-error">{{ getFieldError('comunidades') }}</mat-error>
-                    </mat-form-field>
-    
-                </div>
-    
-                <!-- Rol -->
-                <div class="form-row">
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Formularios</mat-label>
-    
-                        <mat-select formControlName="forms" multiple>
-                            @for (form of allForms; track form.id_form) {
-                            <mat-option [value]="form.id_form">
-                                {{ form.name }}
-                            </mat-option>
-                            }
-                        </mat-select>
-    
-                        <mat-error class="text-error">
-                            {{ getFieldError('formularios') }}
-                        </mat-error>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="half-width">
-                        <mat-label>Rol</mat-label>
-                        <mat-select formControlName="role">
-                            @for (role of roles; track role.value) {
-                            <mat-option [value]="role.value">{{ role.label }}</mat-option>
-                            }
-                        </mat-select>
-                        <mat-icon matSuffix>admin_panel_settings</mat-icon>
-                        <mat-error class="text-error">{{ getFieldError('role') }}</mat-error>
-                    </mat-form-field>
-                </div>
-    
-                <!-- Error general -->
-                @if (error()) {
-                <div class="error-message">
-                    <mat-icon>error</mat-icon>
-                    {{ error() }}
-                </div>
-                }
-    
-            </form>
+            </div>
+
+
+
+            <!-- Contraseña -->
+            @if (userId == null) {
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                        placeholder="Mínimo 8 caracteres">
+                    <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                        <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-error class="text-error">{{ getFieldError('password') }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Repetir Contraseña</mat-label>
+                    <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="repeatPassword"
+                        placeholder="Mínimo 8 caracteres">
+                    <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" type="button">
+                        <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-error class="text-error">{{ getFieldError('repeatPassword') }}</mat-error>
+                </mat-form-field>
+            </div>
+            }
+
+            <div class="form-row">
+
+                <!-- Departamentos -->
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Departamentos</mat-label>
+                    <mat-select formControlName="departamentos" multiple>
+
+                        <!-- Buscador -->
+                        <mat-option>
+                            <ngx-mat-select-search [formControl]="departamentoFilterCtrl"
+                                placeholderLabel="Buscar departamento..."
+                                noEntriesFoundLabel="No se encontraron resultados">
+                            </ngx-mat-select-search>
+                        </mat-option>
+
+                        <!-- Seleccionar / deseleccionar todos -->
+                        <mat-option [value]="SELECT_ALL_VALUE" (click)="toggleSelectAllDepartamentos()">
+                            {{ isAllDeptos() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+                        </mat-option>
+
+                        <!-- Lista filtrada -->
+                        <mat-option *ngFor="let depto of filteredDepartamentos | async" [value]="depto.id">
+                            {{ depto.nombre }}
+                        </mat-option>
+
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('departamentos') }}</mat-error>
+                </mat-form-field>
+
+                <!-- Comunidades -->
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Comunidades</mat-label>
+
+                    <!-- (openedChange) = true al abrir, false al cerrar → solo disparamos al abrir -->
+                    <mat-select formControlName="comunidades" multiple (openedChange)="$event && onComunidadesOpened()">
+
+                        <!-- Buscador local (filtra las comunidades ya cargadas) -->
+                        <mat-option>
+                            <ngx-mat-select-search [formControl]="comunidadFilterCtrl"
+                                placeholderLabel="Buscar comunidad..."
+                                noEntriesFoundLabel="No se encontraron resultados">
+                            </ngx-mat-select-search>
+                        </mat-option>
+
+                        <!-- Estado: cargando -->
+                        @if (isLoadingComunidades()) {
+                        <mat-option disabled>
+                            <div class="loading-option">
+                                <mat-spinner diameter="16"></mat-spinner>
+                                <span>Cargando comunidades...</span>
+                            </div>
+                        </mat-option>
+                        }
+
+                        <!-- Estado: sin departamentos seleccionados -->
+                        @else if (!(createUserForm.get('departamentos')?.value?.length)) {
+                        <mat-option disabled>Primero selecciona un departamento</mat-option>
+                        }
+
+                        <!-- Estado: sin resultados -->
+                        @else if ((filteredComunidades | async)?.length === 0) {
+                        <mat-option disabled>No hay comunidades disponibles</mat-option>
+                        }
+
+                        <!-- Lista de comunidades -->
+                        @else {
+
+                        <mat-option [value]="SELECT_ALL_VALUE" (click)="toggleSelectAllComunidades()">
+                            {{ isAllComunidades() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+                        </mat-option>
+
+                        <mat-option *ngFor="let com of filteredComunidades | async" [value]="com.id">
+                            {{ com.nombre }}
+                        </mat-option>
+                        }
+
+                    </mat-select>
+                    <mat-error class="text-error">{{ getFieldError('comunidades') }}</mat-error>
+                </mat-form-field>
+
+            </div>
+
+            <!-- Rol -->
+            <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Formularios</mat-label>
+
+                    <mat-select formControlName="forms" multiple>
+                        @for (form of allForms; track form.id_form) {
+                        <mat-option [value]="form.id_form">
+                            {{ form.name }}
+                        </mat-option>
+                        }
+                    </mat-select>
+
+                    <mat-error class="text-error">
+                        {{ getFieldError('formularios') }}
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Rol</mat-label>
+                    <mat-select formControlName="role">
+                        @for (role of roles; track role.value) {
+                        <mat-option [value]="role.value">{{ role.label }}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-icon matSuffix>admin_panel_settings</mat-icon>
+                    <mat-error class="text-error">{{ getFieldError('role') }}</mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Error general -->
+            @if (error()) {
+            <div class="error-message">
+                <mat-icon>error</mat-icon>
+                {{ error() }}
+            </div>
+            }
+
+        </form>
 
         }
     </mat-dialog-content>

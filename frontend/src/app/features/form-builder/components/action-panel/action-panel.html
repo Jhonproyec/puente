@@ -73,7 +73,7 @@
       </div>
     </div>
 
-    <div class="form-group" *ngIf="needsValue() && !isBetweenType()">
+    <div class="form-group" *ngIf="needsValue() && !isBetweenType() && !isMultiValueType()">
       <label class="form-label">Valor de Comparación</label>
       <div *ngIf="triggerFieldOptions().length > 0">
         <select class="form-select" [(ngModel)]="newAction.value">
@@ -85,6 +85,26 @@
       </div>
       <input *ngIf="triggerFieldOptions().length === 0" [type]="getInputType()" class="form-input"
         [(ngModel)]="newAction.value" placeholder="Ingresa el valor" />
+    </div>
+
+    <!-- ===== MULTI-VALOR (any_of / all_of) ===== -->
+    <div class="form-group" *ngIf="isMultiValueType() && triggerFieldOptions().length > 0">
+      <label class="form-label">
+        {{ newAction.operator === 'any_of' ? 'Cualquiera de estas opciones' : 'Todas estas opciones' }}
+      </label>
+      <div class="catalog-between-options">
+        <label *ngFor="let option of triggerFieldOptions()"
+          style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <input type="checkbox" [checked]="isMultiValueSelected(option.value)"
+            (change)="toggleMultiValue(option.value, $event)" />
+          {{ option.label }}
+        </label>
+      </div>
+      <small class="help-text">
+        {{ newAction.operator === 'any_of'
+        ? 'Se cumple si AL MENOS UNA opción está seleccionada'
+        : 'Se cumple si TODAS las opciones están seleccionadas' }}
+      </small>
     </div>
 
     <div *ngIf="isBetweenType()" class="form-group">

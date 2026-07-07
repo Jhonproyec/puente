@@ -1,0 +1,194 @@
+<div class="et-props" *ngIf="config">
+
+  <!-- ── Filas ── -->
+  <div class="et-section">
+    <h4 class="et-section__title">Filas (Descripciones)</h4>
+
+    <div class="et-field">
+      <label class="et-label">Fuente</label>
+      <select class="et-select" [(ngModel)]="config.descriptionSource" (change)="onSourceChange()">
+        <option value="manual">Manual</option>
+        <option value="catalog">Catálogo</option>
+      </select>
+    </div>
+
+    <ng-container *ngIf="config.descriptionSource === 'catalog'">
+      <div class="et-field">
+        <label class="et-label">Catálogo</label>
+        <select class="et-select" [(ngModel)]="config.catalogType" (change)="onCatalogTypeChange()">
+          <option value="">-- Selecciona --</option>
+          <option *ngFor="let c of availableCatalogs" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+      <div *ngIf="catalogItems.length > 0" class="et-catalog-items">
+        <div class="et-catalog-actions">
+          <button class="et-btn-sm" (click)="selectAllCatalogRows()">Todos</button>
+          <button class="et-btn-sm et-btn-sm--danger" (click)="clearAllCatalogRows()">Ninguno</button>
+        </div>
+        <div *ngFor="let item of catalogItems" class="et-catalog-item">
+          <input type="checkbox" [checked]="isRowSelected(toString(item.id))"
+            (change)="toggleCatalogRow(item)" />
+          <span>{{ item.nombre }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="config.descriptionSource === 'manual'">
+      <div class="et-row-list">
+        <div *ngFor="let row of config.rows; let i = index" class="et-row-item">
+          <input class="et-input" [(ngModel)]="row.label" (blur)="save()" placeholder="Descripción" />
+          <div class="et-row-item__actions">
+            <button class="et-btn-icon" (click)="moveRow(i, 'up')" [disabled]="i === 0">
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            <button class="et-btn-icon" (click)="moveRow(i, 'down')"
+              [disabled]="i === config.rows.length - 1">
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+            <button class="et-btn-icon et-btn-icon--danger" (click)="removeRow(i)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="et-add-row">
+        <input class="et-input" [(ngModel)]="newRowLabel"
+          placeholder="Nueva descripción..." (keydown.enter)="addManualRow()" />
+        <button class="et-btn-primary" (click)="addManualRow()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ── Columnas simples ── -->
+  <div class="et-section">
+    <div class="et-section__header">
+      <h4 class="et-section__title">Columnas simples</h4>
+      <small class="et-hint">Checkbox independiente por fila</small>
+    </div>
+
+    <div class="et-row-list">
+      <div *ngFor="let col of config.simpleColumns; let i = index" class="et-row-item">
+        <input class="et-input" [(ngModel)]="col.label" (blur)="save()" placeholder="Título columna" />
+        <div class="et-row-item__actions">
+          <button class="et-btn-icon" (click)="moveSimpleColumn(i, 'up')" [disabled]="i === 0">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button class="et-btn-icon" (click)="moveSimpleColumn(i, 'down')"
+            [disabled]="i === config.simpleColumns.length - 1">
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button class="et-btn-icon et-btn-icon--danger" (click)="removeSimpleColumn(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="et-add-row">
+      <input class="et-input" [(ngModel)]="newSimpleColLabel"
+        placeholder="Nombre de columna..." (keydown.enter)="addSimpleColumn()" />
+      <button class="et-btn-primary" (click)="addSimpleColumn()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Grupos de columnas ── -->
+  <div class="et-section">
+    <div class="et-section__header">
+      <h4 class="et-section__title">Grupos de columnas</h4>
+      <button class="et-btn-primary" (click)="addGroup()">
+        <mat-icon>add</mat-icon> Grupo
+      </button>
+    </div>
+
+    <div *ngFor="let group of config.columnGroups; let gi = index" class="et-group">
+
+      <div class="et-group__header">
+        <input class="et-input et-input--group" [(ngModel)]="group.label"
+          (blur)="save()" placeholder="Nombre del grupo" />
+        <div class="et-group__actions">
+          <button class="et-btn-icon" (click)="moveGroup(gi, 'up')" [disabled]="gi === 0">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <button class="et-btn-icon" (click)="moveGroup(gi, 'down')"
+            [disabled]="gi === config.columnGroups.length - 1">
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+          <button class="et-btn-icon et-btn-icon--danger" (click)="removeGroup(gi)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tipo de selección -->
+      <div class="et-field">
+        <label class="et-label">Tipo de selección</label>
+        <select class="et-select" [(ngModel)]="group.selectionType" (change)="save()">
+          <option value="single">Única (radio)</option>
+          <option value="multiple">Múltiple (checkbox)</option>
+        </select>
+      </div>
+
+      <!-- Fuente de opciones -->
+      <div class="et-field">
+        <label class="et-label">Fuente de opciones</label>
+        <select class="et-select" [(ngModel)]="group.optionSource"
+          (change)="onGroupSourceChange(group)">
+          <option value="manual">Manual</option>
+          <option value="catalog">Catálogo</option>
+        </select>
+      </div>
+
+      <!-- Catálogo del grupo -->
+      <ng-container *ngIf="group.optionSource === 'catalog'">
+        <div class="et-field">
+          <label class="et-label">Catálogo</label>
+          <select class="et-select" [(ngModel)]="group.catalogType"
+            (change)="onGroupCatalogChange(group)">
+            <option value="">-- Selecciona --</option>
+            <option *ngFor="let c of availableCatalogs" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div *ngIf="getGroupCatalogItems(group).length > 0" class="et-catalog-items">
+          <div class="et-catalog-actions">
+            <button class="et-btn-sm" (click)="selectAllGroupCols(group)">Todos</button>
+            <button class="et-btn-sm et-btn-sm--danger" (click)="clearGroupCols(group)">Ninguno</button>
+          </div>
+          <div *ngFor="let item of getGroupCatalogItems(group)" class="et-catalog-item">
+            <input type="checkbox"
+              [checked]="isGroupColSelected(group, item.id)"
+              (change)="toggleGroupCatalogCol(group, item)" />
+            <span>{{ item.nombre }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Columnas manuales del grupo -->
+      <ng-container *ngIf="group.optionSource === 'manual'">
+        <div class="et-columns">
+          <div *ngFor="let col of group.columns; let ci = index" class="et-column-item">
+            <input class="et-input" [(ngModel)]="col.label"
+              (blur)="save()" placeholder="Nombre columna" />
+            <button class="et-btn-icon et-btn-icon--danger"
+              *ngIf="group.columns.length > 1"
+              (click)="removeColumn(group, ci)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <button class="et-btn-sm" (click)="addManualColumn(group)">
+            <mat-icon>add</mat-icon> Columna
+          </button>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <div *ngIf="config.columnGroups.length === 0" class="et-empty">
+      Sin grupos. Agrega uno arriba.
+    </div>
+  </div>
+
+</div>

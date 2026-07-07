@@ -23,23 +23,27 @@ export class CatalogSurveyAnswerService {
     elementId: string,
     selectedIds: (string | number)[],
     totalOptions: number,
-    noneIds: (string | number)[]
+    noneIds: (string | number)[],
+    forcedScore?: number   // ✅ score precalculado opcional
   ): void {
-    const selectedNone = selectedIds.some(id => noneIds.includes(id));
-
     let score = 0;
-    if (!selectedNone && totalOptions > 0) {
-      // ✅ Excluir las opciones "ninguno" del denominador
-      const validTotalOptions = totalOptions - noneIds.length;
-      const validSelections = selectedIds.filter(id => !noneIds.includes(id));
 
-      score = validTotalOptions > 0
-        ? validSelections.length / validTotalOptions
-        : 0;
+    // ✅ Si viene un score forzado (ej. catálogo especial), usarlo
+    if (forcedScore !== undefined) {
+      score = forcedScore;
+    } else {
+      const selectedNone = selectedIds.some(id => noneIds.includes(id));
+      if (!selectedNone && totalOptions > 0) {
+        const validTotalOptions = totalOptions - noneIds.length;
+        const validSelections = selectedIds.filter(id => !noneIds.includes(id));
+        score = validTotalOptions > 0
+          ? validSelections.length / validTotalOptions
+          : 0;
+      }
     }
 
     this.answers.set(elementId, { elementId, selectedIds, score });
-    console.log(`📊 Score calculado para ${elementId}: ${score} (${selectedIds.length}/${totalOptions - noneIds.length} opciones válidas)`);
+    console.log(`📊 Score para ${elementId}: ${score}`);
   }
 
   /**

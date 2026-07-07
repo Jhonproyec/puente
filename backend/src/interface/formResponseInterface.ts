@@ -1,8 +1,8 @@
 export interface SaveResponseInput {
-  id_formulario: number;
-  id_usuario?: number | undefined;
+  id_formulario: number | string;
+  id_usuario?: number | undefined | null;
   responses: Record<string, any>;
-  estructura: {
+  estructura?: {
     regions: Array<{
       id: string;
       regionType?: string;

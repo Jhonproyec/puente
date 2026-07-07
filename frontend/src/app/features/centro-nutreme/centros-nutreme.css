@@ -1,0 +1,146 @@
+.centros-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: white;
+
+  mat-card-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2d3748;
+
+      mat-icon {
+        color: #667eea;
+        font-size: 24px;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 0;
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      gap: 1rem;
+
+      p {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+
+      .centros-table {
+        width: 100%;
+        background: transparent;
+
+        .mat-mdc-header-cell {
+          font-weight: 600;
+          color: #4a5568;
+          background: #f8f9fa;
+          border-bottom: 2px solid #e2e8f0;
+          padding: 1rem;
+        }
+
+        .mat-mdc-cell {
+          padding: 1rem;
+          border-bottom: 1px solid #f1f5f9;
+        }
+
+        .mat-mdc-row {
+          transition: background-color 0.3s ease;
+
+          &:hover {
+            background: #f8f9fa;
+          }
+        }
+
+        .codigo-badge {
+          display: inline-block;
+          background: rgba(102, 126, 234, 0.1);
+          color: #667eea;
+          font-weight: 600;
+          font-size: 0.8rem;
+          padding: 0.2rem 0.6rem;
+          border-radius: 6px;
+          letter-spacing: 0.5px;
+        }
+
+        .coordenadas-text {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.8rem;
+          color: #4a5568;
+          max-width: 180px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          .coord-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+            color: #667eea;
+            flex-shrink: 0;
+          }
+        }
+
+        .no-data {
+          color: #a0aec0;
+          font-size: 0.85rem;
+          font-style: italic;
+        }
+
+        .actions-btn {
+          color: #718096;
+          transition: color 0.3s ease;
+
+          &:hover {
+            color: #4a5568;
+          }
+        }
+      }
+    }
+  }
+}
+
+.delete-action {
+  color: #e53e3e;
+
+  mat-icon {
+    color: #e53e3e;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .centros-card mat-card-header {
+    padding: 1rem;
+  }
+
+  .centros-table {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 <div class="structure-panel">
 
-  <!-- ── HEADER STICKY (solo tabs + botones) ── -->
+  <!-- ── HEADER STICKY ── -->
   <div class="structure-panel__sticky-header">
 
     <div class="view-tabs">
@@ -10,6 +10,7 @@
         (click)="onChangeView('actions')">Acciones</button>
       <button class="view-tabs__tab" [class.view-tabs__tab--active]="currentView === 'validations'"
         (click)="onChangeView('validations')">Validaciones</button>
+
     </div>
 
     <div *ngIf="currentView === 'structure'" class="add-buttons">
@@ -25,27 +26,31 @@
       <button class="btn-add btn-add--persona" (click)="onAddPersonRegion()">
         <mat-icon>person</mat-icon><span>Persona</span>
       </button>
+      <button class="btn-add btn-add--table" (click)="onAddEvaluationTable()">
+        <mat-icon>table_chart</mat-icon><span>Tabla</span>
+      </button>
     </div>
 
   </div>
-  <!-- ── FIN HEADER STICKY ── -->
 
-  <!-- ── CONTENIDO SCROLLEABLE (fuera del sticky-header) ── -->
+  <!-- ── CONTENIDO SCROLLEABLE ── -->
   <div class="structure-panel__content">
 
     <!-- STRUCTURE VIEW -->
     <div *ngIf="currentView === 'structure'">
-      <div class="elements-list" cdkDropList [cdkDropListData]="formDefinition?.regions ?? []"
-        (cdkDropListDropped)="dropRegion($event)">
 
-        <div *ngFor="let region of formDefinition?.regions; let i = index" cdkDrag
-          [cdkDragData]="{ type: 'region', id: region.id, index: i }" class="region-item"
+      <!-- Template recursivo -->
+      <ng-template #regionTemplate let-region let-depth="depth">
+
+        <div class="region-item" [attr.data-item-id]="region.id"
           [class.region-item--selected]="isRegionSelected(region.id)"
           [class.region-item--has-dependency]="hasActions(region)"
-          [class.region-item--collapsed]="!isRegionExpanded(region.id)">
+          [class.region-item--collapsed]="!isRegionExpanded(region.id)" [class.region-item--subregion]="depth > 0"
+          [class.region-item--depth-2]="depth === 1">
 
+          <!-- Header -->
           <div class="region-item__header-wrapper">
-            <div cdkDragHandle class="drag-handle drag-handle--region">
+            <div class="drag-handle drag-handle--region">
               <mat-icon>drag_indicator</mat-icon>
             </div>
             <div class="region-item__header" (click)="toggleRegion(region.id); onSelectRegion(region.id)">
@@ -54,8 +59,12 @@
                   {{ isRegionExpanded(region.id) ? 'expand_less' : 'expand_more' }}
                 </mat-icon>
                 <span>{{ region.title }}</span>
+                <span class="depth-indicator" *ngIf="depth > 0">Sub {{ depth }}</span>
                 <span *ngIf="!isRegionExpanded(region.id)" class="badge badge--info">
-                  {{ region.elements.length }} campos
+                  {{ getElementCount(region) }} campos
+                  <ng-container *ngIf="getSubRegionCount(region) > 0">
+                    · {{ getSubRegionCount(region) }} sub
+                  </ng-container>
                 </span>
                 <span *ngIf="hasActions(region)" class="badge badge--warning">
                   <mat-icon>bolt</mat-icon> Condicional
@@ -71,6 +80,10 @@
                 title="Acciones">
                 <mat-icon>bolt</mat-icon>
               </button>
+              <button class="btn-icon" *ngIf="depth > 0" (click)="onUnnestRegion(region.id); $event.stopPropagation()"
+                title="Sacar al nivel raíz">
+                <mat-icon>vertical_align_top</mat-icon>
+              </button>
               <button class="btn-icon btn-icon--delete" (click)="onDeleteRegion(region.id); $event.stopPropagation()"
                 title="Eliminar">
                 <mat-icon>close</mat-icon>
@@ -78,68 +91,127 @@
             </div>
           </div>
 
+          <!-- Contenido colapsable -->
           <div class="region-item__content-wrapper" [class.collapsed]="!isRegionExpanded(region.id)">
-            <div cdkDropListGroup>
-              <div class="region-item__content" cdkDropList [cdkDropListData]="region.elements"
-                (cdkDropListDropped)="dropElement($event)">
 
-                <div *ngFor="let element of region.elements; let i = index" cdkDrag
-                  [cdkDragData]="{ type: 'element', id: element.id, regionId: region.id, index: i }"
-                  class="element-item" [class.element-item--active]="isElementSelected(element.id)"
-                  [class.element-item--has-dependency]="hasActions(element)">
+            <!-- children: elementos y subregiones mezclados -->
+            <div class="region-item__content" appSortableDirective [sortableId]="region.id"
+              [attr.data-sortable-id]="region.id" (sortableDrop)="onSortableDrop($event)">
 
-                  <div cdkDragHandle class="drag-handle drag-handle--small">
-                    <mat-icon>drag_indicator</mat-icon>
-                  </div>
-                  <div class="element-item__info" (click)="onSelectElement(element.id, region.id)">
-                    <div class="element-item__type">
-                      {{ element.type }}
-                      <span *ngIf="element.multipleSelecction" class="badge badge--info">Multi</span>
+              <ng-container *ngFor="let child of region.children; trackBy: trackById">
+
+                <!-- ELEMENTO -->
+                <ng-container *ngIf="!stateService.isRegion(child)">
+                  <div class="element-item" [attr.data-item-id]="child.id"
+                    [class.element-item--active]="isElementSelected(child.id)"
+                    [class.element-item--has-dependency]="hasActions(child)">
+
+                    <div class="drag-handle drag-handle--small">
+                      <mat-icon>drag_indicator</mat-icon>
                     </div>
-                    <div class="element-item__label">{{ element.label }}</div>
-                    <div *ngIf="hasActions(element)" class="badge badge--warning">
-                      <mat-icon>bolt</mat-icon> Condicional
+                    <div class="element-item__info" (click)="onSelectElement(child.id, region.id)">
+                      <div class="element-item__type">
+                        {{ child.type }}
+                        <span *ngIf="child.multipleSelecction" class="badge badge--info">Multi</span>
+                      </div>
+                      <div class="element-item__label">{{ child.label }}</div>
+                      <div *ngIf="hasActions(child)" class="badge badge--warning">
+                        <mat-icon>bolt</mat-icon> Condicional
+                      </div>
+                    </div>
+                    <div class="element-item__actions">
+                      <button class="btn-icon"
+                        (click)="onOpenProperties(child.id, 'element', region.id); $event.stopPropagation()"
+                        title="Propiedades">
+                        <mat-icon>settings</mat-icon>
+                      </button>
+                      <button class="btn-icon"
+                        (click)="onOpenActions(child.id, 'element', region.id); $event.stopPropagation()"
+                        title="Acciones">
+                        <mat-icon>bolt</mat-icon>
+                      </button>
+                      <button class="btn-icon"
+                        (click)="onOpenValidations(child.id, region.id); $event.stopPropagation()" title="Validaciones">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button class="btn-icon" (click)="onOpenFormulas(child.id, region.id); $event.stopPropagation()"
+                        title="Fórmulas">
+                        <mat-icon>functions</mat-icon>
+                      </button>
+                      <button class="btn-icon btn-icon--delete" [disabled]="isPersonIdentifier(child)"
+                        [style.opacity]="isPersonIdentifier(child) ? '0.3' : '1'"
+                        (click)="onDeleteElementSafe(child); $event.stopPropagation()"
+                        [title]="isPersonIdentifier(child) ? 'Campo requerido' : 'Eliminar'">
+                        <mat-icon>close</mat-icon>
+                      </button>
                     </div>
                   </div>
-                  <div class="element-item__actions">
-                    <button class="btn-icon"
-                      (click)="onOpenProperties(element.id, 'element', region.id); $event.stopPropagation()"
-                      title="Propiedades">
-                      <mat-icon>settings</mat-icon>
-                    </button>
-                    <button class="btn-icon"
-                      (click)="onOpenActions(element.id, 'element', region.id); $event.stopPropagation()"
-                      title="Acciones">
-                      <mat-icon>bolt</mat-icon>
-                    </button>
-                    <button class="btn-icon"
-                      (click)="onOpenValidations(element.id, region.id); $event.stopPropagation()" title="Validaciones">
-                      <mat-icon>check_circle</mat-icon>
-                    </button>
-                    <button class="btn-icon" (click)="onOpenFormulas(element.id, region.id); $event.stopPropagation()"
-                      title="Fórmulas">
-                      <mat-icon>functions</mat-icon>
-                    </button>
-                    <button class="btn-icon btn-icon--delete" [disabled]="isPersonIdentifier(element)"
-                      [style.opacity]="isPersonIdentifier(element) ? '0.3' : '1'"
-                      (click)="onDeleteElementSafe(element); $event.stopPropagation()"
-                      [title]="isPersonIdentifier(element) ? 'Campo requerido' : 'Eliminar'">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  </div>
+                </ng-container>
+
+                <!-- SUBREGIÓN (recursiva) -->
+                <ng-container *ngIf="stateService.isRegion(child)">
+                  <ng-container *ngTemplateOutlet="regionTemplate; context: { $implicit: child, depth: depth + 1 }">
+                  </ng-container>
+                </ng-container>
+
+              </ng-container>
+
+              <!-- Empty state -->
+              <div *ngIf="region.children.length === 0" class="empty-region">
+                <mat-icon>inbox</mat-icon>
+                <span>Sin campos. Arrastra aquí o usa "Agregar Campo"</span>
+              </div>
+
+            </div>
+
+            <!-- Dropdown agregar subregión — solo en depth 0 sin subregiones -->
+            <div class="subregion-dropdown-wrapper" *ngIf="depth === 0 && !hasSubRegions(region)">
+
+              <button class="btn-add-subregion" (click)="toggleSubRegionDropdown(region.id, $event)">
+                <mat-icon>subdirectory_arrow_right</mat-icon>
+                Agregar subregión
+                <mat-icon class="dropdown-arrow">
+                  {{ openSubRegionDropdown === region.id ? 'expand_less' : 'expand_more' }}
+                </mat-icon>
+              </button>
+
+              <div class="subregion-dropdown" *ngIf="openSubRegionDropdown === region.id"
+                (click)="$event.stopPropagation()">
+
+                <button class="subregion-dropdown__item subregion-dropdown__item--new"
+                  (click)="onAddNewSubRegion(region.id)">
+                  <mat-icon>add</mat-icon>
+                  Nueva subregión
+                </button>
+
+                <div class="subregion-dropdown__divider" *ngIf="getAvailableRegionsToNest(region.id).length > 0"></div>
+
+                <div *ngIf="getAvailableRegionsToNest(region.id).length === 0" class="subregion-dropdown__empty">
+                  No hay otras regiones disponibles
                 </div>
 
-                <div *ngIf="region.elements.length === 0" class="empty-region">
-                  <mat-icon>inbox</mat-icon>
-                  <span>Sin campos. Arrastra aquí o usa "Agregar Campo"</span>
-                </div>
+                <button *ngFor="let r of getAvailableRegionsToNest(region.id)" class="subregion-dropdown__item"
+                  (click)="onNestExistingRegion(r.id, region.id)">
+                  <mat-icon>folder</mat-icon>
+                  {{ r.title }}
+                </button>
 
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
+      </ng-template>
+
+      <!-- Lista raíz de regiones -->
+      <div class="elements-list" appSortableDirective sortableId="root" [attr.data-sortable-id]="'root'"
+        [sortablePutFilter]="rootPutFilter" (sortableDrop)="onSortableDrop($event)">
+        <ng-container *ngFor="let region of formDefinition?.regions; trackBy: trackById">
+          <ng-container *ngTemplateOutlet="regionTemplate; context: { $implicit: region, depth: 0 }">
+          </ng-container>
+        </ng-container>
       </div>
+
     </div>
 
     <!-- ACTIONS VIEW -->
@@ -172,5 +244,6 @@
         </div>
       </div>
     </div>
+
   </div>
 </div>

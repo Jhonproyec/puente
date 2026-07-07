@@ -66,7 +66,7 @@ export class ValidationPanel implements OnChanges, OnInit, OnDestroy {
       .subscribe(form => {
         if (!form || !this.element) return;
         const updated = form.regions
-          .flatMap(r => r.elements)
+          .flatMap(r => r.children.filter(c => (c as any).type !== 'region') as FormElement[])
           .find(el => el.id === this.element.id);
         if (updated) this.element = updated;
       });

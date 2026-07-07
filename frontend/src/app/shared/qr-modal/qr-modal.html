@@ -1,0 +1,43 @@
+   <div class="qr-modal">
+      <!-- Header -->
+      <div class="qr-modal__header">
+        <div class="qr-modal__header-text">
+          <h2 class="qr-modal__title">{{ data.title ?? 'Código QR' }}</h2>
+          <p class="qr-modal__subtitle" *ngIf="data.subtitle">{{ data.subtitle }}</p>
+        </div>
+        <button mat-icon-button (click)="cerrar()" class="qr-modal__close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+ 
+      <!-- Body -->
+      <div class="qr-modal__body">
+        <ng-container *ngIf="qrUrl; else loading">
+          <div class="qr-modal__image-wrapper">
+            <img
+              [src]="qrUrl"
+              alt="Código QR"
+              class="qr-modal__image"
+              (error)="onImageError()"
+            />
+          </div>
+        </ng-container>
+        <ng-template #loading>
+          <div class="qr-modal__loading">
+            <mat-spinner diameter="48" />
+            <span>Generando QR...</span>
+          </div>
+        </ng-template>
+      </div>
+ 
+      <!-- Footer -->
+      <div class="qr-modal__footer" *ngIf="qrUrl">
+        <button class="btn-cancel" mat-stroked-button (click)="cerrar()">
+          Cerrar
+        </button>
+        <button mat-stroked-button color="btn btn-primary" (click)="descargar()">
+          <mat-icon>download</mat-icon>
+          Descargar QR
+        </button>
+      </div>
+    </div>

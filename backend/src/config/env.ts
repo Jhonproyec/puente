@@ -34,7 +34,8 @@ const envSchema = Joi.object({
   API_PREFIX: Joi.string().default('/api'),
   DEFAULT_TTL: Joi.number().messages({
     'any.required': 'TTL no definido'
-  })
+  }),
+  ID_USUARIOS_CATALOG: Joi.number().messages({'any.required': 'ID DE TABLA USUARIOS NO DEFINIDO EN EL .ENV'})
 }).unknown(true); //Permitir otras variables de entorno
 
 export function validateEnv(): EnvConfigInterface {

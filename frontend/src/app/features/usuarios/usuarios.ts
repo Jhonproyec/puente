@@ -16,6 +16,8 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { AuthService } from '../../core/services/auth/auth.service';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification.service';
+import { QrModal } from '../../shared/qr-modal/qr-modal';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-usuarios',
@@ -38,7 +40,7 @@ import { NotificationService } from '../../core/services/notification.service';
 export class Usuarios implements OnInit {
   users = signal<User[]>([]);
   isLoading = signal(false);
-  displayedColumns: string[] = ['name', 'email', 'role', 'acceso_global', 'actions'];
+  displayedColumns: string[] = ['name', 'email', 'role', 'acceso_global', 'qr', 'actions'];
   totalOrders = 0;
   pageSize = 10;
   pageIndex = 0;
@@ -57,7 +59,7 @@ export class Usuarios implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    if(!this.canView()){
+    if (!this.canView()) {
       this.route.navigate(['/dashboard']);
       this.notificationService.showError('No tienes permisos para esta sección de la aplicación')
     }
@@ -85,7 +87,6 @@ export class Usuarios implements OnInit {
   }
 
   openCreateUserDialog(data: any = null): void {
-    console.log(data);
     const dialogRef = this.dialog.open(CreateUserDialog, {
       width: '800px',
       maxWidth: '100vw',
@@ -132,6 +133,30 @@ export class Usuarios implements OnInit {
     return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   }
 
+  abrirModalQr(user: User): void {
+    const dialogRef = this.dialog.open(QrModal, {
+      data: {
+        qrUrl: null,
+        downloadName: `QR_${user.dpi || user.idUser}.png`,
+        title: 'Código QR',
+        subtitle: `${user.firstName} ${user.lastName}`,
+      },
+      width: '420px',
+      disableClose: false,
+    });
+
+    this.userService.generarQrUsuario(user.idUser).subscribe({
+      next: (res) => {
+        const nombreArchivo = res.qr_path.split(/[\\/]/).pop();
+        const qrUrl = `${environment.BASE_URL.replace('/api/v1', '')}/public/qr/usuarios/${nombreArchivo}`;
+        dialogRef.componentInstance.setQrUrl(qrUrl);
+      },
+      error: (error) => {
+        dialogRef.close();
+        this.notificationService.showError(error.error.message);
+      }
+    });
+  }
 
 
 }

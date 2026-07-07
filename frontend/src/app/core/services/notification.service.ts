@@ -18,7 +18,7 @@ export class NotificationService {
 
   showError(message: string) {
     this.snackBar.open(message, 'Cerrar', {
-      duration: 1500,              // se cierra automáticamente
+      duration: 2000,              // se cierra automáticamente
       panelClass: ['snackbar-error']
 
     });

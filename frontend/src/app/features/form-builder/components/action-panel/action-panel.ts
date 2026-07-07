@@ -57,8 +57,11 @@ export class ActionPanel implements OnInit {
     { value: 'filled', label: 'Está lleno' },
     { value: 'empty', label: 'Está vacío' },
     { value: 'between', label: 'Entre' },
+    { value: 'any_of', label: 'Alguna de las opciones' },
+    { value: 'all_of', label: 'Todas las opciones' },
   ];
   editingIndex: number | null = null;
+  selectedMultiValues: (string | number)[] = [];
 
   constructor(private stateService: FormBuilderStateService) { }
 
@@ -114,7 +117,12 @@ export class ActionPanel implements OnInit {
     return `Campo: ${(this.target as FormElement).label}`;
   }
 
-  needsValue(): boolean { return !['filled', 'empty'].includes(this.newAction.operator); }
+  isMultiValueType(): boolean {
+    return ['any_of', 'all_of'].includes(this.newAction.operator);
+  }
+  needsValue(): boolean {
+    return !['filled', 'empty'].includes(this.newAction.operator);
+  }
   isBetweenType(): boolean { return this.newAction.operator === 'between'; }
 
   getInputType(): string {
@@ -179,8 +187,20 @@ export class ActionPanel implements OnInit {
     if (!this.selectedTriggerElement) { alert('Selecciona un campo'); return; }
     this.newAction.triggerField = this.selectedTriggerElement.id;
 
-    if (this.needsValue() && !this.isBetweenType() && !this.newAction.value) {
+    if (this.needsValue() && !this.isBetweenType() && !this.isMultiValueType() && !this.newAction.value) {
       alert('Ingresa un valor de comparación'); return;
+    }
+    if (this.isMultiValueType() && this.selectedMultiValues.length === 0) {
+      alert('Selecciona al menos una opción'); return;
+    }
+
+    if (this.isBetweenType()) {
+      if (this.newAction.betweenType === 'catalog' && this.selectedCatalogBetweenOptions.length === 0) {
+        alert('Selecciona al menos una opción del catálogo'); return;
+      }
+      if (this.newAction.betweenType !== 'catalog' && !this.newAction.valueEnd) {
+        alert('Ingresa el valor final para "Entre"'); return;
+      }
     }
     if (this.isBetweenType()) {
       if (this.newAction.betweenType === 'catalog' && this.selectedCatalogBetweenOptions.length === 0) {
@@ -196,9 +216,11 @@ export class ActionPanel implements OnInit {
       triggerField: this.selectedTriggerElement.id,
       triggerLabel: this.selectedTriggerElement.label,
       type: this.mapOperatorToActionType(),
-      value: this.newAction.betweenType === 'catalog'
-        ? JSON.stringify(this.selectedCatalogBetweenOptions)
-        : this.newAction.value,
+      value: this.isMultiValueType()
+        ? JSON.stringify(this.selectedMultiValues)
+        : this.newAction.betweenType === 'catalog'
+          ? JSON.stringify(this.selectedCatalogBetweenOptions)
+          : this.newAction.value,
       valueEnd: this.newAction.betweenType !== 'catalog' ? this.newAction.valueEnd || undefined : undefined,
       betweenType: this.newAction.betweenType
     };
@@ -260,14 +282,31 @@ export class ActionPanel implements OnInit {
   private saveActions(actions: DynamicAction[]): void {
     if (this.targetType === 'region') {
       const region = this.target as FormRegion;
-      this.stateService.formDefinition.regions =
-        this.stateService.formDefinition.regions.map(r =>
-          r.id === region.id ? { ...r, actions } : r
-        );
+      const currentForm = this.stateService.formDefinition;
+      const updatedRegions = this.mapRegionsRecursive(currentForm.regions, r =>
+        r.id === region.id ? { ...r, actions } : r
+      );
+      this.stateService.updateFormDefinition({ ...currentForm, regions: updatedRegions });
     } else {
       this.stateService.updateElement((this.target as FormElement).id, { actions });
     }
-    this.stateService['formDefinitionSubject'].next(this.stateService.formDefinition);
+  }
+
+  private mapRegionsRecursive(
+    regions: FormRegion[],
+    transform: (r: FormRegion) => FormRegion
+  ): FormRegion[] {
+    return regions.map(region => {
+      const transformed = transform(region);
+      return {
+        ...transformed,
+        children: transformed.children.map(child =>
+          this.stateService.isRegion(child)
+            ? this.mapRegionsRecursive([child as FormRegion], transform)[0]
+            : child
+        )
+      };
+    });
   }
 
   private resetAction(): void {
@@ -275,6 +314,7 @@ export class ActionPanel implements OnInit {
     this.selectedTriggerElement = null;
     this.selectedCatalogBetweenOptions = [];
     this.triggerFieldOptions.set([]);
+    this.selectedMultiValues = [];
   }
 
   isCatalogOptionInBetween(value: string | number): boolean {
@@ -337,6 +377,11 @@ export class ActionPanel implements OnInit {
           }
         });
       }
+      if ((operator === 'any_of' || operator === 'all_of') && action.value) {
+        try {
+          this.selectedMultiValues = JSON.parse(action.value);
+        } catch { this.selectedMultiValues = []; }
+      }
     }
 
     // Scroll suave al formulario
@@ -351,5 +396,20 @@ export class ActionPanel implements OnInit {
     this.customActionName = '';
     this.customActionVisibility = 'show';
     this.currentExpression = { expression: '', displayExpression: '', sourceFields: [], isValid: false };
+  }
+
+  isMultiValueSelected(value: string | number): boolean {
+    return this.selectedMultiValues.some(v => String(v) === String(value));
+  }
+
+  toggleMultiValue(value: string | number, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedMultiValues.some(v => String(v) === String(value))) {
+        this.selectedMultiValues = [...this.selectedMultiValues, value];
+      }
+    } else {
+      this.selectedMultiValues = this.selectedMultiValues.filter(v => String(v) !== String(value));
+    }
   }
 }

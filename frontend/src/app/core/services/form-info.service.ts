@@ -61,6 +61,9 @@ export interface GetResponsesFilters {
   providedIn: 'root'
 })
 export class FormInfoService {
+  getResponseById(id_respuesta: number) {
+    throw new Error('Method not implemented.');
+  }
   private readonly FORM_BUILDER_URL = environment.BASE_URL + '/formBuilder';
   private readonly FORM_RESPONSE_URL = environment.BASE_URL + '/form-responses';
   private cacheKey = 'FORM_INFO:';

@@ -1,0 +1,90 @@
+<mat-card class="evaluaciones-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>school</mat-icon>
+      Evaluaciones de Educadores Voluntarios
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if(isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Cargando evaluaciones...</p>
+    </div>
+    } @else if(evaluaciones().length === 0) {
+    <div class="empty-state">
+      <mat-icon>assignment_outlined</mat-icon>
+      <p>No hay evaluaciones registradas</p>
+    </div>
+    } @else {
+    <div class="table-container">
+      <table mat-table [dataSource]="evaluaciones()" class="evaluaciones-table">
+
+        <!-- Educador -->
+        <ng-container matColumnDef="educador">
+          <th mat-header-cell *matHeaderCellDef>Educador</th>
+          <td mat-cell *matCellDef="let e">
+            <span class="nombre-principal">{{ e.educador }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Especialidad -->
+        <ng-container matColumnDef="especialidad">
+          <th mat-header-cell *matHeaderCellDef>Especialidad</th>
+          <td mat-cell *matCellDef="let e">{{ e.especialidad }}</td>
+        </ng-container>
+
+        <!-- ¿Realizó la sesión? -->
+        <ng-container matColumnDef="realizo_sesion">
+          <th mat-header-cell *matHeaderCellDef>¿Realizó sesión?</th>
+          <td mat-cell *matCellDef="let e">
+            <mat-chip-set>
+              <mat-chip [class]="getRealizoSesionColor(e.realizo_sesion)" class="status-chip">
+                {{ e.realizo_sesion }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Evaluador -->
+        <ng-container matColumnDef="evaluador">
+          <th mat-header-cell *matHeaderCellDef>Evaluador</th>
+          <td mat-cell *matCellDef="let e">{{ e.evaluador }}</td>
+        </ng-container>
+
+        <!-- Fecha -->
+        <ng-container matColumnDef="fecha_registro">
+          <th mat-header-cell *matHeaderCellDef>Fecha evaluación</th>
+          <td mat-cell *matCellDef="let e">{{ formatFecha(e.fecha_registro) }}</td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let e">
+            <button mat-icon-button matTooltip="Ver evaluación" (click)="verEvaluacion(e)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Eliminar" class="delete-btn"
+              (click)="eliminarEvaluacion(e)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="totalEvaluaciones"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+    }
+  </mat-card-content>
+</mat-card>

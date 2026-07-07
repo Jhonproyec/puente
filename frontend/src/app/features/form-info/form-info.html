@@ -70,6 +70,18 @@
       </div>
     </div>
   </div>
+  @if(esFomularioFamilias){
+  <app-form-info-familias [formKey]="formKey" />
+  }@else if (esFormularioCarnet && formDataLoaded && formData) {
+  <app-form-info-carnet [formKey]="formKey" [formId]="formData!.id_formulario" />
+  } @else if (esFormularioHitos) {
+  <app-form-info-hitos [formKey]="formKey" />
+  }@else if(esFormularioCentroNutreme) {
+    <app-form-info-centro-nutreme></app-form-info-centro-nutreme>
+  }@else if(esFormularioDocentes) {
+    <app-form-info-docentes></app-form-info-docentes>
+  }
+  @else{
   <div class="main-card" style="margin-top: 15px;">
     <div class="responses-header">
       <h2><mat-icon>table_view</mat-icon> Respuestas Registradas</h2>
@@ -147,4 +159,6 @@
     </mat-paginator>
     }
   </div>
+  }
+
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,6 +11,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { FillFormModal } from '../fill-form-modal/fill-form-modal';
 import { FormInfoData, FormInfoService, FormResponse, GetResponsesFilters } from '../../core/services/form-info.service';
+import { FormInfoFamilias } from './components/form-info-familias/form-info-familias';
+import { CARNET_FORM_UUID, CENTRO_NUTREME_FORM_UUID, DOCENTES_FORM_KEY, FAMILIA_FORM_UUID, HITOS_FORM_UUID } from '../../core/constants/form-regions.constants';
+import { FormInfoCarnet } from './components/form-info-carnet/form-info-carnet';
+import { FormInfoHitos } from './components/form-info-hitos/form-info-hitos';
+import { FormInfoCentroNutreme } from './components/form-info-centro-nutreme/form-info-centro-nutreme';
+import { FormInfoDocentes } from './components/form-info-docentes/form-info-docentes';
 
 @Component({
   selector: 'app-form-info',
@@ -24,7 +30,12 @@ import { FormInfoData, FormInfoService, FormResponse, GetResponsesFilters } from
     MatTableModule,
     MatPaginatorModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    FormInfoFamilias,
+    FormInfoCarnet,
+    FormInfoHitos,
+    FormInfoCentroNutreme,
+    FormInfoDocentes,
   ],
   templateUrl: './form-info.html',
   styleUrl: './form-info.css'
@@ -36,12 +47,30 @@ export class FormInfo implements OnInit {
   isLoadingInfo = true;
   isLoadingTable = false;
 
+  esFormularioCarnet = false;
+  formId = 0;
+  formDataLoaded = false;
+
   // Tabla
   responses: FormResponse[] = [];
   totalResponses = 0;
   pageSize = 10;
   pageIndex = 0;
   displayedColumns = ['fecha', 'usuario', 'departamento', 'comunidad', 'personas', 'acciones'];
+
+  esFomularioFamilias: Boolean = false;
+  esFormularioCentroNutreme: Boolean = false;
+  esFormularioDocentes = false;
+  @ViewChild(FormInfoFamilias) formInfoFamiliasRef?: FormInfoFamilias;
+  @ViewChild(FormInfoCarnet) formInfoCarnetRef?: FormInfoCarnet;
+  @ViewChild(FormInfoHitos) formInfoHitosRef?: FormInfoHitos;
+  @ViewChild(FormInfoCentroNutreme) formCentroNutremeRef?: FormInfoCentroNutreme;
+  @ViewChild(FormInfoDocentes) formInfoDocentesRef?: FormInfoDocentes;
+
+
+  // VARIABLES FORMULARIO HITOS
+  esFormularioHitos = false;
+
 
   constructor(
     private router: Router,
@@ -54,9 +83,32 @@ export class FormInfo implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.formKey = params['uuid'];
+
+      //Validar si es el formulario de familias
+      this.esFomularioFamilias = this.formKey === FAMILIA_FORM_UUID;
+      this.esFormularioCarnet = this.formKey === CARNET_FORM_UUID;
+      this.esFormularioHitos = this.formKey === HITOS_FORM_UUID;
+      this.esFormularioCentroNutreme = this.formKey === CENTRO_NUTREME_FORM_UUID
+      this.esFormularioDocentes = this.formKey === DOCENTES_FORM_KEY;
+
       this.loadFormInfo();
-      this.loadResponses();
+
+      if (this.esFomularioFamilias) {
+        // hijo lo maneja
+      } else if (this.esFormularioCarnet) {
+        // hijo lo maneja
+      } else if (this.esFormularioHitos) {
+        // hijo lo maneja
+      } else if(this.esFormularioCentroNutreme){
+        // hijo lo maneja
+      } else if(this.esFormularioDocentes){
+        //hijo l omaneja
+      }
+      else {
+        this.loadResponses();
+      }
     });
+
   }
 
   loadFormInfo(): void {
@@ -65,10 +117,12 @@ export class FormInfo implements OnInit {
       next: (data) => {
         this.formData = data;
         this.isLoadingInfo = false;
+        this.formDataLoaded = true;
         this.cdr.markForCheck();
       },
       error: () => {
         this.isLoadingInfo = false;
+        this.formDataLoaded = true;
         this.cdr.markForCheck();
       }
     });
@@ -100,6 +154,10 @@ export class FormInfo implements OnInit {
     this.loadResponses();
   }
 
+  // onFillForm(): void {
+  //   this.router.navigate([`/formulario/${this.formKey}/fill`]);
+  // }
+
   onFillForm(): void {
     const dialogRef = this.dialog.open(FillFormModal, {
       width: '80vw',
@@ -110,11 +168,24 @@ export class FormInfo implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.success) {
-        // ✅ Invalidar cache y recargar
         this.formInfoService.invalidateInfoCache(this.formKey);
         setTimeout(() => {
           this.loadFormInfo();
-          this.loadResponses();
+          if (this.esFomularioFamilias) {
+            this.formInfoFamiliasRef?.loadFamilias();
+          } else if (this.esFormularioCarnet) {
+            // ✅ Recargar tabla de carnet
+            this.formInfoCarnetRef?.loadPersonas();
+          } else if (this.esFormularioHitos) {
+            this.formInfoHitosRef?.loadEncuestas();
+          } else if(this.esFormularioCentroNutreme){
+            this.formCentroNutremeRef?.loadEvaluaciones();
+          }else if(this.esFormularioDocentes){
+            this.formInfoDocentesRef?.loadEvaluaciones();
+          }
+          else {
+            this.loadResponses();
+          }
         }, 0);
       }
     });

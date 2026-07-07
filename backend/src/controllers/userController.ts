@@ -5,34 +5,6 @@ import { userService } from '@/services/user.service';
 import { Request, Response, NextFunction } from 'express';
 
 class UserController {
-  // async getProfile(
-  //   req: AuthenticatedRequestInterface,
-  //   res: Response,
-  //   next: NextFunction
-  // ): Promise<void> {
-  //   try {
-  //     if (!req.user) {
-  //       res.status(401).json({
-  //         success: false,
-  //         error: {
-  //           message: 'Autenticación requerida',
-  //           statusCode: 401,
-  //         },
-  //       });
-  //       throw new Error('Autenticación requerida');
-  //     }
-
-  //     const user = await userService.getUserProfile(req.user.id);
-
-  //     res.status(200).json({
-  //       success: true,
-  //       message: 'Perfil de usuario',
-  //       data: { user },
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
 
   async updateProfile(
     req: Request,
@@ -40,21 +12,22 @@ class UserController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const{userId, firstName, lastName, email, role, departamentos, comunidades, forms} = req.body;
+      const { userId, firstName, lastName, email, role, departamentos, comunidades, forms, dpi } = req.body;
       const data: UserPayloadInterface = {
-        idUser: userId, 
-        firstName, 
+        idUser: userId,
+        firstName,
         lastName,
         email,
-        rol: role, 
+        rol: role,
         deparaments: departamentos,
         comunidades: comunidades,
         forms,
-        isActive: true
+        isActive: true,
+        dpi
       };
       const updatedUser = await userService.updateUserProfile(userId, data);
       const response: ApiResponseInterface = {
-        success: true, 
+        success: true,
         message: "Usuario editado correctamente",
         data: updatedUser
       }
@@ -123,18 +96,40 @@ class UserController {
     }
   }
 
-  // async changePassword(req: Request, res: Response, next: NextFunction): Promise<void>{
-  //   try {
-  //     const { idUser, oldPassword, newPassword} = req.body;
-  //     await userService.changePassword(idUser, oldPassword, newPassword);
-  //     res.status(200).json({
-  //       success: true, 
-  //       message: 'Contraseña actualizada correctamente'
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
+  async generarQrUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const result = await userService.generarQrUsuarioOnDemand(Number(userId));
+      res.status(200).json({
+        success: true,
+        message: 'QR generado',
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateMyName(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId, nombres, apellidos } = req.body;
+      console.log("El body", req.body);
+      await userService.updateMyName(Number(userId), nombres, apellidos);
+      res.status(200).json({ success: true, message: 'Nombre actualizado correctamente' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId, currentPassword, newPassword } = req.body;
+      await userService.changePassword(Number(userId), currentPassword, newPassword);
+      res.status(200).json({ success: true, message: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const userController = new UserController();

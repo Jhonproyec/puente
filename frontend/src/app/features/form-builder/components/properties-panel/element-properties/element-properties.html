@@ -20,8 +20,8 @@
   </div>
 </div>
 <!-- Element Properties -->
-<div *ngIf="isElement() && asElement().type !== 'survey'" class="properties-form">
-  <!-- Element Type -->
+<div *ngIf="isElement() && asElement().type !== 'survey' && asElement().type !== 'evaluation-table'"
+  class="properties-form"> <!-- Element Type -->
   <div class="form-group">
     <label class="form-label">Tipo de Campo</label>
     <select class="form-select" [ngModel]="asElement().type" (ngModelChange)="updateElementProperty('type', $event)">
@@ -224,10 +224,15 @@
     </div>
   </div>
   @if(!isHeadingType()){
-    <app-element-image-editor *ngIf="isElement()" [element]="asElement()"></app-element-image-editor>
+  <app-element-image-editor *ngIf="isElement()" [element]="asElement()"></app-element-image-editor>
   }
 </div>
 
 <div *ngIf="isElement() && asElement().type === 'survey'" class="properties-form">
   <app-survey-properties [element]="asElement()"></app-survey-properties>
+</div>
+
+<div *ngIf="isElement() && asElement().type === 'evaluation-table'" class="properties-form">
+  <app-evaluation-table-properties [element]="asElement()">
+  </app-evaluation-table-properties>
 </div>

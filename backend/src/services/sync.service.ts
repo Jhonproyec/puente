@@ -1,12 +1,12 @@
 import { prisma } from "@/config/database";
 import { logger } from "@/config/logger";
+import { CARNET_FORM_UUID, FAMILIA_FORM_UUID } from "@/constants/form-regions.constants";
 
 export class SyncService {
     async getInitialSyncData(userId: number) {
         try {
             logger.info(`[SYNC] Iniciando sync para usuario ${userId}`);
 
-            //Primero obtener el usuario y sus comunidades asignadas
             const user = await prisma.usuario.findUnique({
                 where: { id_usuario: userId },
                 select: {
@@ -29,6 +29,10 @@ export class SyncService {
                 }`
             );
 
+            const comunidadesFilter = hasAssignedComunidades
+                ? { id_comunidad: { in: userComunidadeIds } }
+                : {};
+
             const [
                 formularios,
                 catalogs,
@@ -37,7 +41,13 @@ export class SyncService {
                 centrosAtencion,
                 rangosHito,
                 personas,
+                familias,
+                centrosNutreme,
+                usuarios,
+                carnetRespuestas,
             ] = await Promise.all([
+
+                // Formularios
                 prisma.formulario.findMany({
                     where: {
                         estado_registro: true,
@@ -57,6 +67,7 @@ export class SyncService {
                     }
                 }),
 
+                // Catálogos
                 prisma.catalog.findMany({
                     where: { estado_registro: true },
                     include: {
@@ -71,7 +82,7 @@ export class SyncService {
                     }
                 }),
 
-                //Solo departamentos con comunidades del usuario
+                // Departamentos
                 prisma.departamento.findMany({
                     where: {
                         estado_registro: true,
@@ -90,13 +101,11 @@ export class SyncService {
                     }
                 }),
 
-                //Solo comunidades asignadas o todas
+                // Comunidades
                 prisma.comunidad.findMany({
                     where: {
                         estado_registro: true,
-                        ...(hasAssignedComunidades ? {
-                            id_comunidad: { in: userComunidadeIds }
-                        } : {})
+                        ...comunidadesFilter,
                     },
                     select: {
                         id_comunidad: true,
@@ -105,7 +114,7 @@ export class SyncService {
                     }
                 }),
 
-                //Solo centros de las comunidades asignadas
+                // Centros de atención
                 prisma.centroAtencion.findMany({
                     where: {
                         estado_registro: true,
@@ -120,6 +129,7 @@ export class SyncService {
                     }
                 }),
 
+                // Rangos hito
                 prisma.rangoHito.findMany({
                     where: { estado_registro: true },
                     include: {
@@ -134,7 +144,7 @@ export class SyncService {
                     }
                 }),
 
-                //Solo personas de las comunidades asignadas
+                // Personas
                 prisma.persona.findMany({
                     where: {
                         estado_registro: true,
@@ -145,6 +155,7 @@ export class SyncService {
                     select: {
                         id_persona: true,
                         cui: true,
+                        codigo_temporal: true,
                         nombres: true,
                         apellidos: true,
                         fecha_nacimiento: true,
@@ -155,14 +166,96 @@ export class SyncService {
                         tipo_persona: true,
                         id_comunidad: true,
                         datos_extra: true,
+                        registro_incompleto: true,
+                        qr_path: true,
                     }
                 }),
-            ]);
 
-            logger.info(
-                `[SYNC] Datos listos: ${formularios.length} formularios, ` +
-                `${comunidades.length} comunidades, ${personas.length} personas`
-            );
+                // Familias con integrantes y última respuesta del formulario de familias
+                prisma.familia.findMany({
+                    where: {
+                        estado_registro: true,
+                        ...(hasAssignedComunidades ? {
+                            id_comunidad: { in: userComunidadeIds }
+                        } : {})
+                    },
+                    select: {
+                        id_familia: true,
+                        codigo: true,
+                        id_madre: true,
+                        id_comunidad: true,
+                        qr_path: true,
+                        fecha_registro: true,
+                        integrantes: {
+                            where: { estado_registro: true },
+                            select: {
+                                id_persona: true,
+                                rol: true,
+                            }
+                        },
+                        // Solo respuestas del formulario de registro de familias
+                        respuestas: {
+                            where: {
+                                estado_registro: true,
+                                formulario: { uuid: FAMILIA_FORM_UUID },
+                            },
+                            orderBy: { fecha_registro: 'desc' },
+                            take: 1,
+                            select: {
+                                id_respuesta: true,
+                                datos_limpios: true,
+                                version_form: true,
+                            }
+                        }
+                    }
+                }),
+
+                prisma.centroNutreme.findMany({
+                    where: {estado_registro: true},
+                    select:{
+                        id_centro_nutreme: true, 
+                        uuid: true, 
+                        codigo: true, 
+                        nombre: true, 
+                        id_comunidad: true, 
+                        latitud: true, 
+                        longitud: true,
+                    },
+                    orderBy: {nombre: 'asc'}
+                }),
+
+                prisma.usuario.findMany({
+                    where: {estado_registro: true},
+                    select: {
+                        id_usuario: true, 
+                        nombres: true, 
+                        apellidos: true, 
+                        dpi: true,
+                    },
+                    orderBy: {nombres: 'asc'}
+                }),
+
+                prisma.formularioRespuesta.findMany({
+                    where: {
+                        estado_registro: true, 
+                        formulario: {uuid: CARNET_FORM_UUID},
+                        ...(hasAssignedComunidades ? {id_comunidad: {in: userComunidadeIds}} : {})
+                    },
+                    select: {
+                        id_respuesta: true, 
+                        datos_limpios: true, 
+                        version_form: true, 
+                        id_comunidad: true, 
+                        personas: {
+                            select: {id_persona: true}
+                        },
+                        carnetBimestres: {
+                            where: {estado_registro: true},
+                            select: {mes:  true, bimestre: true, huellas: true}
+                        }
+                    }
+                })
+            ]);
 
             return {
                 user,
@@ -184,6 +277,27 @@ export class SyncService {
                     items: r.items,
                 })),
                 personas,
+                familias: familias.map(f => ({
+                    id_familia: f.id_familia,
+                    codigo: f.codigo,
+                    id_madre: f.id_madre,
+                    id_comunidad: f.id_comunidad,
+                    qr_path: f.qr_path,
+                    fecha_registro: f.fecha_registro,
+                    id_respuesta: f.respuestas[0]?.id_respuesta || null,
+                    datos_limpios: f.respuestas[0]?.datos_limpios || null,
+                    integrantes: f.integrantes,
+                })),
+                centrosNutreme,
+                usuarios,
+                carnetRespuestas: carnetRespuestas.map(r => ({
+                    id_respuesta: r.id_respuesta,
+                    datos_limpios: r.datos_limpios,
+                    version_form: r.version_form,
+                    id_persona: r.personas[0]?.id_persona || null,
+                    id_comunidad: r.id_comunidad,
+                    bimestres: r.carnetBimestres
+                })),
             };
 
         } catch (error) {

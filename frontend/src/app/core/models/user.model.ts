@@ -5,7 +5,8 @@ export interface User{
     lastName: string;
     rol: string;
     access_global: boolean;
-    permissions: string[]
+    permissions: string[];
+    dpi: string | null;
 }
 
 export interface FormSession{

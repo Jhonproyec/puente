@@ -17,6 +17,7 @@ export interface FormElement {
   actions: DynamicAction[];
   validations: ValidationRule[];
   formulas?: Formula[];
+  generateTempCode?: boolean;
   image?: ImageConfig;
   ratingConfig?: RatingConfig;
   cameraConfig?: CameraConfig;
@@ -27,18 +28,21 @@ export interface FormElement {
   helpText?: string;
   fieldRole?: string;
   isPersonIdentifier?: boolean;
+  evaluationTableConfig?: EvaluationTableConfig;
 }
 
 export interface FormRegion {
   id: string;
   type: 'region';
   title: string;
-  elements: FormElement[];
+  children: (FormElement | FormRegion)[];
+  // elements: FormElement[];
   actions: DynamicAction[];
   validations: ValidationRule[];
   image?: ImageConfig;
   repeatConfig?: any;
   regionType?: 'persona' | 'default';
+  parentRegionId?: string;
 
 }
 
@@ -46,6 +50,41 @@ export interface FormDefinition {
   name: string;
   regions: FormRegion[];
   globalFormulas?: Formula[];
+}
+
+
+export interface TableSimpleColumn {
+  id: string;
+  label: string;
+}
+
+export interface TableColumnGroup {
+  id: string;
+  label: string;
+  selectionType: 'single' | 'multiple';
+  optionSource: 'manual' | 'catalog';
+  catalogType?: string;
+  columns: { id: string; label: string }[];
+}
+export interface TableRow {
+  id: string;
+  label: string;
+}
+
+
+export interface TableColumn {
+  id: string;
+  label: string;
+  type: 'simple';  // checkbox independiente
+}
+
+export interface EvaluationTableConfig {
+  descriptionSource: 'manual' | 'catalog';
+  catalogType?: string;
+  catalogSelectedIds?: string[];
+  rows: TableRow[];
+  simpleColumns: TableSimpleColumn[];
+  columnGroups: TableColumnGroup[];
 }
 
 export type ElementType =
@@ -60,7 +99,8 @@ export type ElementType =
   | 'camera'
   | 'rating'
   | 'survey'
-  | 'time' | 'phone' | 'coordinates' | 'heading';
+  | 'time' | 'phone' | 'coordinates' | 'heading'
+  | 'evaluation-table';
 
 export interface DynamicAction {
   triggerField: string;
@@ -281,10 +321,10 @@ export interface SurveyResponse {
 }
 
 export interface SurveyConfig {
-mode: 'catalog_question' | 'catalog_subtotal' | 'catalog_stars' | 'result';
-  displayType: 'text' | 'images';       
-  multipleSelection: boolean;           
-  catalogOptions?: CatalogSurveyOption[]; 
+  mode: 'catalog_question' | 'catalog_subtotal' | 'catalog_stars' | 'result';
+  displayType: 'text' | 'images';
+  multipleSelection: boolean;
+  catalogOptions?: CatalogSurveyOption[];
   linkedFieldIds?: string[];
   catalogType?: string;
   catalogSelectedIds?: string[];

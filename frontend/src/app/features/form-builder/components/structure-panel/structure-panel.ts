@@ -1,20 +1,21 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  CdkDragDrop,
-  DragDropModule,
-  moveItemInArray,
-  transferArrayItem
-} from '@angular/cdk/drag-drop';
+// import {
+//   CdkDragDrop,
+//   DragDropModule,
+//   moveItemInArray,
+//   transferArrayItem
+// } from '@angular/cdk/drag-drop';
 import { Subject, takeUntil } from 'rxjs';
 import { FormBuilderStateService } from '../../../../core/services/form-builder-state.service';
 import { FormDefinition, FormElement, FormRegion, ViewMode } from '../../../../core/models/form-builder.model';
 import { MatIconModule } from '@angular/material/icon';
+import { SortableDirective, SortableDropEvent } from '../../../../shared/directives/sortable.directive';
 
 @Component({
   selector: 'app-structure-panel',
   standalone: true,
-  imports: [CommonModule, DragDropModule, MatIconModule],
+  imports: [CommonModule, SortableDirective, MatIconModule],
   templateUrl: './structure-panel.html',
   styleUrl: './structure-panel.css'
 })
@@ -28,6 +29,12 @@ export class StructurePanel implements OnInit, OnDestroy {
   formDefinition: FormDefinition | null = null;
   selectedRegionId: string | null = null;
   selectedElementId: string | null = null;
+  openSubRegionDropdown: string | null = null;
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.openSubRegionDropdown = null;
+  }
 
   constructor(public stateService: FormBuilderStateService) { }
 
@@ -45,6 +52,10 @@ export class StructurePanel implements OnInit, OnDestroy {
     this.stateService.selectedElement$
       .pipe(takeUntil(this.destroy$))
       .subscribe(id => this.selectedElementId = id);
+
+    document.addEventListener('click', () => {
+      this.openSubRegionDropdown = null;
+    });
   }
 
   ngOnDestroy(): void {
@@ -154,74 +165,108 @@ export class StructurePanel implements OnInit, OnDestroy {
 
   // =================== DRAG & DROP ===================
 
-  dropRegion(event: CdkDragDrop<FormRegion[]>): void {
-    if (event.previousIndex === event.currentIndex) return;
+  // dropRegion(event: CdkDragDrop<FormRegion[]>): void {
+  //   if (event.previousIndex === event.currentIndex) return;
 
-    moveItemInArray(
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex
-    );
+  //   moveItemInArray(
+  //     event.container.data,
+  //     event.previousIndex,
+  //     event.currentIndex
+  //   );
 
-    // 🔑 Actualizar el estado
-    this.stateService.updateFormDefinition({ ...this.formDefinition! });
+  //   // 🔑 Actualizar el estado
+  //   this.stateService.updateFormDefinition({ ...this.formDefinition! });
+  // }
+  // ── Drag & Drop para anidar regiones ──────────────────────
+  // isDraggingRegion = false;
+  // draggingRegionId: string | null = null;
+
+  // onRegionDragStarted(regionId: string): void {
+  //   this.isDraggingRegion = true;
+  //   this.draggingRegionId = regionId;
+  // }
+
+  // onRegionDragEnded(): void {
+  //   this.isDraggingRegion = false;
+  //   this.draggingRegionId = null;
+  // }
+
+  // onDropIntoRegion(event: DragEvent, parentRegionId: string): void {
+  //   event.stopPropagation();
+  //   if (!this.draggingRegionId) return;
+  //   if (this.draggingRegionId === parentRegionId) return;
+  //   this.stateService.nestRegionInto(this.draggingRegionId, parentRegionId);
+  //   this.expandedRegions.add(parentRegionId);
+  //   this.isDraggingRegion = false;
+  //   this.draggingRegionId = null;
+  // }
+
+  // canDropInto(parentRegionId: string): boolean {
+  //   if (!this.isDraggingRegion || !this.draggingRegionId) return false;
+  //   if (this.draggingRegionId === parentRegionId) return false;
+  //   const dragging = this.stateService.findRegionById(this.draggingRegionId);
+  //   if (!dragging) return false;
+  //   // Evitar ciclos: buscar en los hijos que sean regiones
+  //   const draggingSubRegions = dragging.children.filter(c => this.stateService.isRegion(c)) as FormRegion[];
+  //   return !this.stateService.findRegionById(parentRegionId, draggingSubRegions);
+  // }
+
+  onUnnestRegion(regionId: string): void {
+    this.stateService.unnestRegion(regionId);
   }
 
-  dropElement(event: CdkDragDrop<FormElement[]>): void {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-    }
+  // dropChild(event: CdkDragDrop<(FormElement | FormRegion)[]>, region: FormRegion): void {
+  //   if (event.previousContainer === event.container) {
+  //     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+  //   } else {
+  //     transferArrayItem(
+  //       event.previousContainer.data,
+  //       event.container.data,
+  //       event.previousIndex,
+  //       event.currentIndex
+  //     );
+  //   }
+  //   this.stateService.updateFormDefinition({ ...this.formDefinition! });
+  // }
 
-    // 🔑 Actualizar el estado
-    this.stateService.updateFormDefinition({ ...this.formDefinition! });
-  }
+
 
   // =================== ACTIONS & VALIDATIONS VIEW ===================
 
   getAllActions(): Array<{ region?: FormRegion; element?: FormElement; actions: any[] }> {
     if (!this.formDefinition) return [];
-
     const result: Array<{ region?: FormRegion; element?: FormElement; actions: any[] }> = [];
 
-    this.formDefinition.regions.forEach(region => {
-      if (region.actions && region.actions.length > 0) {
-        result.push({ region, actions: region.actions });
-      }
-
-      region.elements.forEach(element => {
-        if (element.actions && element.actions.length > 0) {
-          result.push({ element, actions: element.actions });
+    const processRegion = (region: FormRegion) => {
+      if (region.actions?.length) result.push({ region, actions: region.actions });
+      region.children.forEach(c => {
+        if (this.stateService.isRegion(c)) {
+          processRegion(c);
+        } else if (c.actions?.length) {
+          result.push({ element: c, actions: c.actions });
         }
       });
-    });
+    };
 
+    this.formDefinition.regions.forEach(processRegion);
     return result;
   }
 
   getAllValidations(): Array<{ element: FormElement; validations: any[] }> {
     if (!this.formDefinition) return [];
-
     const result: Array<{ element: FormElement; validations: any[] }> = [];
 
-    this.formDefinition.regions.forEach(region => {
-      region.elements.forEach(element => {
-        if (element.validations && element.validations.length > 0) {
-          result.push({ element, validations: element.validations });
+    const processRegion = (region: FormRegion) => {
+      region.children.forEach(c => {
+        if (this.stateService.isRegion(c)) {
+          processRegion(c);
+        } else if (c.validations?.length) {
+          result.push({ element: c, validations: c.validations });
         }
       });
-    });
+    };
 
+    this.formDefinition.regions.forEach(processRegion);
     return result;
   }
 
@@ -270,236 +315,10 @@ export class StructurePanel implements OnInit, OnDestroy {
 
 
   onAddPersonRegion(): void {
-    if (!this.stateService.formDefinition) return;
-
-    const regionId = `region_persona_${Date.now()}`;
-    const cuiId = `persona_cui_${Date.now()}_0`;
-    const esHijoId = `persona_es_hijo_${Date.now()}_1`;
-    const cuiMadreId = `persona_cui_madre_${Date.now()}_2`;
-
-    const personRegion: FormRegion = {
-      id: regionId,
-      type: 'region',
-      regionType: 'persona',          // ✅ Identificador interno
-      title: 'Datos de la Persona',
-      actions: [],
-      validations: [],
-      repeatConfig: '',
-      elements: [
-        {
-          id: cuiId,
-          type: 'number',
-          label: 'CUI',
-          placeholder: 'Ingrese el CUI',
-          required: true,
-          fieldRole: 'cui',
-          isPersonIdentifier: true,
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [
-            { type: 'min_length', value: '13', message: 'El CUI debe tener al menos 13 dígitos' },
-            { type: 'max_length', value: '15', message: 'El CUI debe tener al menos 13 dígitos' },
-            { type: 'only_numbers', value: '', message: 'El CUI solo debe contener números' }
-          ],
-          formulas: []
-        },
-        {
-          id: `persona_nombres_${Date.now()}_3`,
-          type: 'text',
-          label: 'Nombres',
-          placeholder: 'Ingrese los nombres',
-          required: true,
-          fieldRole: 'nombres',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: `persona_apellidos_${Date.now()}_4`,
-          type: 'text',
-          label: 'Apellidos',
-          placeholder: 'Ingrese los apellidos',
-          required: true,
-          fieldRole: 'apellidos',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: `persona_fecha_nac_${Date.now()}_5`,
-          type: 'date',
-          label: 'Fecha de Nacimiento',
-          placeholder: '',
-          required: true,
-          fieldRole: 'fecha_nacimiento',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: `persona_direccion_${Date.now()}_6`,
-          type: 'text',
-          label: 'Dirección',
-          placeholder: 'Ingrese la dirección',
-          required: false,
-          fieldRole: 'direccion',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: `persona_sexo_${Date.now()}_7`,
-          type: 'select',
-          label: 'Sexo',
-          placeholder: '',
-          required: true,
-          fieldRole: 'sexo',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [
-            { id: 1, nombre: 'Masculino' },
-            { id: 2, nombre: 'Femenino' }
-          ],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: `persona_fecha_programa_${Date.now()}_8`,
-          type: 'date',
-          label: 'Fecha de ingreso al programa',
-          placeholder: '',
-          required: true,
-          fieldRole: 'fecha_ingreso_programa',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: esHijoId,
-          type: 'select',
-          label: '¿Es hijo/a?',
-          placeholder: '',
-          required: true,
-          fieldRole: 'es_hijo',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [
-            "23",
-            "24"
-          ],
-          catalogType: "6",
-          actions: [],
-          validations: [],
-          formulas: []
-        },
-        {
-          id: cuiMadreId,
-          type: 'number',
-          label: 'CUI de la Madre',
-          placeholder: 'Ingrese el CUI de la madre',
-          required: true,
-          fieldRole: 'cui_madre',
-          multipleSelecction: false,
-          options: [],
-          selectedOptions: [],
-          catalogType: null,
-          actions: [
-            {
-              name: 'Mostrar si es hijo',
-              triggerField: esHijoId,
-              triggerLabel: '¿Es hijo/a?',
-              type: "show_if_equals",
-              value: '23',
-              betweenType: "number",
-            }
-          ],
-          validations: [
-            { type: 'min_length', value: '13', message: 'El CUI de la madre debe tener al menos 13 dígitos' },
-            { type: 'max_length', value: '15', message: 'El CUI de la madre debe tener al menos 13 o 15 dígitos' },
-            { type: 'only_numbers', value: '', message: 'El CUI solo debe contener números' }
-          ],
-          formulas: []
-        },
-        // {
-        //   id: `persona_nombres_madre_${Date.now()}_9`,
-        //   type: 'text',
-        //   label: 'Nombres de la Madre',
-        //   placeholder: 'Ingrese los nombres de la madre',
-        //   required: false,
-        //   fieldRole: 'nombres_madre',
-        //   multipleSelecction: false,
-        //   options: [],
-        //   selectedOptions: [],
-        //   catalogType: null,
-        //   actions: [
-        //     {
-        //       name: 'Mostrar si es hijo',
-        //       triggerField: esHijoId,
-        //       triggerLabel: '¿Es hijo/a?',
-        //       type: "show_if_equals",
-        //       value: '23',
-        //       betweenType: "number",
-        //     }
-        //   ],
-        //   validations: [],
-        //   formulas: []
-        // },
-        // {
-        //   id: `persona_apellidos_madre_${Date.now()}_10`,
-        //   type: 'text',
-        //   label: 'Apellidos de la Madre',
-        //   placeholder: 'Ingrese los apellidos de la madre',
-        //   required: false,
-        //   fieldRole: 'apellidos_madre',
-        //   multipleSelecction: false,
-        //   options: [],
-        //   selectedOptions: [],
-        //   catalogType: null,
-        //   actions: [
-        //     {
-        //       name: 'Mostrar si es hijo',
-        //       triggerField: esHijoId,
-        //       triggerLabel: '¿Es hijo/a?',
-        //       type: "show_if_equals",
-        //       value: '23',
-        //       betweenType: "number",
-        //     }
-        //   ],
-        //   validations: [],
-        //   formulas: []
-        // }
-      ]
-    };
-
-    // ✅ Agregar al formDefinition
+    const personRegion = this.stateService.buildPersonRegion();
     this.stateService.formDefinition.regions.push(personRegion);
     this.stateService.updateFormDefinition({ ...this.stateService.formDefinition });
-    this.stateService.selectRegion(regionId);
+    this.stateService.selectRegion(personRegion.id);
   }
 
   isPersonIdentifier(element: FormElement): boolean {
@@ -523,4 +342,110 @@ export class StructurePanel implements OnInit, OnDestroy {
   isRegionExpanded(regionId: string): boolean {
     return this.expandedRegions.has(regionId);
   }
+
+
+  toggleSubRegionDropdown(regionId: string, event: Event): void {
+    event.stopPropagation();
+    this.openSubRegionDropdown = this.openSubRegionDropdown === regionId ? null : regionId;
+  }
+
+  onAddNewSubRegion(parentRegionId: string): void {
+    this.openSubRegionDropdown = null;
+    const subRegion = this.stateService.addSubRegion(parentRegionId);
+    if (subRegion) {
+      this.expandedRegions.add(parentRegionId);
+      this.stateService.selectRegion(subRegion.id);
+    }
+  }
+
+  onNestExistingRegion(regionId: string, parentRegionId: string): void {
+    this.openSubRegionDropdown = null;
+    this.stateService.nestRegionInto(regionId, parentRegionId);
+    this.expandedRegions.add(parentRegionId);
+  }
+
+  getAvailableRegionsToNest(parentRegionId: string): FormRegion[] {
+    if (!this.formDefinition) return [];
+    return this.formDefinition.regions.filter(r =>
+      r.id !== parentRegionId &&
+      !r.parentRegionId &&
+      !r.children.some(c => this.stateService.isRegion(c))
+    );
+  }
+
+  getElementCount(region: FormRegion): number {
+    return region.children.filter(c => !this.stateService.isRegion(c)).length;
+  }
+
+  getSubRegionCount(region: FormRegion): number {
+    return region.children.filter(c => this.stateService.isRegion(c)).length;
+  }
+
+  hasSubRegions(region: FormRegion): boolean {
+    return region.children.some(c => this.stateService.isRegion(c));
+  }
+
+  onSortableDrop(event: SortableDropEvent): void {
+    const { fromContainerId, toContainerId, oldIndex, newIndex } = event;
+    if (fromContainerId === toContainerId && oldIndex === newIndex) return;
+
+    const form = this.stateService.formDefinition;
+    const cloned: FormDefinition = JSON.parse(JSON.stringify(form));
+
+    const fromList = this.findChildrenById(cloned.regions, fromContainerId);
+    const toList = this.findChildrenById(cloned.regions, toContainerId);
+    if (!fromList || !toList) return;
+
+    const [moved] = fromList.splice(oldIndex, 1);
+    if (!moved) return;
+
+    if (this.stateService.isRegion(moved as any)) {
+      const targetIsRegion = this.stateService.findRegionById(toContainerId, cloned.regions);
+      (moved as any).parentRegionId = targetIsRegion ? toContainerId : undefined;
+    }
+
+    toList.splice(newIndex, 0, moved);
+    this.stateService.updateFormDefinition(cloned);
+  }
+  private findChildrenById(
+    regions: FormRegion[],
+    containerId: string
+  ): (FormElement | FormRegion)[] | null {
+    if (containerId === 'root') return regions as any;
+    for (const region of regions) {
+      if (region.id === containerId) return region.children;
+      const subRegions = region.children.filter(
+        c => this.stateService.isRegion(c)
+      ) as FormRegion[];
+      const found = this.findChildrenById(subRegions, containerId);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  onAddEvaluationTable(): void {
+    const element = this.stateService.addEvaluationTable();
+    if (!element) {
+      alert('Primero crea una región');
+      return;
+    }
+    const regionId = this.stateService.selectedRegion || '';
+    this.stateService.selectElement(element.id, regionId);
+    this.stateService.setPanelMode('properties');
+  }
+
+  /**
+ * Filtro para el contenedor raíz: solo permite soltar regiones,
+ * nunca elementos sueltos (deben vivir siempre dentro de una región).
+ */
+  rootPutFilter = (dragEl: HTMLElement): boolean => {
+    return !dragEl.classList.contains('element-item');
+  };
+
+  // StructurePanel
+trackById(index: number, item: FormElement | FormRegion): string {
+  return item.id;
+}
+
+
 }

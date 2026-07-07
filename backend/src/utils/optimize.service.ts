@@ -1,18 +1,20 @@
 import { UPLOAD_DIR } from "@/middleware/uploadMiddleware";
 import path from "path";
 import sharp from "sharp";
+import fs from "fs";
 
 export interface ProcessedImage {
-    filename: string;   // nombre físico en disco: abc123.webp
-    ruta: string;       // ruta relativa: uploads/images/abc123.webp
-    size: number;       // bytes del archivo optimizado
-    mime_type: string;  // siempre image/webp
+    filename: string;
+    ruta:     string;
+    size:     number;
+    mime_type: string;
 }
 
 interface OptimizeOptions {
-    maxWidth?: number;   // default: 1920
-    maxHeight?: number;  // default: 1920
-    quality?: number;    // default: 82  (0-100)
+    maxWidth?:  number;
+    maxHeight?: number;
+    quality?:   number;
+    subFolder?: string; // ✅ nuevo
 }
 
 export async function OptimizeAndSave(
@@ -21,48 +23,61 @@ export async function OptimizeAndSave(
     options: OptimizeOptions = {},
 ): Promise<ProcessedImage> {
 
-
     const {
-        maxWidth = 1920,
+        maxWidth  = 1920,
         maxHeight = 1920,
-        quality = 82,
+        quality   = 82,
+        subFolder = '',  // ✅ por defecto vacío — comportamiento anterior
     } = options;
 
-    const hash = crypto.randomUUID().toString();
-    const filename = `${hash}.webp`;
-    const filepath = path.join(UPLOAD_DIR, filename);
+    // ✅ Construir directorio destino
+    const targetDir = subFolder
+        ? path.join(UPLOAD_DIR, subFolder)
+        : UPLOAD_DIR;
 
-    const metadata = await sharp(buffer).metadata();
+    // ✅ Crear subdirectorio si no existe
+    if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    const hash     = crypto.randomUUID().toString();
+    const filename = `${hash}.webp`;
+    const filepath = path.join(targetDir, filename);
+
+    const metadata   = await sharp(buffer).metadata();
     const needsResize =
-        (metadata.width && metadata.width > maxWidth) ||
+        (metadata.width  && metadata.width  > maxWidth)  ||
         (metadata.height && metadata.height > maxHeight);
 
     let pipeline = sharp(buffer).rotate().withMetadata();
 
     if (needsResize) {
         pipeline = pipeline.resize(maxWidth, maxHeight, {
-            fit: 'inside',        // mantiene aspecto, no recorta
+            fit:              'inside',
             withoutEnlargement: true,
         });
     }
 
     const outputBuffer = await pipeline
-        .webp({ quality, effort: 4 })  // effort 4: buen balance velocidad/compresión
+        .webp({ quality, effort: 4 })
         .toBuffer();
 
-
     await sharp(outputBuffer).toFile(filepath);
-    // ── Log de compresión ─────────────────────────────────────────
-    const originalKB = (buffer.byteLength / 1024).toFixed(1);
+
+    const originalKB  = (buffer.byteLength  / 1024).toFixed(1);
     const optimizedKB = (outputBuffer.byteLength / 1024).toFixed(1);
-    const saving = (((buffer.byteLength - outputBuffer.byteLength) / buffer.byteLength) * 100).toFixed(1);
+    const saving      = (((buffer.byteLength - outputBuffer.byteLength) / buffer.byteLength) * 100).toFixed(1);
     console.log(`📸 ${originalName}: ${originalKB}KB → ${optimizedKB}KB (${saving}% ahorro)`);
+
+    // ✅ Ruta relativa incluyendo el subFolder
+    const rutaRelativa = subFolder
+        ? `uploads/images/${subFolder}/${filename}`
+        : `uploads/images/${filename}`;
 
     return {
         filename,
-        ruta: `uploads/images/${filename}`,
-        size: outputBuffer.byteLength,
+        ruta:      rutaRelativa,
+        size:      outputBuffer.byteLength,
         mime_type: 'image/webp',
     };
-
 }

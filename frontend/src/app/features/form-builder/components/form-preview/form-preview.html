@@ -19,7 +19,7 @@
       </div>
 
       <div class="preview-region__content">
-        <div *ngFor="let element of region.elements" class="preview-field"
+        <div *ngFor="let element of getRegionElements(region)" class="preview-field"
           [class.preview-field--has-actions]="hasActions(element)">
           <!-- LABEL -->
           <label *ngIf="element.type !== 'heading'" class="preview-field__label"

@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { EvaluationTableProperties } from '../../evaluation-table-properties/evaluation-table-properties';
 
 interface ManualOption {
   id: string | number;
@@ -28,7 +29,8 @@ interface ManualOption {
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    SurveyProperties
+    SurveyProperties,
+    EvaluationTableProperties
   ],
   templateUrl: './element-properties.html',
   styleUrl: './element-properties.css'
@@ -165,7 +167,13 @@ export class ElementProperties implements OnInit, OnChanges, OnDestroy {
   updateNumericFields(form: any): void {
     if (!form) return;
 
-    const allElements = form.regions.flatMap((r: any) => r.elements);
+    const getAllElements = (regions: any[]): any[] =>
+      regions.flatMap((r: any) => [
+        ...(r.children ?? []).filter((c: any) => c.type !== 'region'),
+        ...getAllElements((r.children ?? []).filter((c: any) => c.type === 'region'))
+      ]);
+
+    const allElements = getAllElements(form.regions);
 
     this.allNumericFields = allElements.filter((el: FormElement) =>
       el.type === 'number' &&
@@ -176,16 +184,22 @@ export class ElementProperties implements OnInit, OnChanges, OnDestroy {
   /**
    * Actualiza el array de campos select disponibles
    */
-  updateSelectFields(form: any): void {
-    if (!form) return;
+updateSelectFields(form: any): void {
+  if (!form) return;
 
-    const allElements = form.regions.flatMap((r: any) => r.elements);
+  const getAllElements = (regions: any[]): any[] =>
+    regions.flatMap((r: any) => [
+      ...(r.children ?? []).filter((c: any) => c.type !== 'region'),
+      ...getAllElements((r.children ?? []).filter((c: any) => c.type === 'region'))
+    ]);
 
-    this.allSelectFields = allElements.filter((el: FormElement) =>
-      (el.type === 'select' || el.type === 'radio' || el.type === 'checkbox') &&
-      el.id !== (this.isElement() ? this.asElement().id : '')
-    );
-  }
+  const allElements = getAllElements(form.regions);
+
+  this.allSelectFields = allElements.filter((el: FormElement) =>
+    (el.type === 'select' || el.type === 'radio' || el.type === 'checkbox') &&
+    el.id !== (this.isElement() ? this.asElement().id : '')
+  );
+}
 
   ngOnDestroy(): void {
     this.destroy$.next();

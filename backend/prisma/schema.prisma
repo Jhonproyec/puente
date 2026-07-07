@@ -24,20 +24,25 @@ model Usuario {
   fecha_creacion  DateTime @default(now())
   fecha_edicion   DateTime @updatedAt
   accesso_global  Boolean  @default(false)
-
-  rol Rol @relation(fields: [id_rol], references: [id_rol])
+  dpi             String?  @db.VarChar(13)
+  rol             Rol      @relation(fields: [id_rol], references: [id_rol])
+  qr_path         String?  @db.VarChar(500)
 
   formulariosAsignados   FormularioUsuario[]
   formulariosCreados     Formulario[]          @relation("FormularioCreador")
   formulariosModificados Formulario[]          @relation("FormularioModificador")
   respuestas             FormularioRespuesta[]
   comunidades            UsuarioComunidad[]
+  hitosEncuestas         HitosEncuesta[]
+  centroNutreme         CentroNutreme[]
+
 
   @@index([estado_registro])
   @@index([id_rol])
   @@index([fecha_creacion])
   @@index([estado_registro, fecha_creacion])
   @@index([email, estado_registro])
+  @@index([dpi])
 }
 
 model UsuarioComunidad {
@@ -164,10 +169,13 @@ model Comunidad {
   fecha_edicion   DateTime     @updatedAt
   departamento    Departamento @relation(fields: [id_departamento], references: [id_departamento], onDelete: Cascade)
 
-  usuarios   UsuarioComunidad[]
-  personas   Persona[]
-  respuestas FormularioRespuesta[]
+  usuarios        UsuarioComunidad[]
+  personas        Persona[]
+  respuestas      FormularioRespuesta[]
   centrosAtencion CentroAtencion[]
+  familias        Familia[]
+  hitosEncuestas  HitosEncuesta[]
+  centroNutremes  CentroNutreme[]
 
   @@unique([id_departamento, nombre])
   @@index([estado_registro])
@@ -232,6 +240,7 @@ model Formulario {
   // Usuarios asignados
   usuariosAsignados FormularioUsuario[]
   respuestas        FormularioRespuesta[]
+  hitosEncuestas    HitosEncuesta[]
 
   @@index([estado])
   @@index([estado_registro])
@@ -263,12 +272,15 @@ model FormularioRespuesta {
   estado_registro Boolean  @default(true)
   fecha_registro  DateTime @default(now())
   fecha_edicion   DateTime @updatedAt
+  id_familia      Int?
 
-  formulario   Formulario                   @relation(fields: [id_formulario], references: [id_formulario], onDelete: Cascade)
-  usuario      Usuario?                     @relation(fields: [id_usuario], references: [id_usuario])
-  comunidad    Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
-  departamento Departamento?                @relation(fields: [id_departamento], references: [id_departamento])
-  personas     FormularioRespuestaPersona[]
+  formulario      Formulario                   @relation(fields: [id_formulario], references: [id_formulario], onDelete: Cascade)
+  usuario         Usuario?                     @relation(fields: [id_usuario], references: [id_usuario])
+  comunidad       Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
+  departamento    Departamento?                @relation(fields: [id_departamento], references: [id_departamento])
+  personas        FormularioRespuestaPersona[]
+  familia         Familia?                     @relation(fields: [id_familia], references: [id_familia])
+  carnetBimestres CarnetBimestre[]
 
   @@index([id_formulario])
   @@index([id_formulario, version_form])
@@ -279,6 +291,7 @@ model FormularioRespuesta {
   @@index([estado_registro])
   @@index([id_formulario, id_comunidad, fecha_registro])
   @@index([id_formulario, id_departamento, fecha_registro])
+  @@index([id_familia])
 }
 
 //******** FIN MODELO DE FORMULARIOS
@@ -296,12 +309,19 @@ model Persona {
   tipo_persona           String?   @db.VarChar(20) // 'embarazada', 'nino'
   id_comunidad           Int?
   datos_extra            Json?     @db.JsonB // campos adicionales no estructurados
+  registro_incompleto    Boolean   @default(false)
+  qr_path                String?   @db.VarChar(500)
   estado_registro        Boolean   @default(true)
   fecha_registro         DateTime  @default(now())
   fecha_edicion          DateTime  @updatedAt
+  codigo_temporal        String?   @unique @db.VarChar(20)
 
-  comunidad  Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
-  respuestas FormularioRespuestaPersona[]
+  comunidad        Comunidad?                   @relation(fields: [id_comunidad], references: [id_comunidad])
+  respuestas       FormularioRespuestaPersona[]
+  familiaComoMadre Familia[]                    @relation("FamiliaMadre")
+  familias         FamiliaIntegrante[]
+  carnetBimestres  CarnetBimestre[]
+  hitosNinos       HitosNino[]
 
   @@index([cui])
   @@index([tipo_persona])
@@ -309,6 +329,8 @@ model Persona {
   @@index([fecha_nacimiento])
   @@index([tipo_persona, id_comunidad])
   @@index([estado_registro])
+  @@index([codigo_temporal])
+  @@index([registro_incompleto])
 }
 
 model FormularioRespuestaPersona {
@@ -341,16 +363,208 @@ model CatalogoImagenes {
 }
 
 model CentroAtencion {
-  id_centro       Int       @id @default(autoincrement())
+  id_centro       Int      @id @default(autoincrement())
   id_comunidad    Int
-  nombre          String    @db.VarChar(255)
-  estado_registro Boolean   @default(true)
-  fecha_registro  DateTime  @default(now())
-  fecha_edicion   DateTime  @updatedAt
+  nombre          String   @db.VarChar(255)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
 
   comunidad Comunidad @relation(fields: [id_comunidad], references: [id_comunidad], onDelete: Cascade)
 
   @@unique([id_comunidad, nombre])
   @@index([id_comunidad, estado_registro])
   @@index([estado_registro])
+}
+
+model Familia {
+  id_familia      Int      @id @default(autoincrement())
+  codigo          String   @unique @db.VarChar(20)
+  id_comunidad    Int
+  id_madre        Int
+  qr_path         String?  @db.VarChar(500)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  comunidad   Comunidad             @relation(fields: [id_comunidad], references: [id_comunidad])
+  madre       Persona               @relation("FamiliaMadre", fields: [id_madre], references: [id_persona])
+  integrantes FamiliaIntegrante[]
+  respuestas  FormularioRespuesta[]
+
+  @@index([id_comunidad])
+  @@index([id_madre])
+  @@index([codigo])
+  @@index([estado_registro])
+  @@index([id_comunidad, estado_registro])
+}
+
+model FamiliaIntegrante {
+  id_familia      Int
+  id_persona      Int
+  rol             RolFamilia
+  estado_registro Boolean    @default(true)
+  fecha_registro  DateTime   @default(now())
+  fecha_edicion   DateTime   @updatedAt
+
+  familia Familia @relation(fields: [id_familia], references: [id_familia], onDelete: Cascade)
+  persona Persona @relation(fields: [id_persona], references: [id_persona])
+
+  @@id([id_familia, id_persona])
+  @@index([id_familia])
+  @@index([id_persona])
+  @@index([rol])
+}
+
+enum RolFamilia {
+  MADRE
+  PADRE
+  NINO
+  ENCARGADO
+}
+
+model CarnetBimestre {
+  id_carnet_bimestre Int      @id @default(autoincrement())
+  id_respuesta       Int
+  id_persona         Int
+  mes                Int // ID del catálogo: 431-442
+  bimestre           Int // 1-6 calculado automáticamente
+  huellas            Json     @db.JsonB // [{fecha, sesion}, ...]
+  estado_registro    Boolean  @default(true)
+  fecha_registro     DateTime @default(now())
+  fecha_edicion      DateTime @updatedAt
+
+  respuesta FormularioRespuesta @relation(fields: [id_respuesta], references: [id_respuesta], onDelete: Cascade)
+  persona   Persona             @relation(fields: [id_persona], references: [id_persona])
+
+  @@unique([id_respuesta, mes])
+  @@index([id_respuesta])
+  @@index([id_persona])
+  @@index([bimestre])
+  @@index([mes])
+  @@index([estado_registro])
+}
+
+// ══════════════════════════════════════════
+// HITOS DE DESARROLLO
+// ══════════════════════════════════════════
+
+model HitosEncuesta {
+  id_encuesta     Int      @id @default(autoincrement())
+  uuid            String   @unique @default(uuid()) @db.VarChar(60)
+  id_formulario   Int
+  id_comunidad    Int
+  id_usuario      Int?
+  cantidad_ninos  Int      @default(0)
+  estado          String   @default("completa") @db.VarChar(30)
+  estado_registro Boolean  @default(true)
+  fecha_registro  DateTime @default(now())
+  fecha_edicion   DateTime @updatedAt
+
+  formulario Formulario  @relation(fields: [id_formulario], references: [id_formulario])
+  comunidad  Comunidad   @relation(fields: [id_comunidad], references: [id_comunidad])
+  usuario    Usuario?    @relation(fields: [id_usuario], references: [id_usuario])
+  ninos      HitosNino[]
+
+  @@index([id_formulario])
+  @@index([id_comunidad])
+  @@index([id_usuario])
+  @@index([estado_registro])
+  @@index([fecha_registro])
+  @@index([id_formulario, id_comunidad])
+  @@index([id_formulario, id_comunidad, fecha_registro])
+  @@index([id_comunidad, fecha_registro])
+  @@index([id_usuario, estado_registro])
+  @@index([estado, estado_registro])
+}
+
+model HitosNino {
+  id_nino              Int      @id @default(autoincrement())
+  uuid                 String   @unique @default(uuid()) @db.VarChar(60)
+  id_encuesta          Int
+  id_persona           Int?
+  indice               Int
+  nombres              String   @db.VarChar(150)
+  apellidos            String   @db.VarChar(150)
+  tiene_consentimiento Boolean  @default(true)
+  tabla_element_id     String?  @db.VarChar(100)
+  responses            Json?    @db.JsonB
+  estado_registro      Boolean  @default(true)
+  fecha_registro       DateTime @default(now())
+  fecha_edicion        DateTime @updatedAt
+
+  encuesta HitosEncuesta         @relation(fields: [id_encuesta], references: [id_encuesta], onDelete: Cascade)
+  persona  Persona?              @relation(fields: [id_persona], references: [id_persona])
+  tablas   HitosTablaRespuesta[]
+
+  @@index([id_encuesta])
+  @@index([id_persona])
+  @@index([estado_registro])
+  @@index([id_encuesta, indice])
+  @@index([tiene_consentimiento])
+  @@index([id_encuesta, tiene_consentimiento])
+  @@index([id_encuesta, estado_registro])
+}
+
+model HitosTablaRespuesta {
+  id_tabla_resp    Int      @id @default(autoincrement())
+  id_nino          Int
+  table_element_id String   @db.VarChar(100)
+  row_id           String   @db.VarChar(50)
+  group_id         String   @db.VarChar(100)
+  col_id           String   @db.VarChar(50)
+  estado_registro  Boolean  @default(true)
+  fecha_registro   DateTime @default(now())
+  fecha_edicion    DateTime @updatedAt
+
+  nino HitosNino @relation(fields: [id_nino], references: [id_nino], onDelete: Cascade)
+
+  @@unique([id_nino, table_element_id, row_id, group_id])
+  @@index([id_nino])
+  @@index([table_element_id])
+  @@index([estado_registro])
+  @@index([id_nino, table_element_id])
+  @@index([row_id])
+  @@index([group_id])
+  @@index([col_id])
+}
+
+model CentroNutreme {
+  id_centro_nutreme Int      @id @default(autoincrement())
+  uuid              String   @unique @default(uuid()) @db.VarChar(36)
+  codigo            String   @unique @db.VarChar(50)
+  nombre            String   @db.VarChar(255)
+  id_comunidad      Int
+  id_usuario        Int? //personal a carg
+  // coordenadas       String?  @db.VarChar(100) //lat, lng
+  latitud           Float?
+  longitud          Float?
+  qr_path           String?  @db.VarChar(500)
+  estado_registro   Boolean  @default(true)
+  fecha_registro    DateTime @default(now())
+  fecha_edicion     DateTime @updatedAt
+
+  comunidad Comunidad @relation(fields: [id_comunidad], references: [id_comunidad])
+  usuario   Usuario?  @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@index([id_comunidad])
+  @@index([id_usuario])
+  @@index([estado_registro])
+  @@index([codigo])
+}
+
+
+model SyncStaging{
+  id      Int @id @default(autoincrement())
+  tipo    String  @db.VarChar(50) //boletas, hitos o centros nutreme
+  payload Json
+  estado String @default("pendiente") @db.VarChar(20) //Pendiente, procesado, completado, o error
+  intentos Int @default(0)
+  error_mensaje String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  processed_at DateTime?
+
+  @@index([estado])
+  @@index([created_at])
 }

@@ -83,7 +83,7 @@ export class CatalogService {
           // Invalida el listado general
           this.cacheService.delete(this.keys.all());
           return newCatalog;
-        }
+        } 
         return null;
       }),
       catchError(error => {
@@ -202,8 +202,9 @@ export class CatalogService {
         return null;
       }),
       catchError(error => {
-        console.error('Error al guardar el nuevo item del catalogo', error);
-        return throwError(() => new Error('Error al crear el item'));
+        console.error("Error al guardar el nuevo item del catálogo", error);
+        const message = error?.error?.error?.message ?? 'Error al crear el item';
+        return throwError(() => new Error(message));
       })
     );
   }

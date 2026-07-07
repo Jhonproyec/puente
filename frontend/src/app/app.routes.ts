@@ -2,6 +2,7 @@ import { Routes, UrlMatcher, UrlSegment } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 import { permissionGuard } from './core/guards/permission.guard-guard';
 import { formBuilderUnsaveGuardTsGuard } from './core/guards/form-builder-unsave.guard.ts-guard';
+// import { formFillUnsavedGuarGuard } from './core/guards/form-fill-unsaved-guar-guard';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -19,6 +20,38 @@ const formularioMatcher: UrlMatcher = (segments: UrlSegment[]) => {
     return null;
 };
 
+// const formularioFillMatcher: UrlMatcher = (segments: UrlSegment[]) => {
+//     if (segments.length === 3 &&
+//         segments[0].path === 'formulario' &&
+//         UUID_REGEX.test(segments[1].path) &&
+//         segments[2].path === 'fill') {
+//         return {
+//             consumed: segments,
+//             posParams: {
+//                 uuid: new UrlSegment(segments[1].path, {})
+//             }
+//         };
+//     }
+//     return null;
+// }
+
+// const formularioFillSectionMatcher: UrlMatcher = (segments: UrlSegment[]) => {
+//     console.log('section matcher segments:', segments.map(s => s.path));
+//     if (segments.length === 4 &&
+//         segments[0].path === 'formulario' &&
+//         UUID_REGEX.test(segments[1].path) &&
+//         segments[2].path === 'fill' &&
+//         segments[3].path.length > 0) { // ✅ cualquier string no vacío
+//         return {
+//             consumed: segments,
+//             posParams: {
+//                 uuid: new UrlSegment(segments[1].path, {}),
+//                 sectionId: new UrlSegment(segments[3].path, {})
+//             }
+//         };
+//     }
+//     return null;
+// };
 const formularioBuildMatcher: UrlMatcher = (segments: UrlSegment[]) => {
     console.log('segments:', segments.map(s => s.path));
     if (segments.length === 3 &&
@@ -79,6 +112,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/catalog-management/catalog-management').then(m => m.CatalogManagement),
             },
             {
+                path: 'centro-nutreme',
+                canActivate: [permissionGuard(['CREATE_CATALOG'])],
+                loadComponent: () => import('./features/centro-nutreme/centros-nutreme').then(m =>m.CentrosNutreme),
+            },
+            {
                 path: 'images',
                 canActivate: [permissionGuard(['CREATE_CATALOG'])],
                 loadComponent: () => import('./features/image-catalog/image-catalog').then(m => m.ImageCatalog),
@@ -104,6 +142,15 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/form-builder/form-builder').then(m => m.FormBuilder),
                 canDeactivate: [formBuilderUnsaveGuardTsGuard]
             },
+            // {
+            //     matcher: formularioFillMatcher, 
+            //     loadComponent: () => import('./features/form-fill/form-fill-index/form-fill-index').then(m => m.FormFillIndex),
+            //     canDeactivate: [formFillUnsavedGuarGuard]
+            // },
+            // {
+            //     matcher: formularioFillSectionMatcher,
+            //     loadComponent: () => import('./features/form-fill/form-fill-section/form-fill-section').then(m => m.FormFillSection)
+            // }
         ]
     },
 

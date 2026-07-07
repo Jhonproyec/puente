@@ -4,6 +4,7 @@ import { cacheService } from "./cache.service";
 import { logger } from "@/config/logger";
 import { CatalogoItemResponse, CreateCatalogItemInterface, UpdateCatalogItemInterface } from "@/interface/catalogItemInterface";
 import { ConflictError } from "@/utils/appError";
+import { Prisma } from "@prisma/client";
 
 
 const KEY_CATALOG = 'catalogs';
@@ -215,19 +216,25 @@ export class CatalogService {
                     nombre: raw.nombre,
                 };
             } else {
-                // Catálogo simple → CatalogItem
-                const item = await prisma.catalogItem.create({
-                    data: {
-                        id_catalog: data.id_catalog,
-                        nombre: data.nombre
-                    }
-                });
+                try {
+                    const item = await prisma.catalogItem.create({
+                        data: {
+                            id_catalog: data.id_catalog,
+                            nombre: data.nombre
+                        }
+                    });
 
-                createdItem = {
-                    id_catalog_item: item.id_catalog_item,
-                    id_catalog: item.id_catalog,
-                    nombre: item.nombre,
-                };
+                    createdItem = {
+                        id_catalog_item: item.id_catalog_item,
+                        id_catalog: item.id_catalog,
+                        nombre: item.nombre,
+                    };
+                } catch (error) {
+                    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                        throw new ConflictError(`Ya existe un item con el nombre "${data.nombre}" en este catálogo`);
+                    }
+                    throw error;
+                }
             }
 
             cacheService.delete(cacheKeys.allCatalogs());
@@ -390,10 +397,12 @@ export class CatalogService {
             });
 
             if (!catalog) throw new ConflictError('Catálogo no encontrado');
-
+            console.log(catalog);
             const parentLabel = catalog.tabla_origen
                 ? this.tableMapper[catalog.tabla_origen]?.parentLabel
                 : undefined;
+            console.log(parentLabel);
+
 
             return {
                 filterFields: catalog.campo_filtro ? [catalog.campo_filtro] : [],
@@ -505,7 +514,7 @@ export class CatalogService {
                     orderBy: { id_departamento: 'desc' }
                 }),
                 idField: 'id_departamento',
-                create: ({ nombre }) => { 
+                create: ({ nombre }) => {
                     return prisma.departamento.create({
                         data: { nombre }
                     });
@@ -544,8 +553,8 @@ export class CatalogService {
                     data: { estado_registro: false }
                 }),
             },
-            'centroAtencion': {
-                findMany: (where = {}) => prisma.centroAtencion.findMany({
+            'centroNutreme': {          // 👈 NUEVO
+                findMany: (where = {}) => prisma.centroNutreme.findMany({
                     where: { estado_registro: true, ...where },
                     include: {
                         comunidad: {
@@ -556,26 +565,12 @@ export class CatalogService {
                             }
                         }
                     },
-                    orderBy: { id_centro: 'desc' }
+                    orderBy: { id_centro_nutreme: 'desc' }
                 }),
-                idField: 'id_centro',
+                idField: 'id_centro_nutreme',
                 filterField: 'id_comunidad',
                 parentField: 'comunidad',
-                parentLabel: 'Comunidad', 
-                create: ({ nombre, filterValue }) => {
-                    if (!filterValue) throw new ConflictError('Debes seleccionar una comunidad');
-                    return prisma.centroAtencion.create({
-                        data: { nombre, id_comunidad: filterValue }
-                    });
-                },
-                update: (id, { nombre }) => prisma.centroAtencion.update({
-                    where: { id_centro: id },
-                    data: { nombre }
-                }),
-                delete: (id) => prisma.centroAtencion.update({
-                    where: { id_centro: id },
-                    data: { estado_registro: false }
-                }),
+                parentLabel: 'Comunidad',
             },
             'rangoHito': {
                 findMany: (where = {}) => prisma.rangoHito.findMany({ where, orderBy: { id_rango_hito: 'desc' } },),
@@ -599,6 +594,16 @@ export class CatalogService {
                     where: { id_rango_hito_detalle: id },
                     data: { estado_registro: false }
                 }),
+            },
+            'usuario': {
+                findMany: (where = {}) => prisma.usuario.findMany({
+                    where: { estado_registro: true, ...where },
+                    orderBy: { nombres: 'asc' }
+                }).then(rows => rows.map(u => ({
+                    ...u,
+                    nombre: `${u.nombres} ${u.apellidos}`  
+                }))),
+                idField: 'id_usuario',
             },
         };
 }
